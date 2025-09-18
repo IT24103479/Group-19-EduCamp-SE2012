@@ -10,7 +10,9 @@ public class ClassEntity {
     @GeneratedValue(strategy=GenerationType.IDENTITY)//you dont have provide an id data base auto create the primary key
     private long id;
 
-    private String subject;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
     private String grade;
     private String teacher;
     private double fee;
@@ -27,10 +29,10 @@ public void setId(Long id){
 }
 
 //subject
-public String getSubject(){
+public Subject getSubject(){
      return subject;
 }
-public void setSubject(String subject){
+public void setSubject(Subject subject){
     this.subject=subject;
 }
 
@@ -57,4 +59,5 @@ public String getGrade(){
 public void setGrade(String grade){
     this.grade=grade;
 }
+
 }

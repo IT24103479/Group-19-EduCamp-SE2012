@@ -13,7 +13,7 @@ public class Subject {
     private String name;
 
     //list of classes associated with this subject
-    @OneToMany(mappedBy="Subject")
+    @OneToMany(mappedBy="subject")
     private List<ClassEntity> classes;
 
     public Subject() {}
@@ -35,5 +35,5 @@ public class Subject {
     public List<ClassEntity> getClasses() {
         return classes;
     }
-    public void setClasses(List<ClassEntity> classes){}
+    public void setClasses(List<ClassEntity> classes){this.classes = classes;}
 }

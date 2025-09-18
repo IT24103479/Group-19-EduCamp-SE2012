@@ -35,5 +35,5 @@ public class Subject {
     public List<ClassEntity> getClasses() {
         return classes;
     }
-    public void setClasses(List<ClassEntity> classes){}
+    public void setClasses(List<ClassEntity> classes){ this.classes=classes;}
 }

@@ -7,7 +7,7 @@ import com.example.Edu_Camp.repository.ClassRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController //HTTP requests and retyrn Json data
+@RestController //HTTP requests and return Json data
 @RequestMapping("/classes") 
 
 //spring boot talk to the database without having to create it manually
@@ -15,11 +15,13 @@ public class ClassController{
     private final ClassRepository repository;
 
     public ClassController(ClassRepository repository){
+
         this.repository=repository;
     }
 
     @GetMapping
     public List<ClassEntity> getAllClasses(){
+
         return repository.findAll();
     }
     @GetMapping("/search")//responds to http get request

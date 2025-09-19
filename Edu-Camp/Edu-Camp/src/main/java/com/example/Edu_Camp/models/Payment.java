@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="enrollments")
-public class Enrollment {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class Enrollment {
     private LocalDateTime enrollmentDate;
     private String paypalTransactionId;
 
-    public Enrollment() {}
+    public Payment() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

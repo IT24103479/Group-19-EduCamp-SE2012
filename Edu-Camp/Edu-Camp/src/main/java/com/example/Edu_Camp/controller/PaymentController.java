@@ -1,6 +1,6 @@
 package com.example.Edu_Camp.controller;
 
-import com.example.Edu_Camp.models.Enrollment;
+import com.example.Edu_Camp.models.Payment;
 import com.example.Edu_Camp.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ public class PaymentController {
 
     @PostMapping("/pay/{enrollmentId}")
     public String pay(@PathVariable Long enrollmentId) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow();
+        Payment payment = enrollmentRepository.findById(enrollmentId).orElseThrow();
 
         // TODO: Call PayPal SDK to create payment
         // Return PayPal approval URL
@@ -24,11 +24,11 @@ public class PaymentController {
 
     @GetMapping("/success")
     public String success(@RequestParam Long enrollmentId, @RequestParam String paymentId) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow();
-        enrollment.setPaymentCompleted(true);
-        enrollment.setPaypalTransactionId(paymentId);
-        enrollment.setEnrollmentDate(LocalDateTime.now());
-        enrollmentRepository.save(enrollment);
+        Payment payment = enrollmentRepository.findById(enrollmentId).orElseThrow();
+        payment.setPaymentCompleted(true);
+        payment.setPaypalTransactionId(paymentId);
+        payment.setEnrollmentDate(LocalDateTime.now());
+        enrollmentRepository.save(payment);
 
         return "Payment successful! Materials unlocked for class.";
     }

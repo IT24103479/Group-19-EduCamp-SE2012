@@ -1,5 +1,6 @@
 import React from "react";
 import { Facebook, Mail, Phone } from "lucide-react";
+import logo from "../assets/logo.jpg";
 
 const Footer: React.FC = () => {
   return (
@@ -9,8 +10,8 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
+              <div className="w-20 h-20 bg-emerald-600 rounded-lg flex items-center justify-center">
+                 <img src={logo} alt="Logo" className="w-20 h-20 object-contain"/>
               </div>
               <div>
                 <h3 className="text-xl font-bold">Educamp</h3>

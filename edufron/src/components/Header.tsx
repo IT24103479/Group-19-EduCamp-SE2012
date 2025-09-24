@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, User, UserPlus } from 'lucide-react';
+import logo from "../assets/logo.jpg";
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
@@ -26,11 +27,11 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">E</span>
+              <img src={logo} alt="Logo" className="w-12 h-12 object-contain"/>
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">Educamp</h1>
-              <p className="text-xs text-emerald-600">Vidura Higher Education</p>
+              <p className="text-xs text-emerald-600">Vidura Higher Education Institute</p>
             </div>
           </Link>
 

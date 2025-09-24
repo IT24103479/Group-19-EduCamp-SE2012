@@ -1,13 +1,20 @@
 import React from "react";
-import ClassList from "./pages/ClassList"; // ✅ must match your export
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import ClassRecords from "./pages/ClassRecords";
 
 function App() {
   return (
-    <div className="App">
-      <h1>Tuition Classes</h1>
-      <ClassList />
-    </div>
+    <Router>
+      <nav className="bg-gray-800 p-4 text-white">
+        <Link to="/" className="mr-4">Home</Link>
+        <Link to="/classes">Classes</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<h1 className="p-6 text-xl">Welcome to Edu Camp</h1>} />
+        <Route path="/classes" element={<ClassRecords />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -19,10 +19,11 @@ public class Teacher {
     private String b_day;
     private String qualification;
     private String j_date;
+    private String password;
 
     public Teacher() {}
 
-    public Teacher(String name,String email,String subject,String phone,String address,String qualification,String b_day, String j_date) {
+    public Teacher(String name,String email,String subject,String phone,String address,String qualification,String b_day, String j_date,String password) {
 
             this.name = name;
             this.subject = subject;
@@ -33,6 +34,7 @@ public class Teacher {
             this.qualification = qualification;
             this.b_day = b_day;
             this.j_date = j_date;
+            this.password = password;
         }
         public Long getId () {
             return id;
@@ -96,4 +98,7 @@ public class Teacher {
         public void setJ_date (String j_date) {
                this.j_date= j_date;
         }
+
+        public String getPassword () { return password;}
+        public void setPassword (String password) { this.password = password; }
     }

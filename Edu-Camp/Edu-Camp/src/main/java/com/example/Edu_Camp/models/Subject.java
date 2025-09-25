@@ -10,30 +10,22 @@ public class Subject {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
-    //list of classes associated with this subject
-    @OneToMany(mappedBy="Subject")
+    @OneToMany(mappedBy="subject")  // must match field name in ClassEntity
     private List<ClassEntity> classes;
 
     public Subject() {}
 
-    //getters and setters
-    public Long getId() {
-        return id; }
-    public void setId(Long id){
-        this.id=id;
-    }
+    // getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id){ this.id = id; }
 
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name=name;
-    }
+    public String getName(){ return name; }
+    public void setName(String name){ this.name = name; }
 
-    public List<ClassEntity> getClasses() {
-        return classes;
-    }
-    public void setClasses(List<ClassEntity> classes){}
+    public List<ClassEntity> getClasses() { return classes; }
+    public void setClasses(List<ClassEntity> classes){ this.classes = classes; }
 }
+

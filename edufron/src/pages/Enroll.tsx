@@ -52,12 +52,33 @@ const Enroll: React.FC = () => {
               ],
             });
           },
-          onApprove: (_data, actions) => {
-            return actions.order.capture().then((details) => {
+           onApprove: async (_data, actions) => {
+            try {
+              const details: any = await actions.order.capture();
+              const transactionId = details.purchase_units[0].payments.captures[0].id;
+
               toast.success("Payment successful! Enrollment complete.");
               console.log("Payment details:", details);
-            });
+              console.log("Transaction ID:", transactionId);
+
+              // Send payment info to backend
+              await fetch("http://localhost:8080/api/payments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId: 1, // replace with logged-in user ID
+                  classId: 2, // replace with selected class ID
+                  paymentCompleted: true,
+                  paypalTransactionId: transactionId,
+                  enrollmentDate: new Date().toISOString(),
+                }),
+              });
+            } catch (err) {
+              toast.error("Failed to save enrollment.");
+              console.error("Enrollment save error:", err);
+            }
           },
+
           onError: (err) => {
             toast.error("Payment failed. Please try again.");
             console.error("PayPal error:", err);

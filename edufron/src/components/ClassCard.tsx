@@ -70,7 +70,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classItem, index }) => {
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-emerald-600">Rs. {classItem.price}</span>
           <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            Join Class
+            Enroll
           </button>
         </div>
       </div>

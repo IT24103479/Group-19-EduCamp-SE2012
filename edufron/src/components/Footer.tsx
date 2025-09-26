@@ -93,7 +93,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-slate-700 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-slate-400 text-sm">
-            © 2025 Educamp - Vidura Higher Education Centre. All rights
+            © 2025 Educamp - Vidura Higher Education Institute. All rights
             reserved.
           </p>
           <p className="text-slate-400 text-sm mt-2 sm:mt-0">

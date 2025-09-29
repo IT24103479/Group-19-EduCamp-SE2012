@@ -10,7 +10,7 @@ interface Subject {
   description: string;
   duration: string;
   students: number;
-  price: number;
+  price: string;
 }
 
 // Props for SubjectCard

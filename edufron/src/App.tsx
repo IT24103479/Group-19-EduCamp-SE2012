@@ -13,7 +13,8 @@ import SignUp from './pages/SignUp';
 import Subjects from './pages/Subjects';
 import Teachers from './pages/Teachers';
 import Classes from './pages/Classes';
-
+import StudentDashboard from './pages/StudentDashboard';
+import Profile from './pages/Profile';
 const App: React.FC = () => {
   return (
     <Theme appearance="inherit" radius="large" scaling="100%">
@@ -28,6 +29,8 @@ const App: React.FC = () => {
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/classes" element={<Classes />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/dashboard" element={<StudentDashboard />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
 
           <ToastContainer

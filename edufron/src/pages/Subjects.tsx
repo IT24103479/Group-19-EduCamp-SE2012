@@ -16,12 +16,6 @@ interface Subject {
   price: string;
 }
 
-interface SubjectCardProps {
-  subject: Subject;
-  index: number;
-}
-
-
 const Subjects: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');

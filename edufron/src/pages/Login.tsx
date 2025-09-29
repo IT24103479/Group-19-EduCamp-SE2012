@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ import Footer from '../components/Footer';
 // ✅ Zod schema
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 // ✅ Infer TS type from schema
@@ -20,6 +20,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -32,16 +33,74 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success('Login successful!');
-      console.log('Login data:', data);
+      console.log('Attempting login...', data);
+
+      const response = await fetch('http://localhost:8081/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for session cookies
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      console.log('Login response status:', response.status);
+
+      const result = await response.json();
+      console.log('Login response data:', result);
+
+      if (response.ok && result.success) {
+        toast.success('Login successful!');
+        console.log('User data:', result.user);
+        
+        // Store user data in localStorage or context if needed
+        if (result.user) {
+          localStorage.setItem('user', JSON.stringify(result.user));
+        }
+        
+        // Redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        // Handle specific error messages
+        if (result.message?.includes('Invalid email or password')) {
+          toast.error('Invalid email or password. Please try again.');
+        } else if (result.message?.includes('deactivated')) {
+          toast.error('Account is deactivated. Please contact support.');
+        } else {
+          toast.error(result.message || 'Login failed. Please try again.');
+        }
+      }
     } catch (error) {
-      toast.error('Login failed. Please try again.');
+      console.error('Login error:', error);
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast.error('Cannot connect to server. Please check if backend is running.');
+      } else {
+        toast.error('Network error. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ✅ Test backend connection (optional)
+  const testBackendConnection = async () => {
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/me', {
+        credentials: 'include',
+      });
+      console.log('Backend connection test:', response.status);
+    } catch (error) {
+      console.error('Backend connection failed:', error);
+    }
+  };
+
+  // Test connection on component mount (optional)
+  React.useEffect(() => {
+    testBackendConnection();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,7 +110,7 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-            <p className="mt-2 text-slate-600">Sign in to your account</p>
+            <p className="mt-2 text-slate-600">Sign in to your EduCamp account</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
@@ -141,6 +200,13 @@ const Login: React.FC = () => {
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
+
+            {/* Demo credentials hint */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700 text-center">
+                <strong>Demo:</strong> Use the credentials from your registered account
+              </p>
+            </div>
 
             {/* Signup Link */}
             <div className="mt-6 text-center">

@@ -24,8 +24,8 @@ public class StudentService {
         student.setPhoneNumber(profileDto.getPhoneNumber());
         student.setAddress(profileDto.getAddress());
         student.setEmergencyContact(profileDto.getEmergencyContact());
-        student.setAcademicLevel(profileDto.getAcademicLevel());
-        student.setMajor(profileDto.getMajor());
+        student.setGrade(profileDto.getGrade());
+        student.setDateOfBirth(profileDto.getDateOfBirth());
 
         return studentRepository.save(student);
     }

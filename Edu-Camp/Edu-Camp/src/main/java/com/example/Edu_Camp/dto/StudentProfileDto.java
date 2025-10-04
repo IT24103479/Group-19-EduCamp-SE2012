@@ -1,6 +1,7 @@
 package com.example.Edu_Camp.dto;
 
 import jakarta.validation.constraints.*;
+import java.time.LocalDate;
 
 public class StudentProfileDto {
     @NotBlank(message = "Phone number is required")
@@ -14,10 +15,14 @@ public class StudentProfileDto {
     @NotBlank(message = "Emergency contact is required")
     private String emergencyContact;
 
-    @NotBlank(message = "Academic level is required")
-    private String academicLevel;
+    // Updated fields: removed academicLevel and major, added grade and dateOfBirth
+    @NotBlank(message = "Grade is required")
+    @Size(max = 20, message = "Grade must not exceed 20 characters")
+    private String grade;
 
-    private String major;
+    @NotNull(message = "Date of birth is required")
+    @Past(message = "Date of birth must be in the past")
+    private LocalDate dateOfBirth;
 
     // Getters and Setters
     public String getPhoneNumber() { return phoneNumber; }
@@ -29,9 +34,9 @@ public class StudentProfileDto {
     public String getEmergencyContact() { return emergencyContact; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
 
-    public String getAcademicLevel() { return academicLevel; }
-    public void setAcademicLevel(String academicLevel) { this.academicLevel = academicLevel; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
 
-    public String getMajor() { return major; }
-    public void setMajor(String major) { this.major = major; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 }

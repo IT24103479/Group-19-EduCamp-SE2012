@@ -3,6 +3,7 @@ package com.example.Edu_Camp.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "students")
@@ -22,8 +23,10 @@ public class Student {
     private String phoneNumber;
     private String address;
     private String emergencyContact;
-    private String academicLevel;
-    private String major;
+    private String grade;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -41,6 +44,14 @@ public class Student {
         this();
         this.user = user;
         this.studentId = studentId;
+    }
+
+    public Student(User user, String studentId, String grade, LocalDate dateOfBirth) {
+        this();
+        this.user = user;
+        this.studentId = studentId;
+        this.grade = grade;
+        this.dateOfBirth = dateOfBirth;
     }
 
     // Getters and Setters
@@ -62,17 +73,29 @@ public class Student {
     public String getEmergencyContact() { return emergencyContact; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
 
-    public String getAcademicLevel() { return academicLevel; }
-    public void setAcademicLevel(String academicLevel) { this.academicLevel = academicLevel; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
 
-    public String getMajor() { return major; }
-    public void setMajor(String major) { this.major = major; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Business logic methods
+    public int getAge() {
+        if (dateOfBirth == null) {
+            return 0;
+        }
+        return LocalDate.now().getYear() - dateOfBirth.getYear();
+    }
+
+    public boolean isUnderage() {
+        return getAge() < 18;
+    }
 
     @PreUpdate
     public void preUpdate() {

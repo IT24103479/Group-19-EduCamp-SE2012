@@ -1,0 +1,56 @@
+# COMPLETELY DROP AND RECREATE ALL TABLES
+spring.jpa.hibernate.ddl-auto=create-drop
+
+
+POST          http://localhost:8081/api/auth/register
+Content-Type: application/json
+
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "confirmPassword": "password123"
+}
+
+
+
+POST            http://localhost:8081/api/auth/login
+{
+    "email": "john@example.com",
+    "password": "password123"
+}
+
+
+
+
+GET              http://localhost:8081/api/students/profile
+Cookie: sessionId={{session_id}}
+
+
+
+
+PUT           http://localhost:8081/api/students/profile
+Content-Type: application/json
+Cookie: sessionId={{session_id}}
+{
+    "phoneNumber": "+1234567890",
+    "address": "123 Main St, City, State 12345",
+    "emergencyContact": "+1987654321",
+    "academicLevel": "Undergraduate",
+    "major": "Computer Science"
+}
+
+
+
+
+GET        http://localhost:8081/api/auth/me
+Cookie: sessionId={{session_id}}
+
+
+
+
+
+
+POST        http://localhost:8081/api/auth/logout
+Cookie: sessionId={{session_id}}

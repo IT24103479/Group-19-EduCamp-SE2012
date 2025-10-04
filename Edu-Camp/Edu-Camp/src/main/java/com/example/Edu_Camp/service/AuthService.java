@@ -116,13 +116,27 @@ public class AuthService {
     }
 
     private String generateStudentId() {
-        String studentId;
-        do {
-            // Format: STU + year + random numbers (e.g., STU20240001)
-            String year = String.valueOf(LocalDateTime.now().getYear());
-            String random = String.format("%04d", UUID.randomUUID().hashCode() & 0xFFFF);
-            studentId = "STU" + year + random;
-        } while (studentRepository.existsByStudentId(studentId));
+        String year = String.valueOf(LocalDateTime.now().getYear());
+
+        // Get total number of students and add 1
+        long totalStudents = studentRepository.count();
+        int nextNumber = (int) (totalStudents + 1);
+
+        // Format: STU20240001
+        String studentId = String.format("STU%s%04d", year, nextNumber);
+
+        // Simple retry logic for safety
+        int attempts = 0;
+        while (studentRepository.existsByStudentId(studentId) && attempts < 50) {
+            nextNumber++;
+            studentId = String.format("STU%s%04d", year, nextNumber);
+            attempts++;
+        }
+
+        // Final fallback
+        if (studentRepository.existsByStudentId(studentId)) {
+            studentId = "STU" + year + "X" + System.currentTimeMillis() % 10000;
+        }
 
         return studentId;
     }

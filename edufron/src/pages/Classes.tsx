@@ -125,6 +125,7 @@ const Classes: React.FC = () => {
   const types = [...new Set(classes.map((classItem) => classItem.type))];
 
   return (
+
     <div className="min-h-screen bg-gray-50">
       <Header />
 
@@ -187,6 +188,7 @@ const Classes: React.FC = () => {
 
       <Footer />
     </div>
+
   );
 };
 

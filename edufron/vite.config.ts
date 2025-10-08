@@ -1,27 +1,32 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
+import { fileURLToPath } from "url";
+import {dirname ,resolve } from "path";
+import history from 'connect-history-api-fallback';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
-  
-  // Allow all hosts for dev server (useful for remote devices)
-  server: {
-    allowedHosts: true,
-  },
+   name: "spa-fallback",
+      configureServer(server) {
+        server.middlewares.use(
+          history({
+            rewrites: [
+              { from: /^\/admin(?:\/.*)?$/, to: "/admin.html" }, // matches /admin, /admin/, /admin/anything
+  { from: /^\/.*$/, to: "/index.html" },
+            ],
+          })
+        );
+      },
 
-  // Suppress specific esbuild warnings
-  esbuild: {
-    logOverride: {
-      'ignored-directive': 'silent', 
-    },
-  },
-
-  // Set log level
-  logLevel: 'info', 
-
-  // Custom Rollup build warning handling
   build: {
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),     // main app
+        admin: resolve(__dirname, 'admin.html'),    // admin app
+      },
       onwarn(warning, warn) {
         // Ignore harmless warnings
         if (
@@ -47,4 +52,28 @@ export default defineConfig({
       },
     },
   },
+
+  // Allow all hosts for dev server (useful for remote devices)
+  server: {
+    allowedHosts: true,
+    
+     fs: {
+      allow: ['.'],
+    },
+    proxy: {},
+
+    
+  },
+  // 👇 crucial part
+  optimizeDeps: {},
+
+  // Suppress specific esbuild warnings
+  esbuild: {
+    logOverride: {
+      'ignored-directive': 'silent', 
+    },
+  },
+
+  // Set log level
+  logLevel: 'info', 
 });

@@ -19,5 +19,25 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+     plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      // common rules
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
+  },
+
+  // Admin-specific overrides
+  {
+    files: [ 'src/admin.tsx',
+      'src/AdminApp.tsx',
+      'src/components/admin/**/*.{ts,tsx}',
+      'src/pages/admin/**/*.{ts,tsx}',], // only admin folder
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off', // admin exception
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    },
   },
 ])

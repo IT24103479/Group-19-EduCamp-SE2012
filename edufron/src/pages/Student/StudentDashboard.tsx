@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import DashboardCard from '../../components/DashboardCard';
-import UpcomingClasses from '../../components/UpcomingClasses';
-import RecentAnnouncements from '../../components/RecentAnnouncements';
-import GradeChart from '../../components/GradeChart';
+import DashboardCard from '../../components/DashBoard/DashboardCard';
+import UpcomingClasses from '../../components/DashBoard/UpcomingClasses';
+import RecentAnnouncements from '../../components/DashBoard/RecentAnnouncements';
+import GradeChart from '../../components/DashBoard/GradeChart';
 import { BookOpen, TrendingUp, CheckCircle, Calendar, FileText, User, Settings, LogOut } from 'lucide-react';
 
 const StudentDashboard: React.FC = () => {

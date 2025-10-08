@@ -12,7 +12,6 @@ import AdminEnrollments from "./pages/admin/AdminEnrollments";
 import AdminProfile from "./pages/admin/AdminProfile";
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
-
 import '@radix-ui/themes/styles.css';
 import { Theme } from '@radix-ui/themes';
 import { ToastContainer } from 'react-toastify';
@@ -35,10 +34,10 @@ const AdminApp: React.FC = () => {
       <Route path="users" element={<AdminUsers />} />
       <Route path="enrollments" element={<AdminEnrollments />} />
       <Route path="profile" element={<AdminProfile />} />
+      <Route path="*" element={<AdminDashboard />} />
     </Route>
 
-    <Route path="/login" element={<Login />} />
-    <Route path="*" element={<NotFound />} />
+    <Route path="*" element={<AdminDashboard />} />
   </Routes>
   <ToastContainer
         position="top-right"

@@ -70,3 +70,95 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+/* -----------------------------
+   Admin Theme Variables (Scoped)
+------------------------------ */
+.admin {
+  /* Light Mode Variables */
+  --background: 0 0% 100%;
+  --foreground: 215.4 16.3% 26.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 215.4 16.3% 26.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215.4 16.3% 26.9%;
+  --nav-primary: 215.4 16.3% 46.9%;
+  --nav-primary-foreground: 0 0% 100%;
+  --nav-hover: 215.4 16.3% 36.9%;
+  --nav-active: 215.4 16.3% 26.9%;
+  --primary: 158.1 64.4% 51.6%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 156.2 73.4% 86.3%;
+  --secondary: 200.4 98% 39.4%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-light: 204 93.8% 93.7%;
+  --accent: 47.9 95.8% 53.1%;
+  --accent-foreground: 26 83.3% 14.1%;
+  --accent-light: 54.5 91.7% 95.3%;
+  --muted: 215.4 16.3% 96.9%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 215.3 19.3% 88.2%;
+  --input: 215.3 19.3% 88.2%;
+  --ring: 158.1 64.4% 51.6%;
+  --radius: 0.75rem;
+
+  --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(158.1 64.4% 41.6%));
+  --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(200.4 98% 29.4%));
+  --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(47.9 95.8% 43.1%));
+  --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--accent)) 100%);
+
+  --shadow-elegant: 0 10px 25px -5px hsl(var(--primary) / 0.1), 0 10px 10px -5px hsl(var(--primary) / 0.04);
+  --shadow-card: 0 4px 6px -1px hsl(215.4 16.3% 46.9% / 0.1), 0 2px 4px -1px hsl(215.4 16.3% 46.9% / 0.06);
+
+  --sidebar-background: hsl(210, 10%, 92%);;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+}
+
+/* Dark Mode Scoped */
+.admin.dark {
+  --background: 215.4 27.9% 7.9%;
+  --foreground: 215.4 16.3% 96.9%;
+  --card: 215.4 27.9% 10.2%;
+  --card-foreground: 215.4 16.3% 96.9%;
+  --popover: 215.4 27.9% 10.2%;
+  --popover-foreground: 215.4 16.3% 96.9%;
+  --primary: 158.1 64.4% 51.6%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 156.2 73.4% 76.3%;
+  --secondary: 200.4 98% 49.4%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-light: 204 93.8% 83.7%;
+  --accent: 47.9 95.8% 63.1%;
+  --accent-foreground: 26 83.3% 14.1%;
+  --accent-light: 54.5 91.7% 85.3%;
+  --muted: 215.4 27.9% 16.9%;
+  --muted-foreground: 215.3 16.3% 65.9%;
+  --destructive: 0 75.7% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 215.4 27.9% 16.9%;
+  --input: 215.4 27.9% 16.9%;
+  --ring: 158.1 64.4% 51.6%;
+  --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(158.1 64.4% 41.6%));
+  --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(200.4 98% 39.4%));
+  --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(47.9 95.8% 53.1%));
+  --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--accent)) 100%);
+  --shadow-elegant: 0 10px 25px -5px hsl(0 0% 0% / 0.4), 0 10px 10px -5px hsl(0 0% 0% / 0.1);
+  --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+}

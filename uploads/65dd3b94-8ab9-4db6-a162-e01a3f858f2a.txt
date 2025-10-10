@@ -1,0 +1,2 @@
+# COMPLETELY DROP AND RECREATE ALL TABLES
+spring.jpa.hibernate.ddl-auto=create-drop

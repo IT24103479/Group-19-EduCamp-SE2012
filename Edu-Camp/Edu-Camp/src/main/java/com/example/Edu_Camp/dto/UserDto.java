@@ -10,9 +10,11 @@ public class UserDto {
     private String role;
     private Boolean isActive;
     private LocalDateTime createdAt;
-    private String studentId;
+    private String studentNumber;
+    private String employeeId;
+    private String adminLevel;
 
-    // Getters and Setters
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -34,6 +36,12 @@ public class UserDto {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
+    public String getStudentNumber() { return studentNumber; }
+    public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
+
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
+    public String getAdminLevel() { return adminLevel; }
+    public void setAdminLevel(String adminLevel) { this.adminLevel = adminLevel; }
 }

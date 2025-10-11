@@ -10,7 +10,7 @@ public class LoginDto {
     @NotBlank(message = "Password is required")
     private String password;
 
-    // Getters and Setters
+    // getters & setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 

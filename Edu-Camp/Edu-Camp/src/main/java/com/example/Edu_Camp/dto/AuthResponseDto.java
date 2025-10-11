@@ -5,6 +5,8 @@ public class AuthResponseDto {
     private String message;
     private UserDto user;
 
+    public AuthResponseDto() {}
+
     public AuthResponseDto(boolean success, String message) {
         this.success = success;
         this.message = message;
@@ -16,7 +18,7 @@ public class AuthResponseDto {
         this.user = user;
     }
 
-    // Getters and Setters
+    // getters and setters
     public boolean isSuccess() { return success; }
     public void setSuccess(boolean success) { this.success = success; }
 

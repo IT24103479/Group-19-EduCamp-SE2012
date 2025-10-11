@@ -1,68 +1,50 @@
 package com.example.Edu_Camp.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "students")
-public class Student {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@PrimaryKeyJoinColumn(name = "user_id")
+public class Student extends User {
 
     @Column(unique = true, nullable = false)
-    private String studentId;
-
-    @OneToOne
-    @JsonBackReference
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private String studentNumber;
 
     private String phoneNumber;
     private String address;
     private String emergencyContact;
     private String grade;
+    private String profilePicture;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private String gender;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Constructors
+    // Constructors, getters, setters...
     public Student() {
-        this.createdAt = LocalDateTime.now();
+        super();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Student(User user, String studentId) {
-        this();
-        this.user = user;
-        this.studentId = studentId;
-    }
-
-    public Student(User user, String studentId, String grade, LocalDate dateOfBirth) {
-        this();
-        this.user = user;
-        this.studentId = studentId;
-        this.grade = grade;
+    public Student(String firstName, String lastName, String email, String password,
+                   String studentNumber, String phoneNumber, LocalDate dateOfBirth, String gender) {
+        super(firstName, lastName, email, password, "STUDENT");
+        this.studentNumber = studentNumber;
+        this.phoneNumber = phoneNumber;
         this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    // Getters and Setters for all fields
+    public String getStudentNumber() { return studentNumber; }
+    public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
@@ -76,20 +58,20 @@ public class Student {
     public String getGrade() { return grade; }
     public void setGrade(String grade) { this.grade = grade; }
 
+    public String getProfilePicture() { return profilePicture; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    // Business logic methods
     public int getAge() {
-        if (dateOfBirth == null) {
-            return 0;
-        }
+        if (dateOfBirth == null) return 0;
         return LocalDate.now().getYear() - dateOfBirth.getYear();
     }
 
@@ -100,5 +82,6 @@ public class Student {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+        super.preUpdate();
     }
 }

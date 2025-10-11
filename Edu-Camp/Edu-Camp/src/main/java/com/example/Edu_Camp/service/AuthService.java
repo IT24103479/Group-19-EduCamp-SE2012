@@ -1,10 +1,8 @@
 package com.example.Edu_Camp.service;
 
 import com.example.Edu_Camp.dto.*;
-import com.example.Edu_Camp.models.User; // Changed from .models to .model
-import com.example.Edu_Camp.models.Student; // Changed from .models to .model
-import com.example.Edu_Camp.repository.UserRepository;
-import com.example.Edu_Camp.repository.StudentRepository;
+import com.example.Edu_Camp.models.*;
+import com.example.Edu_Camp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,19 +16,32 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
+    private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final SessionService sessionService;
+    private final EmailService emailService;
 
     @Autowired
-    private StudentRepository studentRepository;
+    public AuthService(UserRepository userRepository,
+                       StudentRepository studentRepository,
+                       TeacherRepository teacherRepository,
+                       AdminRepository adminRepository,
+                       PasswordEncoder passwordEncoder,
+                       SessionService sessionService,
+                       EmailService emailService) {
+        this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
+        this.teacherRepository = teacherRepository;
+        this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.sessionService = sessionService;
+        this.emailService = emailService;
+    }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private SessionService sessionService;
-
-    public Map<String, String> validateRegistration(RegistrationDto registrationDto) {
+    public Map<String, String> validateStudentRegistration(StudentRegistrationDto registrationDto) {
         Map<String, String> errors = new HashMap<>();
 
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
@@ -41,37 +52,121 @@ public class AuthService {
             errors.put("confirmPassword", "Passwords do not match");
         }
 
+        if (registrationDto.getPassword().length() < 8) {
+            errors.put("password", "Password must be at least 8 characters long");
+        }
+
+        return errors;
+    }
+
+    public Map<String, String> validateTeacherRegistration(TeacherRegistrationDto registrationDto) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            errors.put("email", "Email is already registered");
+        }
+
+        if (teacherRepository.existsByEmployeeId(registrationDto.getEmployeeId())) {
+            errors.put("employeeId", "Employee ID already exists");
+        }
+
+        return errors;
+    }
+
+    public Map<String, String> validateAdminRegistration(AdminRegistrationDto registrationDto) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            errors.put("email", "Email is already registered");
+        }
+
+        if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
+            errors.put("confirmPassword", "Passwords do not match");
+        }
+
+        if (registrationDto.getPassword().length() < 8) {
+            errors.put("password", "Password must be at least 8 characters long");
+        }
+
         return errors;
     }
 
     @Transactional
-    public AuthResponseDto register(RegistrationDto registrationDto) {
+    public AuthResponseDto registerStudent(StudentRegistrationDto registrationDto) {
         try {
-            // Create user
-            User user = new User();
-            user.setFirstName(registrationDto.getFirstName());
-            user.setLastName(registrationDto.getLastName());
-            user.setEmail(registrationDto.getEmail().toLowerCase());
-            user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-            user.setRole("STUDENT"); // Default role for registrations
+            String studentNumber = generateStudentNumber();
 
-            User savedUser = userRepository.save(user);
+            Student student = new Student(
+                    registrationDto.getFirstName(),
+                    registrationDto.getLastName(),
+                    registrationDto.getEmail().toLowerCase(),
+                    passwordEncoder.encode(registrationDto.getPassword()),
+                    studentNumber,
+                    registrationDto.getPhoneNumber(),
+                    registrationDto.getDateOfBirth(),
+                    registrationDto.getGender()
+            );
 
-            // Generate unique student ID
-            String studentId = generateStudentId();
+            student.setGrade("Not Assigned");
+            student.setAddress("");
+            student.setEmergencyContact("");
 
-            // Create student profile
-            Student student = new Student(savedUser, studentId);
-            studentRepository.save(student);
+            Student savedStudent = studentRepository.save(student);
+            UserDto userDto = convertToUserDto(savedStudent);
 
-            // Set bidirectional relationship
-            savedUser.setStudent(student);
-            userRepository.save(savedUser);
-
-            return new AuthResponseDto(true, "Registration successful");
+            return new AuthResponseDto(true, "Student registration successful", userDto);
 
         } catch (Exception e) {
-            throw new RuntimeException("Registration failed: " + e.getMessage());
+            throw new RuntimeException("Student registration failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public AuthResponseDto registerTeacher(TeacherRegistrationDto registrationDto) {
+        try {
+            String tempPassword = generateTemporaryPassword();
+            String encodedPassword = passwordEncoder.encode(tempPassword);
+
+            Teacher teacher = new Teacher(
+                    registrationDto.getFirstName(),
+                    registrationDto.getLastName(),
+                    registrationDto.getEmail().toLowerCase(),
+                    encodedPassword,
+                    registrationDto.getDepartment(),
+                    registrationDto.getEmployeeId()
+            );
+
+            Teacher savedTeacher = teacherRepository.save(teacher);
+
+            emailService.sendTeacherLoginLink(savedTeacher.getEmail(), tempPassword);
+
+            UserDto userDto = convertToUserDto(savedTeacher);
+
+            return new AuthResponseDto(true, "Teacher registration successful. Login link sent to email.", userDto);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Teacher registration failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public AuthResponseDto registerAdmin(AdminRegistrationDto registrationDto) {
+        try {
+            Admin admin = new Admin(
+                    registrationDto.getFirstName(),
+                    registrationDto.getLastName(),
+                    registrationDto.getEmail().toLowerCase(),
+                    passwordEncoder.encode(registrationDto.getPassword()),
+                    registrationDto.getAdminLevel()
+            );
+
+            Admin savedAdmin = adminRepository.save(admin);
+            UserDto userDto = convertToUserDto(savedAdmin);
+
+            return new AuthResponseDto(true, "Admin registration successful", userDto);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Admin registration failed: " + e.getMessage(), e);
         }
     }
 
@@ -88,22 +183,20 @@ public class AuthService {
                 throw new RuntimeException("Invalid email or password");
             }
 
-            // Create session
             String sessionId = sessionService.createSession(user);
 
-            // Convert to DTO
             UserDto userDto = convertToUserDto(user);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Login successful");
             response.put("user", userDto);
-            response.put("sessionId", sessionId); // Include session ID in response
+            response.put("sessionId", sessionId);
 
             return response;
 
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -115,30 +208,28 @@ public class AuthService {
         return sessionService.getUserFromSession(sessionId);
     }
 
-    private String generateStudentId() {
+    private String generateStudentNumber() {
         String year = String.valueOf(LocalDateTime.now().getYear());
-
-        // Get total number of students and add 1
         long totalStudents = studentRepository.count();
         int nextNumber = (int) (totalStudents + 1);
+        String studentNumber = String.format("STU%s%04d", year, nextNumber);
 
-        // Format: STU20240001
-        String studentId = String.format("STU%s%04d", year, nextNumber);
-
-        // Simple retry logic for safety
         int attempts = 0;
-        while (studentRepository.existsByStudentId(studentId) && attempts < 50) {
+        while (studentRepository.existsByStudentNumber(studentNumber) && attempts < 50) {
             nextNumber++;
-            studentId = String.format("STU%s%04d", year, nextNumber);
+            studentNumber = String.format("STU%s%04d", year, nextNumber);
             attempts++;
         }
 
-        // Final fallback
-        if (studentRepository.existsByStudentId(studentId)) {
-            studentId = "STU" + year + "X" + System.currentTimeMillis() % 10000;
+        if (studentRepository.existsByStudentNumber(studentNumber)) {
+            studentNumber = "STU" + year + "X" + System.currentTimeMillis() % 10000;
         }
 
-        return studentId;
+        return studentNumber;
+    }
+
+    private String generateTemporaryPassword() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 
     private UserDto convertToUserDto(User user) {
@@ -150,7 +241,15 @@ public class AuthService {
         userDto.setRole(user.getRole());
         userDto.setIsActive(user.getIsActive());
         userDto.setCreatedAt(user.getCreatedAt());
-        userDto.setStudentId(user.getStudent() != null ? user.getStudent().getStudentId() : null);
+
+        if (user instanceof Student) {
+            userDto.setStudentNumber(((Student) user).getStudentNumber());
+        } else if (user instanceof Teacher) {
+            userDto.setEmployeeId(((Teacher) user).getEmployeeId());
+        } else if (user instanceof Admin) {
+            userDto.setAdminLevel(((Admin) user).getAdminLevel());
+        }
+
         return userDto;
     }
 }

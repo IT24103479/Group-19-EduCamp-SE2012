@@ -1,7 +1,6 @@
 package com.example.Edu_Camp.controller;
 
 import com.example.Edu_Camp.dto.StudentProfileDto;
-import com.example.Edu_Camp.models.Student;
 import com.example.Edu_Camp.models.User;
 import com.example.Edu_Camp.service.AuthService;
 import com.example.Edu_Camp.service.StudentService;
@@ -17,14 +16,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class StudentController {
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
+    private final AuthService authService;
 
     @Autowired
-    private AuthService authService;
+    public StudentController(StudentService studentService, AuthService authService) {
+        this.studentService = studentService;
+        this.authService = authService;
+    }
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(HttpServletRequest request) {
@@ -33,18 +35,19 @@ public class StudentController {
             User user = authService.getAuthenticatedUser(sessionId);
 
             if (user == null) {
-                return ResponseEntity.status(401).body(
-                        Map.of("success", false, "message", "Not authenticated")
-                );
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
             }
 
-            Student student = studentService.getStudentByUser(user);
-            return ResponseEntity.ok(Map.of("success", true, "student", student));
+            if (!"STUDENT".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Student role required."));
+            }
+
+            var profile = studentService.getStudentProfile(user);
+            return ResponseEntity.ok(Map.of("success", true, "profile", profile));
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
-            );
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
@@ -52,15 +55,12 @@ public class StudentController {
     public ResponseEntity<?> updateProfile(@Valid @RequestBody StudentProfileDto profileDto,
                                            BindingResult bindingResult,
                                            HttpServletRequest request) {
-        // Validation
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             for (var error : bindingResult.getFieldErrors()) {
                 errors.put(error.getField(), error.getDefaultMessage());
             }
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", "Validation failed", "errors", errors)
-            );
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Validation failed", "errors", errors));
         }
 
         try {
@@ -68,22 +68,61 @@ public class StudentController {
             User user = authService.getAuthenticatedUser(sessionId);
 
             if (user == null) {
-                return ResponseEntity.status(401).body(
-                        Map.of("success", false, "message", "Not authenticated")
-                );
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
             }
 
-            Student updatedStudent = studentService.updateStudentProfile(user, profileDto);
-            return ResponseEntity.ok(
-                    Map.of("success", true, "message", "Profile updated successfully", "student", updatedStudent)
-            );
+            if (!"STUDENT".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Student role required."));
+            }
+
+            var updatedProfile = studentService.updateStudentProfile(user, profileDto);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully", "profile", updatedProfile));
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
-            );
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    @GetMapping("/profile/fields")
+    public ResponseEntity<?> getEditableFields(HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            var user = authService.getAuthenticatedUser(sessionId);
+
+            if (user == null || !"STUDENT".equals(user.getRole())) {
+                return ResponseEntity.status(401)
+                        .body(Map.of("success", false, "message", "Not authenticated as student"));
+            }
+
+            // Full list of fields and edit permissions
+            Map<String, Boolean> editableFields = new HashMap<>();
+            editableFields.put("profilePicture", studentService.canEditField("profilePicture"));
+            editableFields.put("phoneNumber", studentService.canEditField("phoneNumber"));
+            editableFields.put("emergencyContact", studentService.canEditField("emergencyContact"));
+            editableFields.put("address", studentService.canEditField("address"));
+            editableFields.put("dateOfBirth", studentService.canEditField("dateOfBirth"));
+
+            // Explicitly mark these as read-only
+            editableFields.put("firstName", false);
+            editableFields.put("lastName", false);
+            editableFields.put("email", false);
+            editableFields.put("studentNumber", false);
+            editableFields.put("assignedCourses", false);
+            editableFields.put("grade", false);
+            editableFields.put("updatedAt", false);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "editableFields", editableFields
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
 
     private String extractSessionId(HttpServletRequest request) {
         if (request.getCookies() != null) {
@@ -93,6 +132,12 @@ public class StudentController {
                 }
             }
         }
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
         return request.getHeader("X-Session-Id");
     }
 }

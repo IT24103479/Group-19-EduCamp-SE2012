@@ -1,12 +1,13 @@
 package com.example.Edu_Camp.models;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-public class User {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +24,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String role = "STUDENT"; // Default role
+    @Column(nullable = false)
+    private String role;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
@@ -34,25 +36,21 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private Student student;
-
-    // Constructors
     public User() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User(String firstName, String lastName, String email, String password) {
+    public User(String firstName, String lastName, String email, String password, String role) {
         this();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
-    // Getters and Setters
+    // getters & setters...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -79,9 +77,6 @@ public class User {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public Student getStudent() { return student; }
-    public void setStudent(Student student) { this.student = student; }
 
     @PreUpdate
     public void preUpdate() {

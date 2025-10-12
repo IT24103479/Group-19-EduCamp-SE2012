@@ -20,6 +20,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ClassRecords from './pages/TeacherRecords';
 import TeacherRecords from './pages/TeacherRecords';
 import TeacherMaterialForm from "./pages/TeacherMaterialForm";
+import TeacherDashboard from './pages/TeacherDashboard';
 
 const App: React.FC = () => {
   return (
@@ -39,6 +40,7 @@ const App: React.FC = () => {
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/class-records" element={<ClassRecords />} />
              <Route path="/teacher-upload/:id" element={<TeacherMaterialForm />} />
+            <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
 

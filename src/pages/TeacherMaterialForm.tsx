@@ -1,5 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+
+interface Material {
+  id: number;
+  title: string;
+  description: string;
+  subject: string;
+  className: string;
+  fileUrl: string;
+  fileName?: string;
+}
 
 const TeacherMaterialForm: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -7,47 +17,172 @@ const TeacherMaterialForm: React.FC = () => {
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [materials, setMaterials] = useState<Material[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !subject || !className || !file) {
-      toast.error ("Please fill all required fields and select a file");
-      return;
+  // Fetch uploaded materials
+  const fetchMaterials = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/materials");
+      if (!response.ok) throw new Error("Failed to fetch materials");
+      const data = await response.json();
+      setMaterials(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load materials");
     }
+  };
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("subject", subject);
-    formData.append("className", className);
-    formData.append("file", file);
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
+
+  // Handle upload
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!title || !subject || !className || !file) {
+    toast.error("Please fill all required fields and select a file");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = async () => {
+    const base64File = (reader.result as string).split(",")[1]; // remove prefix
+    const payload = {
+      title,
+      description,
+      subject,
+      className,
+      fileName: file.name,
+      fileData: base64File
+    };
 
     try {
       const response = await fetch("http://localhost:8080/api/materials", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) throw new Error("Upload failed");
+
       toast.success("Material uploaded successfully!");
-      setTitle(""); setDescription(""); setSubject(""); setClassName(""); setFile(null);
+      setTitle("");
+      setDescription("");
+      setSubject("");
+      setClassName("");
+      setFile(null);
+      fetchMaterials();
     } catch (err) {
       console.error(err);
       toast.error("Upload failed!");
     }
   };
+};
+
+
+  // Handle delete
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this material?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/materials/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Delete failed");
+
+      toast.success("Material deleted successfully!");
+      setMaterials(materials.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed!");
+    }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-4">Upload Teacher Material</h2>
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4 text-emerald-700">
+        Upload Teaching Materials
+      </h2>
+
+      {/* Upload Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input placeholder="Title*" value={title} onChange={e => setTitle(e.target.value)} />
-        <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
-        <input placeholder="Subject*" value={subject} onChange={e => setSubject(e.target.value)} />
-        <input placeholder="Class*" value={className} onChange={e => setClassName(e.target.value)} />
-        <input type="file" onChange={e => setFile(e.target.files ? e.target.files[0] : null)} />
-        <button type="submit">Upload</button>
+        <input
+          placeholder="Title*"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          placeholder="Subject*"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          placeholder="Class*"
+          value={className}
+          onChange={(e) => setClassName(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+          className="w-full border p-2 rounded"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-emerald-500 text-white py-2 rounded hover:bg-emerald-600"
+        >
+          Upload File
+        </button>
       </form>
+
+      {/* Uploaded Files */}
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">Uploaded Materials</h3>
+        {materials.length === 0 ? (
+          <p className="text-gray-500">No materials uploaded yet.</p>
+        ) : (
+          <ul className="space-y-3">
+            {materials.map((m) => (
+              <li
+                key={m.id}
+                className="flex justify-between items-center bg-gray-50 p-3 rounded shadow-sm"
+              >
+                <div>
+                  <p className="font-semibold">{m.title}</p>
+                  <p className="text-sm text-gray-600">
+                    {m.subject} | {m.className}
+                  </p>
+                  <a
+                    href={m.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 hover:underline text-sm"
+                  >
+                    View / Download File
+                  </a>
+                </div>
+                <button
+                  onClick={() => handleDelete(m.id)}
+                  className="text-red-500 hover:text-red-700 font-medium"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

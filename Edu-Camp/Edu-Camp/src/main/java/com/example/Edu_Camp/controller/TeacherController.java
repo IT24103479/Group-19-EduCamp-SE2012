@@ -1,8 +1,11 @@
 package com.example.Edu_Camp.controller;
 
 import com.example.Edu_Camp.models.Teacher;
+import com.example.Edu_Camp.models.TeacherMaterial;
+import com.example.Edu_Camp.repository.MaterialRepository;
 import com.example.Edu_Camp.repository.TeacherRepository;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -10,12 +13,15 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/teachers")
+@CrossOrigin(origins="http://localhost:5173")
 public class TeacherController {
 
     private final TeacherRepository teacherRepository;
+    private final MaterialRepository materialRepository;
 
-    public TeacherController(TeacherRepository teacherRepository) {
+    public TeacherController(TeacherRepository teacherRepository, MaterialRepository materialRepository) {
         this.teacherRepository = teacherRepository;
+        this.materialRepository = materialRepository;
     }
 
     // ✅ Get all teachers
@@ -26,13 +32,26 @@ public class TeacherController {
 
     // ✅ Get teacher by ID
     @GetMapping("/{id}")
-    public Optional<Teacher> getTeacherById(@PathVariable Long id) {
-        return teacherRepository.findById(id);
+    public ResponseEntity<?> getMaterial(@PathVariable Long id) {
+        Optional<TeacherMaterial> materialOptional = materialRepository.findById(id);
+
+        if (materialOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TeacherMaterial material = materialOptional.get();
+
+        // Return file as downloadable attachment
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + material.getFileName() + "\"")
+                .header("Content-Type", "application/octet-stream")
+                .body(material.getFileData());
     }
 
     // ✅ Add a new teacher
     @PostMapping
     public Teacher createTeacher(@RequestBody Teacher teacher) {
+        System.out.println("📌 Received Teacher: " + teacher.getName());
         return teacherRepository.save(teacher);
     }
 
@@ -45,9 +64,23 @@ public class TeacherController {
 
     // ✅ Search teachers by subject and address
     @GetMapping("/search")
-    public List<Teacher> findBySubjectAndAddress(
+    public List<Teacher> findBySubject(
             @RequestParam String subject,
             @RequestParam String address) {
-        return teacherRepository.findBySubjectAndAddress(subject, address);
+        return teacherRepository.findBySubject(subject);
     }
+    @PutMapping("/teachers/{id}")
+    public Teacher updateTeacher(@PathVariable Long id, @RequestBody Teacher teacher) {
+        Teacher existing = teacherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        existing.setName(teacher.getName());
+        existing.setSubject(teacher.getSubject());
+        existing.setEmail(teacher.getEmail());
+        // ... set other fields you want to allow editing
+
+        return teacherRepository.save(existing);
+    }
+
+
 }

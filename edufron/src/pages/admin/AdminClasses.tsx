@@ -101,9 +101,9 @@ export default function AdminClasses() {
 
   useEffect(() => {
     Promise.all([
-      axios.get<Teacher[]>("http://localhost:8080/teachers"),
-      axios.get<Subject[]>("http://localhost:8080/subjects"),
-      axios.get<any[]>("http://localhost:8080/classes"),
+      axios.get<Teacher[]>("http://localhost:8081/teachers"),
+      axios.get<Subject[]>("http://localhost:8081/subjects"),
+      axios.get<any[]>("http://localhost:8081/classes"),
     ])
       .then(([teachersRes, subjectsRes, classesRes]) => {
         setTeachers(teachersRes.data);
@@ -177,7 +177,7 @@ export default function AdminClasses() {
 };
 
     if (editingClass) {
-      axios.put(`http://localhost:8080/classes/${editingClass.id}`, payload)
+      axios.put(`http://localhost:8081/classes/${editingClass.id}`, payload)
         .then((res) => {
           setClasses(classes.map((cls) => (cls.id === editingClass.id ? res.data : cls)));
           toast({
@@ -198,7 +198,7 @@ export default function AdminClasses() {
         });
         console.log("PUT payload:", payload);
     } else {
-      axios.post("http://localhost:8080/classes", { ...payload, enrolled: 0 })
+      axios.post("http://localhost:8081/classes", { ...payload, enrolled: 0 })
         .then((res) => {
           setClasses([...classes, res.data]);
           toast({
@@ -238,7 +238,7 @@ subjectIds: cls.subjectIds?.map(String) || [],
   };
 
   const handleDelete = (id: string | number) => {
-    fetch(`http://localhost:8080/classes/${id}`, {
+    fetch(`http://localhost:8081/classes/${id}`, {
       method: "DELETE",
     })
       .then((res) => {

@@ -41,7 +41,7 @@ const EnrolledClasses: React.FC = () => {
         console.log("🔍 Fetching enrolled classes for user:", user);
 
         // ✅ call /me (no ID in path)
-        const res = await axios.get("http://localhost:8080/educamp/api/auth/me", {
+        const res = await axios.get("http://localhost:8081/educamp/api/auth/me", {
            withCredentials: true, // ✅ important for sending cookies
         });
 
@@ -60,7 +60,7 @@ const EnrolledClasses: React.FC = () => {
         const classPromises = enrollments.map((enroll) => {
           console.log(`➡️ Fetching class details for classId: ${enroll.classId}`);
           return axios
-            .get(`http://localhost:8080/classes/${enroll.classId}`)
+            .get(`http://localhost:8081/classes/${enroll.classId}`)
             .then((clsRes) => {
               console.log(`✅ Class details for ${enroll.classId}:`, clsRes.data);
               return clsRes.data;

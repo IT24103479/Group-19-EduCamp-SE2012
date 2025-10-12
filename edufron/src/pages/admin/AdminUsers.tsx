@@ -84,7 +84,7 @@ export default function AdminUsers() {
   });
 
 useEffect(() => {
-  axios.get("http://localhost:8080/educamp/api/auth/me")
+  axios.get("http://localhost:8081/educamp/api/auth/me")
     .then(res => {
       const user = res.data.user; // your /me endpoint returns { authenticated: true, user: {...} }
       if (user) {

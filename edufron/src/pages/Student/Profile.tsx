@@ -94,7 +94,7 @@ const Profile: React.FC = () => {
       }
 
       // Fetch student profile from backend
-      const response = await fetch('http://localhost:8080/educamp/api/auth/me', {
+      const response = await fetch('http://localhost:8081/educamp/api/auth/me', {
         credentials: 'include', // Important for session cookies
       });
 
@@ -126,7 +126,7 @@ const Profile: React.FC = () => {
   const onSubmit = async (data: ProfileFormData) => {
     setIsUpdating(true);
     try {
-      const response = await fetch('http://localhost:8080/api/students/profile', {
+      const response = await fetch('http://localhost:8081/api/students/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

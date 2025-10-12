@@ -40,7 +40,7 @@ const ClassRecords: React.FC = () => {
 
   // Delete a class
   const handleDelete = (id: number) => {
-    fetch(`http://localhost:8080/classes/${id}`, { method: "DELETE" })
+    fetch(`http://localhost:8081/classes/${id}`, { method: "DELETE" })
       .then(() => setClasses((prev) => prev.filter((c) => c.id !== id)))
       .catch((err) => console.error(err));
   };

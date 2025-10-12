@@ -15,7 +15,7 @@ const ClassPaymentPage: React.FC = () => {
   useEffect(() => {
     if (!classId) return;
     setLoading(true);
-    axios.get("http://localhost:8080/classes")
+    axios.get("http://localhost:8081/classes")
       .then(res => {
         const found = res.data.find((cls: any) => cls.id === classId);
         if (found) {

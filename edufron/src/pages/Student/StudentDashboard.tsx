@@ -23,7 +23,7 @@ const StudentDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch('http://localhost:8081/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

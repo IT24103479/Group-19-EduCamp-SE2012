@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/classes")
-@CrossOrigin(origins="http://localhost:3000")
+@CrossOrigin(origins="http://localhost:5173")
 public class ClassController {
 
     private final ClassRepository classRepository;

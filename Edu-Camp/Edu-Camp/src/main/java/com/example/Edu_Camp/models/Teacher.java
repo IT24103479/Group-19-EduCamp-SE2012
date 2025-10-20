@@ -8,10 +8,10 @@ public class Teacher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column( unique = true)
     private String email;
     private String subject;
     private String phone;

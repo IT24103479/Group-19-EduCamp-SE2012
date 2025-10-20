@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/subjects")
-@CrossOrigin(origins = "http://localhost:3000") // allow React frontend
+@CrossOrigin(origins = "http://localhost:5173") // allow React frontend
 public class SubjectController {
 
     private final SubjectRepository subjectRepository;

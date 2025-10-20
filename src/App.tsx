@@ -21,6 +21,8 @@ import ClassRecords from './pages/TeacherRecords';
 import TeacherRecords from './pages/TeacherRecords';
 import TeacherMaterialForm from "./pages/TeacherMaterialForm";
 import TeacherDashboard from './pages/TeacherDashboard';
+import AddTeacherForm from "./components/AddTeacherForm";
+
 
 const App: React.FC = () => {
   return (
@@ -41,6 +43,7 @@ const App: React.FC = () => {
             <Route path="/class-records" element={<ClassRecords />} />
              <Route path="/teacher-upload/:id" element={<TeacherMaterialForm />} />
             <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+            <Route path="/register-teacher" element={<AddTeacherForm />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
 

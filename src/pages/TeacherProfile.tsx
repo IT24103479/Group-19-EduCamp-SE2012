@@ -159,15 +159,6 @@ const TeacherProfile = () => {
           <span className="font-semibold">Phone:</span> {teacher.phone}
         </p>
       </div>
-{/* Upload Material Button */}
-        <div className="flex justify-center mb-8">
-          <button
-            onClick={() => navigate(`/teacher-upload/${teacher.id}`)}
-            className="px-5 py-3 bg-emerald-500 text-white rounded-lg shadow hover:bg-emerald-600 transition"
-          >
-            📚 Upload Teaching Material
-          </button>
-        </div>
       <Link to="/teachers">
         <button className="mt-6 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600">
           Back to Teachers

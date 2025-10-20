@@ -108,30 +108,35 @@ const TeacherMaterialForm: React.FC = () => {
 
       {/* Upload Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        Title : 
         <input
           placeholder="Title*"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        Description :
         <textarea
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        Subject : 
         <input
           placeholder="Subject*"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        Class :
         <input
           placeholder="Class*"
           value={className}
           onChange={(e) => setClassName(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        Select File* :
         <input
           type="file"
           onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}

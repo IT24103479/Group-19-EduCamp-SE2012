@@ -10,11 +10,13 @@ import NotFound from './pages/NotFound';
 import Enroll from './pages/Enroll';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import AdminSignUp from './pages/AdminSignUp';
 import Subjects from './pages/Subjects';
 import Teachers from './pages/Teachers';
 import Classes from './pages/Classes';
 import StudentDashboard from './pages/StudentDashboard';
 import Profile from './pages/Profile';
+import Submissions from './pages/Submissions';
 const App: React.FC = () => {
   return (
     <Theme appearance="inherit" radius="large" scaling="100%">
@@ -26,11 +28,13 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/subjects" element={<Subjects />} />
+            <Route path="/register/admin" element={<AdminSignUp />} />
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/classes" element={<Classes />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/submissions" element={<Submissions />} />
           </Routes>
 
           <ToastContainer

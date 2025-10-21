@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,18 +8,17 @@ import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// ✅ Zod schema
+// ✅ Validation schema
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
-// ✅ Infer TS type from schema
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -30,6 +29,7 @@ const Login: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // ✅ Main login function
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
@@ -37,68 +37,76 @@ const Login: React.FC = () => {
 
       const response = await fetch('http://localhost:8081/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Important for session cookies
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Important for cookie-based sessions
         body: JSON.stringify({
           email: data.email,
           password: data.password,
         }),
       });
 
-      console.log('Login response status:', response.status);
-
       const result = await response.json();
-      console.log('Login response data:', result);
+      console.log('Login response:', result);
 
       if (response.ok && result.success) {
         toast.success('Login successful!');
-        console.log('User data:', result.user);
-        
-        // Store user data in localStorage or context if needed
+
+        // Store user info in localStorage
         if (result.user) {
           localStorage.setItem('user', JSON.stringify(result.user));
+          localStorage.setItem('isAuthenticated', 'true');
         }
-        
-        // Redirect to dashboard
-        navigate('/dashboard');
+
+        // ✅ Redirect user based on role
+        const role = result.user?.role?.toUpperCase();
+        switch (role) {
+          case 'STUDENT':
+            navigate('/dashboard');
+            break;
+          case 'TEACHER':
+            navigate('/teacher-dashboard');
+            break;
+          case 'ADMIN':
+            navigate('/admin-dashboard');
+            break;
+          default:
+            navigate('/dashboard');
+        }
       } else {
-        // Handle specific error messages
+        // Handle backend validation or session errors
         if (result.message?.includes('Invalid email or password')) {
           toast.error('Invalid email or password. Please try again.');
         } else if (result.message?.includes('deactivated')) {
-          toast.error('Account is deactivated. Please contact support.');
+          toast.error('Your account has been deactivated. Contact support.');
         } else {
           toast.error(result.message || 'Login failed. Please try again.');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        toast.error('Cannot connect to server. Please check if backend is running.');
+        toast.error('Cannot connect to server. Is the backend running?');
       } else {
-        toast.error('Network error. Please try again.');
+        toast.error('Unexpected error. Please try again.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ✅ Test backend connection (optional)
+  // ✅ Optional: test backend session endpoint
   const testBackendConnection = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/auth/me', {
+      const res = await fetch('http://localhost:8081/api/auth/me', {
         credentials: 'include',
       });
-      console.log('Backend connection test:', response.status);
-    } catch (error) {
-      console.error('Backend connection failed:', error);
+      console.log('Backend /me test:', res.status);
+    } catch (err) {
+      console.error('Backend connection failed:', err);
     }
   };
 
-  // Test connection on component mount (optional)
-  React.useEffect(() => {
+  useEffect(() => {
     testBackendConnection();
   }, []);
 
@@ -117,10 +125,7 @@ const Login: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
                 </label>
                 <div className="relative">
@@ -129,7 +134,7 @@ const Login: React.FC = () => {
                     {...register('email')}
                     type="email"
                     id="email"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -140,10 +145,7 @@ const Login: React.FC = () => {
 
               {/* Password */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -152,7 +154,7 @@ const Login: React.FC = () => {
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     id="password"
-                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your password"
                   />
                   <button
@@ -168,7 +170,7 @@ const Login: React.FC = () => {
                 )}
               </div>
 
-              {/* Remember me + Forgot password */}
+              {/* Remember Me / Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
@@ -176,10 +178,7 @@ const Login: React.FC = () => {
                     type="checkbox"
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded"
                   />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-slate-700"
-                  >
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
                     Remember me
                   </label>
                 </div>
@@ -191,7 +190,7 @@ const Login: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Submit */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -201,21 +200,18 @@ const Login: React.FC = () => {
               </button>
             </form>
 
-            {/* Demo credentials hint */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-700 text-center">
-                <strong>Demo:</strong> Use the credentials from your registered account
+            {/* Hint */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-center">
+              <p className="text-sm text-blue-700">
+                <strong>Note:</strong> Use your registered credentials to log in.
               </p>
             </div>
 
             {/* Signup Link */}
             <div className="mt-6 text-center">
               <p className="text-slate-600">
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  className="text-emerald-600 hover:text-emerald-500 font-medium"
-                >
+                Don’t have an account?{' '}
+                <Link to="/signup" className="text-emerald-600 hover:text-emerald-500 font-medium">
                   Sign up here
                 </Link>
               </p>

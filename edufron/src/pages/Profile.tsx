@@ -5,383 +5,525 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { User, Mail, Phone, MapPin, Edit3, Save, X, Shield } from 'lucide-react';
+import { 
+  User, Mail, Phone, MapPin, Edit3, Save, X, Calendar, 
+  GraduationCap, Shield, BookOpen, Clock, Cake
+} from 'lucide-react';
 import { toast } from 'react-toastify';
 
-// Validation schema for profile updates
+// ✅ Validation schema for editable fields
 const profileSchema = z.object({
   phoneNumber: z.string()
     .min(10, 'Phone number must be at least 10 characters')
     .regex(/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number'),
+  emergencyContact: z.string()
+    .min(10, 'Emergency contact must be at least 10 characters')
+    .regex(/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number'),
   address: z.string()
     .min(10, 'Address must be at least 10 characters')
     .max(200, 'Address must be less than 200 characters'),
-  emergencyContact: z.string()
-    .min(10, 'Emergency contact must be at least 10 characters'),
-  academicLevel: z.string().min(1, 'Academic level is required'),
-  major: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 interface StudentProfile {
   id: number;
-  studentId: string;
-  phoneNumber?: string;
-  address?: string;
-  emergencyContact?: string;
-  academicLevel?: string;
-  major?: string;
+  studentNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  emergencyContact: string;
+  grade: string;
+  dateOfBirth: string;
+  gender: string;
+  profilePicture?: string;
   createdAt: string;
   updatedAt: string;
+  age: number;
+  underage: boolean;
+  assignedCourses: string[];
 }
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors }, 
+    reset 
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });
 
-  // Fetch user data and student profile
+  // ✅ Secure fetch helper (handles session expiry globally)
+  const secureFetch = async (url: string, options: RequestInit = {}) => {
+    const response = await fetch(url, { 
+      ...options, 
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      }
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      toast.info('Session expired. Please login again.');
+      localStorage.removeItem('user');
+      navigate('/login');
+      throw new Error('Unauthorized');
+    }
+
+    return response;
+  };
+
+  // ✅ Verify session before fetching profile
   useEffect(() => {
-    fetchProfileData();
+    const verifyAndFetchProfile = async () => {
+      try {
+        const meResponse = await fetch('http://localhost:8081/api/auth/me', {
+          credentials: 'include',
+        });
+
+        if (meResponse.status === 401 || meResponse.status === 403) {
+          toast.info('Your session has expired. Please login again.');
+          navigate('/login');
+          return;
+        }
+
+        await fetchProfileData();
+      } catch (error) {
+        console.error('Session check failed:', error);
+        toast.error('Unable to verify session. Please try again.');
+        navigate('/login');
+      }
+    };
+
+    verifyAndFetchProfile();
   }, []);
 
   const fetchProfileData = async () => {
     try {
       setIsLoading(true);
-      
-      // Get current user from localStorage
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
 
-      // Fetch student profile from backend
-      const response = await fetch('http://localhost:8081/api/students/profile', {
-        credentials: 'include', // Important for session cookies
-      });
+      const response = await secureFetch('http://localhost:8081/api/students/profile');
+      console.log('Profile API Response Status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        if (result.success) {
-          setStudentProfile(result.student);
-          // Pre-fill form with existing data
-          if (result.student) {
-            setValue('phoneNumber', result.student.phoneNumber || '');
-            setValue('address', result.student.address || '');
-            setValue('emergencyContact', result.student.emergencyContact || '');
-            setValue('academicLevel', result.student.academicLevel || '');
-            setValue('major', result.student.major || '');
-          }
+        console.log('Profile API Response Data:', result);
+
+        if (result.success && result.profile) {
+          setStudentProfile(result.profile);
+          reset({
+            phoneNumber: result.profile.phoneNumber || '',
+            emergencyContact: result.profile.emergencyContact || '',
+            address: result.profile.address || '',
+          });
+        } else {
+          toast.error(result.message || 'Failed to load profile');
         }
-      } else if (response.status === 401) {
-        toast.error('Please login to view your profile');
-        navigate('/login');
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Profile fetch error:', error);
       toast.error('Failed to load profile data');
-    } finally {
-      setIsLoading(false);
+    } finally { 
+      setIsLoading(false); 
     }
   };
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsUpdating(true);
     try {
-      const response = await fetch('http://localhost:8081/api/students/profile', {
+      console.log('Submitting profile data:', data);
+      
+      const response = await secureFetch('http://localhost:8081/api/students/profile', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
         body: JSON.stringify(data),
       });
 
       const result = await response.json();
-
+      console.log('Update API Response:', result);
+      
       if (response.ok && result.success) {
         toast.success('Profile updated successfully!');
-        setStudentProfile(result.student);
+        setStudentProfile(result.profile);
         setIsEditing(false);
-        // Update local storage if user data changed
-        if (result.student) {
-          const updatedUser = { ...user, student: result.student };
-          setUser(updatedUser);
-          localStorage.setItem('user', JSON.stringify(updatedUser));
-        }
+      } else if (result.errors) {
+        Object.values(result.errors).forEach((error: any) => toast.error(error));
       } else {
         toast.error(result.message || 'Failed to update profile');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Profile update error:', error);
       toast.error('Network error. Please try again.');
-    } finally {
-      setIsUpdating(false);
+    } finally { 
+      setIsUpdating(false); 
     }
   };
 
   const handleEditToggle = () => {
-    if (isEditing) {
-      // Reset form to current values when canceling
-      if (studentProfile) {
-        setValue('phoneNumber', studentProfile.phoneNumber || '');
-        setValue('address', studentProfile.address || '');
-        setValue('emergencyContact', studentProfile.emergencyContact || '');
-        setValue('academicLevel', studentProfile.academicLevel || '');
-        setValue('major', studentProfile.major || '');
-      }
+    if (isEditing && studentProfile) {
+      reset({
+        phoneNumber: studentProfile.phoneNumber || '',
+        emergencyContact: studentProfile.emergencyContact || '',
+        address: studentProfile.address || '',
+      });
     }
     setIsEditing(!isEditing);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lime-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Please login to view your profile</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="mt-4 bg-lime-600 text-white px-6 py-2 rounded-lg hover:bg-lime-700"
-          >
-            Go to Login
-          </button>
-        </div>
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // ✅ Loading state
+  if (isLoading) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+        <p className="mt-4 text-slate-600">Loading your profile...</p>
       </div>
-    );
-  }
+    </div>
+  );
+
+  // ✅ Retry button on load failure
+  if (!studentProfile) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-slate-600 mb-4">Unable to load profile data</p>
+        <button 
+          onClick={fetchProfileData} 
+          className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Header />
       
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Profile Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-lime-500 to-green-500 px-6 py-8 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-lime-600">
-                    {user.firstName?.[0]}{user.lastName?.[0]}
-                  </span>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-8 py-6 text-white">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center space-x-6 mb-4 md:mb-0">
+                <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-white/30">
+                  {studentProfile.profilePicture ? (
+                    <img 
+                      src={studentProfile.profilePicture} 
+                      alt="Profile" 
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-3xl font-bold text-white">
+                      {studentProfile.firstName?.[0]}{studentProfile.lastName?.[0]}
+                    </span>
+                  )}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">
-                    {user.firstName} {user.lastName}
+                  <h1 className="text-3xl font-bold">
+                    {studentProfile.firstName} {studentProfile.lastName}
                   </h1>
-                  <p className="text-lime-100">{user.studentId || 'Student'}</p>
-                  <p className="text-lime-200 text-sm mt-1">{user.email}</p>
+                  <p className="text-emerald-100 text-lg mt-1">
+                    {studentProfile.studentNumber}
+                  </p>
+                  <p className="text-emerald-200 mt-1 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {studentProfile.email}
+                  </p>
                 </div>
               </div>
               
               <div className="flex space-x-3">
                 {!isEditing ? (
-                  <button
+                  <button 
                     onClick={handleEditToggle}
-                    className="bg-white text-lime-600 px-4 py-2 rounded-lg hover:bg-lime-50 transition-colors flex items-center space-x-2"
+                    className="bg-white text-emerald-600 px-6 py-3 rounded-lg hover:bg-slate-50 flex items-center gap-2 transition-all duration-200 font-medium shadow-md"
                   >
-                    <Edit3 className="w-4 h-4" />
-                    <span>Edit Profile</span>
+                    <Edit3 className="w-5 h-5" />
+                    Edit Profile
                   </button>
                 ) : (
-                  <>
-                    <button
+                  <div className="flex space-x-3">
+                    <button 
                       onClick={handleEditToggle}
-                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2"
+                      className="bg-slate-500 text-white px-6 py-3 rounded-lg hover:bg-slate-600 flex items-center gap-2 transition-all duration-200 font-medium"
                     >
-                      <X className="w-4 h-4" />
-                      <span>Cancel</span>
+                      <X className="w-5 h-5" />
+                      Cancel
                     </button>
-                    <button
+                    <button 
                       onClick={handleSubmit(onSubmit)}
                       disabled={isUpdating}
-                      className="bg-lime-600 text-white px-4 py-2 rounded-lg hover:bg-lime-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
+                      className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 flex items-center gap-2 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                     >
-                      <Save className="w-4 h-4" />
-                      <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
+                      <Save className="w-5 h-5" />
+                      {isUpdating ? 'Saving...' : 'Save Changes'}
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Profile Form */}
-          <div className="p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Personal Information */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Personal Information Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                <User className="w-5 h-5 text-emerald-600" />
+                Personal Information
+              </h2>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <User className="w-5 h-5 mr-2 text-lime-600" />
-                    Personal Information
-                  </h3>
-                  
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                    <div className="flex items-center space-x-2 text-gray-900">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span>{user.email}</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Email cannot be changed</p>
-                  </div>
-
-                  <div>
-                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number *
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        {...register('phoneNumber')}
-                        type="tel"
-                        id="phoneNumber"
-                        disabled={!isEditing}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent disabled:bg-gray-100"
-                        placeholder="+1234567890"
-                      />
-                    </div>
-                    {errors.phoneNumber && (
-                      <p className="text-sm text-red-600 mt-1">{errors.phoneNumber.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                      Address *
-                    </label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
-                      <textarea
-                        {...register('address')}
-                        id="address"
-                        disabled={!isEditing}
-                        rows={3}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent disabled:bg-gray-100 resize-none"
-                        placeholder="123 Main St, City, State 12345"
-                      />
-                    </div>
-                    {errors.address && (
-                      <p className="text-sm text-red-600 mt-1">{errors.address.message}</p>
-                    )}
+                {/* Read-only Fields */}
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Student Number</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <Shield className="w-4 h-4 text-slate-500" />
+                    <span className="font-mono text-slate-900">{studentProfile.studentNumber}</span>
                   </div>
                 </div>
 
-                {/* Academic Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Shield className="w-5 h-5 mr-2 text-blue-600" />
-                    Academic Information
-                  </h3>
-
-                  <div>
-                    <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700 mb-1">
-                      Emergency Contact *
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        {...register('emergencyContact')}
-                        type="tel"
-                        id="emergencyContact"
-                        disabled={!isEditing}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent disabled:bg-gray-100"
-                        placeholder="+1987654321"
-                      />
-                    </div>
-                    {errors.emergencyContact && (
-                      <p className="text-sm text-red-600 mt-1">{errors.emergencyContact.message}</p>
-                    )}
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Email Address</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-900">{studentProfile.email}</span>
                   </div>
+                </div>
 
-                  <div>
-                    <label htmlFor="academicLevel" className="block text-sm font-medium text-gray-700 mb-1">
-                      Academic Level *
-                    </label>
-                    <select
-                      {...register('academicLevel')}
-                      id="academicLevel"
-                      disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent disabled:bg-gray-100"
-                    >
-                      <option value="">Select academic level</option>
-                      <option value="Freshman">Freshman</option>
-                      <option value="Sophomore">Sophomore</option>
-                      <option value="Junior">Junior</option>
-                      <option value="Senior">Senior</option>
-                      <option value="Graduate">Graduate</option>
-                      <option value="Undergraduate">Undergraduate</option>
-                      <option value="Postgraduate">Postgraduate</option>
-                    </select>
-                    {errors.academicLevel && (
-                      <p className="text-sm text-red-600 mt-1">{errors.academicLevel.message}</p>
-                    )}
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Date of Birth</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <Cake className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-900">
+                      {studentProfile.dateOfBirth ? formatDate(studentProfile.dateOfBirth) : 'Not set'}
+                    </span>
                   </div>
+                </div>
 
-                  <div>
-                    <label htmlFor="major" className="block text-sm font-medium text-gray-700 mb-1">
-                      Major
-                    </label>
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Age</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span className="text-slate-900">
+                      {studentProfile.age || 'N/A'} years
+                      {studentProfile.underage && (
+                        <span className="ml-2 text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                          Underage
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Gender</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <User className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-900">{studentProfile.gender || 'Not specified'}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">Grade</label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <GraduationCap className="w-4 h-4 text-slate-500" />
+                    <span className="text-slate-900">{studentProfile.grade || 'Not assigned'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Editable Contact Information Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                <Phone className="w-5 h-5 text-emerald-600" />
+                Contact Information
+                {isEditing && (
+                  <span className="text-sm font-normal text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                    Editing
+                  </span>
+                )}
+              </h2>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Phone Number *
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
-                      {...register('major')}
-                      type="text"
-                      id="major"
+                      {...register('phoneNumber')}
+                      type="tel"
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent disabled:bg-gray-100"
-                      placeholder="Computer Science"
+                      className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors"
+                      placeholder="+1234567890"
                     />
-                    {errors.major && (
-                      <p className="text-sm text-red-600 mt-1">{errors.major.message}</p>
+                  </div>
+                  {errors.phoneNumber && (
+                    <p className="mt-2 text-sm text-red-600">{errors.phoneNumber.message}</p>
+                  )}
+                </div>
+
+                {/* Emergency Contact */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Emergency Contact *
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input
+                      {...register('emergencyContact')}
+                      type="tel"
+                      disabled={!isEditing}
+                      className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors"
+                      placeholder="+1987654321"
+                    />
+                  </div>
+                  {errors.emergencyContact && (
+                    <p className="mt-2 text-sm text-red-600">{errors.emergencyContact.message}</p>
+                  )}
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Address *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                    <textarea
+                      {...register('address')}
+                      disabled={!isEditing}
+                      rows={4}
+                      className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors resize-none"
+                      placeholder="123 Main Street, City, State, ZIP Code"
+                    />
+                  </div>
+                  {errors.address && (
+                    <p className="mt-2 text-sm text-red-600">{errors.address.message}</p>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Right Column - Additional Information */}
+          <div className="space-y-8">
+            {/* Academic Information Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-emerald-600" />
+                Academic Information
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Assigned Courses</label>
+                  <div className="space-y-2">
+                    {studentProfile.assignedCourses && studentProfile.assignedCourses.length > 0 ? (
+                      studentProfile.assignedCourses.map((course, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                          <span className="text-slate-900">{course}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-slate-500 text-sm p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        No courses assigned yet
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Read-only information */}
-              {!isEditing && studentProfile && (
-                <div className="bg-gray-50 rounded-lg p-4 mt-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">Profile Information</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600">Student ID:</span>
-                      <p className="font-mono text-gray-900">{studentProfile.studentId}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Last Updated:</span>
-                      <p className="text-gray-900">
-                        {new Date(studentProfile.updatedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+            {/* Profile Metadata Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-emerald-600" />
+                Profile Information
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-sm font-medium text-slate-700">Member Since</span>
+                  <span className="text-sm text-slate-900">{formatDate(studentProfile.createdAt)}</span>
                 </div>
-              )}
-            </form>
+                
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-sm font-medium text-slate-700">Last Updated</span>
+                  <span className="text-sm text-slate-900">{formatDateTime(studentProfile.updatedAt)}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-sm font-medium text-slate-700">Profile Status</span>
+                  <span className={`text-sm px-2 py-1 rounded-full ${
+                    studentProfile.underage 
+                      ? 'bg-amber-100 text-amber-800' 
+                      : 'bg-emerald-100 text-emerald-800'
+                  }`}>
+                    {studentProfile.underage ? 'Underage Student' : 'Active Student'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Card */}
+            {!isEditing && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Quick Actions</h2>
+                <div className="space-y-3">
+                  <button 
+                    onClick={handleEditToggle}
+                    className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2 transition-colors font-medium"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="w-full bg-slate-600 text-white py-3 px-4 rounded-lg hover:bg-slate-700 flex items-center justify-center gap-2 transition-colors font-medium"
+                  >
+                    <User className="w-4 h-4" />
+                    Back to Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+        {/* Profile Info */}
+        {/* (Same rest of your UI structure as before — no logic changes needed) */}
       </main>
 
       <Footer />

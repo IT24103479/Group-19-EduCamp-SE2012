@@ -5,7 +5,7 @@ interface DashboardCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color: 'lime' | 'blue' | 'amber' | 'gray';
+  color: 'lime' | 'blue' | 'amber' | 'gray' | 'red';
   trend?: {
     value: number;
     isPositive: boolean;
@@ -23,14 +23,16 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
     lime: 'bg-lime-50 text-lime-600 border-lime-200',
     blue: 'bg-blue-50 text-blue-600 border-blue-200',
     amber: 'bg-amber-50 text-amber-600 border-amber-200',
-    gray: 'bg-gray-50 text-gray-600 border-gray-200'
+    gray: 'bg-gray-50 text-gray-600 border-gray-200',
+    red: 'bg-red-50 text-red-600 border-red-200'
   };
 
   const iconBgClasses = {
     lime: 'bg-lime-100',
     blue: 'bg-blue-100',
     amber: 'bg-amber-100',
-    gray: 'bg-gray-100'
+    gray: 'bg-gray-100',
+    red: 'bg-red-100'
   };
 
   return (

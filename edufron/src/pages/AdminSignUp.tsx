@@ -3,19 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// ✅ Validation schema (matches backend StudentRegistrationDto)
-const signUpSchema = z.object({
+// Validation schema (matches backend AdminRegistrationDto)
+const adminSignUpSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  phoneNumber: z.string().regex(/^\+?[0-9]{10,15}$/, 'Enter a valid phone number'),
-  dateOfBirth: z.string().min(1, 'Date of birth is required'),
-  gender: z.string().min(1, 'Gender is required'),
+  adminLevel: z.string().min(1, 'Admin level is required'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, 
@@ -24,34 +22,27 @@ const signUpSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
-}).refine((data) => {
-  const birthDate = new Date(data.dateOfBirth);
-  const today = new Date();
-  return birthDate < today;
-}, {
-  message: 'Date of birth must be in the past',
-  path: ['dateOfBirth'],
 });
 
-type SignUpFormData = z.infer<typeof signUpSchema>;
+type AdminSignUpFormData = z.infer<typeof adminSignUpSchema>;
 
-const SignUp: React.FC = () => {
+const AdminSignUp: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
+  const { register, handleSubmit, formState: { errors } } = useForm<AdminSignUpFormData>({
+    resolver: zodResolver(adminSignUpSchema),
   });
 
-  // ✅ Auto-login helper
+  // Auto-login helper
   const autoLogin = async (email: string, password: string) => {
     try {
       const res = await fetch('http://localhost:8081/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // important for cookie session
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -61,8 +52,8 @@ const SignUp: React.FC = () => {
       if (res.ok && result.success) {
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('isAuthenticated', 'true');
-        toast.success('Welcome to EduCamp!');
-        navigate('/dashboard');
+        toast.success('Welcome to EduCamp Admin!');
+        navigate('/admin/dashboard');
         return true;
       } else {
         toast.error(result.message || 'Auto-login failed.');
@@ -75,24 +66,22 @@ const SignUp: React.FC = () => {
     }
   };
 
-  // ✅ Registration submit
-  const onSubmit = async (data: SignUpFormData) => {
+  // Admin Registration submit
+  const onSubmit = async (data: AdminSignUpFormData) => {
     setIsLoading(true);
     try {
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        phoneNumber: data.phoneNumber,
-        dateOfBirth: data.dateOfBirth,
-        gender: data.gender,
+        adminLevel: data.adminLevel,
         password: data.password,
         confirmPassword: data.confirmPassword,
       };
 
-      console.log('Registering student...', payload);
+      console.log('Registering admin...', payload);
 
-      const response = await fetch('http://localhost:8081/api/auth/register/student', {
+      const response = await fetch('http://localhost:8081/api/auth/register/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -100,10 +89,10 @@ const SignUp: React.FC = () => {
       });
 
       const result = await response.json();
-      console.log('Registration response:', result);
+      console.log('Admin registration response:', result);
 
       if (response.ok && result.success) {
-        toast.success('Student account created successfully! Logging you in...');
+        toast.success('Admin account created successfully! Logging you in...');
         const success = await autoLogin(data.email, data.password);
 
         if (!success) {
@@ -116,11 +105,11 @@ const SignUp: React.FC = () => {
         } else if (result.errors) {
           Object.values(result.errors).forEach((msg: any) => toast.error(msg));
         } else {
-          toast.error(result.message || 'Registration failed. Try again.');
+          toast.error(result.message || 'Admin registration failed. Try again.');
         }
       }
     } catch (err) {
-      console.error('Registration error:', err);
+      console.error('Admin registration error:', err);
       toast.error('Server unreachable or network error.');
     } finally {
       setIsLoading(false);
@@ -133,8 +122,8 @@ const SignUp: React.FC = () => {
       <main className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl w-full space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-slate-900">Create Student Account</h2>
-            <p className="mt-2 text-slate-600">Join EduCamp as a student</p>
+            <h2 className="text-3xl font-bold text-slate-900">Create Admin Account</h2>
+            <p className="mt-2 text-slate-600">Join EduCamp as an administrator</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
@@ -177,42 +166,21 @@ const SignUp: React.FC = () => {
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
 
-              {/* Phone Number */}
+              {/* Admin Level */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Admin Level *</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input {...register('phoneNumber')} type="tel"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g., +94712345678" />
-                </div>
-                {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber.message}</p>}
-              </div>
-
-              {/* Date of Birth & Gender */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Date of Birth *</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input {...register('dateOfBirth')} type="date"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
-                  </div>
-                  {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Gender *</label>
-                  <select {...register('gender')}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
+                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <select {...register('adminLevel')}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                    <option value="">Select Admin Level</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="MODERATOR">Moderator</option>
+                    <option value="SUPPORT">Support</option>
                   </select>
-                  {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
                 </div>
+                {errors.adminLevel && <p className="mt-1 text-sm text-red-600">{errors.adminLevel.message}</p>}
               </div>
 
               {/* Password */}
@@ -251,7 +219,7 @@ const SignUp: React.FC = () => {
 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Note:</strong> A student profile will be automatically created and logged in.
+                  <strong>Note:</strong> An admin account will be created with full administrative privileges.
                 </p>
               </div>
 
@@ -260,7 +228,7 @@ const SignUp: React.FC = () => {
                 disabled={isLoading}
                 className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
               >
-                {isLoading ? 'Creating Account...' : 'Create Student Account'}
+                {isLoading ? 'Creating Admin Account...' : 'Create Admin Account'}
               </button>
             </form>
 
@@ -272,6 +240,15 @@ const SignUp: React.FC = () => {
                 </Link>
               </p>
             </div>
+
+            <div className="mt-4 text-center">
+              <p className="text-slate-600 text-sm">
+                Need a different account type?{' '}
+                <Link to="/register/student" className="text-emerald-600 hover:text-emerald-500 font-medium">
+                  Register as Student
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </main>
@@ -280,4 +257,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default AdminSignUp;

@@ -3,14 +3,13 @@ import React, { useState, useEffect } from "react";
 interface Teacher {
   id: number;
   name: string;
-  subject: string;
+  subject: { id: number; name: string };
   email: string;
   phone: string;
   qualification: string;
   b_day: string;
   j_date: string;
 }
-
 
 const TeacherRecords: React.FC = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -109,7 +108,7 @@ const TeacherRecords: React.FC = () => {
                       <input
                         type="text"
                         name="subject"
-                        value={editData.subject || ""}
+                        value={editData.subject?.name|| ""}
                         onChange={handleChange}
                         className="border p-1 rounded w-full"
                       />
@@ -178,7 +177,7 @@ const TeacherRecords: React.FC = () => {
                   <>
                     <td className="p-2 border text-center">{teacher.id}</td>
                     <td className="p-2 border">{teacher.name}</td>
-                    <td className="p-2 border">{teacher.subject}</td>
+                    <td className="p-2 border">{teacher.subject?.name}</td>
                     <td className="p-2 border">{teacher.email}</td>
                     <td className="p-2 border">{teacher.phone}</td>
                     <td className="p-2 border">{teacher.qualification}</td>

@@ -5,10 +5,15 @@ import TeacherCard from "../components/TeacherCard";
 import { Search, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface Subject {
+  id: number;
+  name: string;
+}
+
 interface Teacher {
   id: number;
   name: string;
-  subject: string;
+  subject: Subject;
   email: string;
   phone: string;
   address: string;
@@ -23,7 +28,7 @@ const Teachers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // ✅ navigation hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:8080/teachers")
@@ -38,16 +43,19 @@ const Teachers: React.FC = () => {
       });
   }, []);
 
-  const subjects = ["all", ...Array.from(new Set(teachers.map((t) => t.subject)))];
+  // Get unique subject names
+  const subjects = ["all", ...Array.from(new Set(teachers.map((t) => t.subject?.name)))];
 
   const filteredTeachers = teachers.filter((teacher) => {
+    const subjectName = teacher.subject?.name || "";
+
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      subjectName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesSubject =
       selectedSubject === "all" ||
-      teacher.subject.toLowerCase() === selectedSubject.toLowerCase();
+      subjectName.toLowerCase() === selectedSubject.toLowerCase();
 
     return matchesSearch && matchesSubject;
   });

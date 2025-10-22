@@ -123,19 +123,33 @@ const TeacherMaterialForm: React.FC = () => {
           className="w-full border p-2 rounded"
         />
         Subject : 
-        <input
-          placeholder="Subject*"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
+        
+<select
+  value={subject}
+  onChange={(e) => setSubject(e.target.value)}
+  className="w-full border p-2 rounded"
+  required
+>
+  <option value="">-- Choose Subject --</option>
+  <option value="Mathematics">Mathematics</option>
+  <option value="Science">Science</option>
+  <option value="English">English</option>
+  <option value="ICT">ICT</option>
+</select>
         Class :
-        <input
-          placeholder="Class*"
+        <select
           value={className}
           onChange={(e) => setClassName(e.target.value)}
           className="w-full border p-2 rounded"
-        />
+          >
+              <option value="">-- Choose Grade --</option>
+              <option value="Grade 6">Grade 6</option>
+              <option value="Grade 7">Grade 7</option>
+              <option value="Grade 8">Grade 8</option>
+              <option value="Grade 9">Grade 9</option>
+              <option value="Grade 10">Grade 10</option>
+              <option value="Grade 11">Grade 11</option>
+       </select>
         Select File* :
         <input
           type="file"

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 interface Teacher {
   id: number;
   name: string;
-  subject: string;
+  subject: { id: number; name: string };
   email: string;
   phone: string;
   address: string;
@@ -39,7 +39,7 @@ const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index }) => {
 
       <div className="p-6">
         <h3 className="text-xl font-bold text-slate-900 mb-2">{teacher.name}</h3>
-        <p className="text-emerald-600 font-medium mb-3">{teacher.subject}</p>
+        <p className="text-emerald-600 font-medium mb-3">{teacher.subject?.name}</p>
         <p className="text-slate-600 mb-4">{teacher.qualification}</p>
 
         <Link to={`/teachers/${teacher.id}`}>

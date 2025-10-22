@@ -1,63 +1,65 @@
 package com.example.Edu_Camp.models;
 
-
-import jakarta.persistence.*; //for JPA annotations.these are what tell spring bppth how your java class should map to database
+import jakarta.persistence.*; //map java objects to database tables
+import java.util.List;
+import com.example.Edu_Camp.models.Teacher;
+import com.example.Edu_Camp.models.Subject;
 
 @Entity
-@Table(name="classes")
+@Table(name = "classes")
 public class ClassEntity {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)//you dont have provide an id data base auto create the primary key
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="class_id")
+    private Long class_id;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+    @Column(nullable=false)
     private String grade;
-    private String teacher;
+
+    @Column(nullable=false)
     private double fee;
 
-    public ClassEntity(){}//default constructor
-    //for hibernate to know how to buld the object
+    @Column(nullable = false)
+    private String name;
 
-//Id
-public Long getId(){
-    return id;
-}
-public void setId(Long id){
-    this.id=id;
-}
+    @Column(nullable=false, length=1000)
+    private String timetable;
 
-//subject
-public Subject getSubject(){
-     return subject;
-}
-public void setSubject(Subject subject){
-    this.subject=subject;
-}
+    // Many classes can have the same teacher
+    @ManyToOne
+    @JoinColumn(name="teacher_id", nullable=false)
+    private Teacher teacher;
 
-//Teacher
-public String getTeacher(){
-    return teacher;
-}
-public void setTeacher(String teacher){
-    this.teacher=teacher;
-}
+    // Many-to-many relationship with subjects
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name="class_subjects",
+            joinColumns=@JoinColumn(name="class_id"),
+            inverseJoinColumns=@JoinColumn(name="subject_id")
+    )
+    private List<Subject> subjects;
 
-//Fee
-public double getFee(){
-    return fee;
-}
-public void setFee(double fee){
-    this.fee=fee;
-}
+    public ClassEntity() {}
 
-//grade
-public String getGrade(){
-    return grade;
-}
-public void setGrade(String grade){
-    this.grade=grade;
-}
+    // Getters and setters
+    public Long getClass_id() { return class_id; }
+    public void setClass_id(Long class_id) { this.class_id = class_id; }
 
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+
+    public double getFee() { return fee; }
+    public void setFee(double fee) { this.fee = fee; }
+
+    public String getTimetable() { return timetable; }
+    public void setTimetable(String timetable) { this.timetable = timetable; }
+
+    public Teacher getTeacher() { return teacher; }
+    public void setTeacher(Teacher teacher) { this.teacher = teacher; }
+
+    public List<Subject> getSubjects() { return subjects; }
+    public void setSubjects(List<Subject> subjects) { this.subjects = subjects; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 }

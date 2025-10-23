@@ -27,7 +27,7 @@ const Header: React.FC = () => {
   const burgerMenuItems = [
     { name: 'My Profile', path: '/dashboard', icon: UserCircle },
     { name: 'Announcements', path: '/announcements', icon: Bell },
-    { name: 'My Classes', path: '/my-classes', icon: BookOpen },
+    { name: 'My Classes', path: '/my-enrollments', icon: BookOpen },
     { name: 'Instructor', path: '/instructor', icon: GraduationCap },
     { name: 'Admin', path: '/register/admin', icon: Shield },
   ];

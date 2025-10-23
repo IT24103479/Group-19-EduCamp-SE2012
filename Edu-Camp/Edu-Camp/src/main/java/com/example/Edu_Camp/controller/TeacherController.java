@@ -1,86 +1,222 @@
 package com.example.Edu_Camp.controller;
 
+import com.example.Edu_Camp.dto.TeacherDto;
 import com.example.Edu_Camp.models.Teacher;
-import com.example.Edu_Camp.models.TeacherMaterial;
-import com.example.Edu_Camp.repository.MaterialRepository;
+import com.example.Edu_Camp.models.User;
 import com.example.Edu_Camp.repository.TeacherRepository;
-
+import com.example.Edu_Camp.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/teachers")
-@CrossOrigin(origins="http://localhost:5173")
+@RequestMapping("/api/teachers")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class TeacherController {
 
     private final TeacherRepository teacherRepository;
-    private final MaterialRepository materialRepository;
+    private final AuthService authService;
 
-    public TeacherController(TeacherRepository teacherRepository, MaterialRepository materialRepository) {
+    public TeacherController(TeacherRepository teacherRepository, AuthService authService) {
         this.teacherRepository = teacherRepository;
-        this.materialRepository = materialRepository;
+        this.authService = authService;
     }
 
-    // ✅ Get all teachers
     @GetMapping
-    public List<Teacher> getAllTeachers() {
-        return teacherRepository.findAll();
-    }
+    public ResponseEntity<?> getAllTeachers(HttpServletRequest request) {
+        try {
+            // Check authentication and authorization
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
 
-    // ✅ Get teacher by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getMaterial(@PathVariable Long id) {
-        Optional<TeacherMaterial> materialOptional = materialRepository.findById(id);
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
 
-        if (materialOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            List<Teacher> teachers = teacherRepository.findAll();
+
+            // Convert to DTO to avoid exposing sensitive data
+            List<TeacherDto> teacherDTOs = teachers.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of("success", true, "teachers", teacherDTOs));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
-
-        TeacherMaterial material = materialOptional.get();
-
-        // Return file as downloadable attachment
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"" + material.getFileName() + "\"")
-                .header("Content-Type", "application/octet-stream")
-                .body(material.getFileData());
     }
 
-    // ✅ Add a new teacher
-    @PostMapping
-    public Teacher createTeacher(@RequestBody Teacher teacher) {
-        System.out.println("📌 Received Teacher: " + teacher.getName());
-        return teacherRepository.save(teacher);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTeacher(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
+
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
+
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            Optional<Teacher> teacherOptional = teacherRepository.findById(id);
+            if (teacherOptional.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("success", false, "message", "Teacher not found"));
+            }
+
+            Teacher teacher = teacherOptional.get();
+            TeacherDto teacherDTO = convertToDTO(teacher);
+            return ResponseEntity.ok(Map.of("success", true, "teacher", teacherDTO));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
-    // ✅ Delete a teacher
-    @DeleteMapping("/{id}")
-    public String deleteTeacher(@PathVariable Long id) {
-        teacherRepository.deleteById(id);
-        return "Teacher with ID " + id + " deleted successfully!";
+    // ✅ Update teacher (Admin only)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTeacher(
+            @PathVariable Long id,
+            @RequestBody TeacherDto updatedTeacher,
+            HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
+
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
+
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            Optional<Teacher> teacherOptional = teacherRepository.findById(id);
+            if (teacherOptional.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("success", false, "message", "Teacher not found"));
+            }
+
+            Teacher teacher = teacherOptional.get();
+
+            // Update fields
+            if (updatedTeacher.getPhoneNumber() != null) {
+                teacher.setPhoneNumber(updatedTeacher.getPhoneNumber());
+            }
+            if (updatedTeacher.getQualification() != null) {
+                teacher.setQualification(updatedTeacher.getQualification());
+            }
+            if (updatedTeacher.getImage() != null) {
+                teacher.setImage(updatedTeacher.getImage());
+            }
+            if (updatedTeacher.getSubjectName() != null) {
+                teacher.setSubjectName(updatedTeacher.getSubjectName());
+            }
+
+            Teacher savedTeacher = teacherRepository.save(teacher);
+            TeacherDto teacherDTO = convertToDTO(savedTeacher);
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "Teacher updated successfully", "teacher", teacherDTO));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
-    // ✅ Search teachers by subject and address
     @GetMapping("/search")
-    public List<Teacher> findBySubject(
+    public ResponseEntity<?> findTeachersBySubject(
             @RequestParam String subject,
-            @RequestParam String address) {
-        return teacherRepository.findBySubject(subject);
+            HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
+
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
+
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            List<Teacher> teachers = teacherRepository.findBySubjectName(subject);
+            List<TeacherDto> teacherDTOs = teachers.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of("success", true, "teachers", teacherDTOs));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
-    @PutMapping("/teachers/{id}")
-    public Teacher updateTeacher(@PathVariable Long id, @RequestBody Teacher teacher) {
-        Teacher existing = teacherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
 
-        existing.setName(teacher.getName());
-        existing.setSubject(teacher.getSubject());
-        existing.setEmail(teacher.getEmail());
-        // ... set other fields you want to allow editing
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTeacher(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
 
-        return teacherRepository.save(existing);
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
+
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            if (!teacherRepository.existsById(id)) {
+                return ResponseEntity.status(404).body(Map.of("success", false, "message", "Teacher not found"));
+            }
+
+            teacherRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Teacher deleted successfully"));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
+    // Helper method to convert Teacher to DTO
+    private TeacherDto convertToDTO(Teacher teacher) {
+        TeacherDto dto = new TeacherDto();
+        dto.setId(teacher.getId());
+        dto.setFirstName(teacher.getFirstName());
+        dto.setLastName(teacher.getLastName());
+        dto.setEmail(teacher.getEmail());
+        dto.setPhoneNumber(teacher.getPhoneNumber());
+        dto.setQualification(teacher.getQualification());
+        dto.setDateOfBirth(teacher.getDateOfBirth());
+        dto.setImage(teacher.getImage());
+        dto.setSubjectName(teacher.getSubjectName());
+        dto.setTeacherNumber(teacher.getTeacherNumber());
+        dto.setJoinDate(teacher.getJoinDate());
+        return dto;
+    }
 
+    // Extract session ID (same as in your other controllers)
+    private String extractSessionId(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("sessionId".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return request.getHeader("X-Session-Id");
+    }
 }

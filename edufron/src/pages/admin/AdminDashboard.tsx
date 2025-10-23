@@ -19,12 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "../../components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+
 
 // Mock data for dashboard
 const statsData = [
@@ -176,115 +171,8 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Enrollment Trends */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Enrollment Trends</CardTitle>
-            <CardDescription>Monthly student enrollment over the past 6 months</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={enrollmentData}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="students" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={3}
-                    dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+   
 
-        {/* Subject Distribution */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Subject Distribution</CardTitle>
-            <CardDescription>Student enrollment by subject</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={subjectDistribution}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {subjectDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-        <Card className="shadow-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Recent Enrollments</CardTitle>
-              <CardDescription>Latest student enrollment requests</CardDescription>
-            </div>
-            <Button variant="outline" size="sm">
-              <Eye className="w-4 h-4 mr-2" />
-              View All
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Teacher</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentEnrollments.map((enrollment) => (
-                  <TableRow key={enrollment.id}>
-                    <TableCell className="font-medium">{enrollment.student}</TableCell>
-                    <TableCell>{enrollment.class}</TableCell>
-                    <TableCell>{enrollment.teacher}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={
-                          enrollment.status === 'approved' ? 'default' :
-                          enrollment.status === 'pending' ? 'secondary' :
-                          'destructive'
-                        }
-                      >
-                        {enrollment.status.charAt(0).toUpperCase() + enrollment.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{enrollment.date}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-    </div>
+    </div></div>
   );
 }

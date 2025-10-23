@@ -2,19 +2,11 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ClassCard from "../components/ClassCard";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { subjectImages } from "../utils/subjectImages";
 
-export interface Subject {
-  id: number;
-  name: string;
-}
-
-export interface Teacher {
-  id: number;
-  name: string;
-}
-
+export interface Subject { id: number; name: string; }
+export interface Teacher { id: number; name: string; }
 export interface ClassItem {
   class_id?: number;
   grade: string;
@@ -29,52 +21,33 @@ const Classes: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [filteredClasses, setFilteredClasses] = useState<ClassItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("");
 
-  // Fetch classes from backend
   useEffect(() => {
     const fetchClasses = async () => {
       try {
         const res = await fetch("http://localhost:8080/classes");
         let data = await res.json();
-
-        // Normalize backend field class_id -> id
-        data = data.map((c: any) => ({
-          ...c,
-          id: c.class_id,
-        }));
-
+        data = data.map((c: any) => ({ ...c, id: c.class_id }));
         setClasses(data);
-        setFilteredClasses(data); // initial display
-      } catch (err) {
-        console.error("Error fetching classes:", err);
-      }
+        setFilteredClasses(data);
+      } catch (err) { console.error(err); }
     };
     fetchClasses();
   }, []);
 
-  // Apply filter on search button click
   const handleSearch = () => {
-    if (!searchTerm) {
-      setFilteredClasses(classes);
-      return;
-    }
-
+    if (!searchTerm || !filterType) { setFilteredClasses(classes); return; }
     const filtered = classes.filter((cls) => {
-      const teacherName = cls.teacher?.name ?? "";
-      const subjectNames = cls.subjects?.map((s) => s.name.toLowerCase()) ?? [];
-      return (
-        cls.grade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        subjectNames.some((s) => s.includes(searchTerm.toLowerCase()))
-      );
+      if (filterType === "grade") return cls.grade.toLowerCase().includes(searchTerm.toLowerCase());
+      if (filterType === "teacher") return cls.teacher?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      if (filterType === "subject") return cls.subjects?.some(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      return false;
     });
-
     setFilteredClasses(filtered);
   };
 
-  const handleEnroll = (classId: number) => {
-    alert(`Enrolled in class ID: ${classId}`);
-  };
+  const handleEnroll = (classId: number) => alert(`Enrolled in class ID: ${classId}`);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,19 +61,31 @@ const Classes: React.FC = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex gap-4 mb-8">
+        {/* Search & Filter */}
+        <div className="flex gap-4 mb-8 flex-col md:flex-row">
+          <div className="relative w-full md:w-1/4">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none"
+            >
+              <option value="" disabled>Select a filter</option>
+              <option value="grade">Grade</option>
+              <option value="teacher">Teacher</option>
+              <option value="subject">Subject</option>
+            </select>
+          </div>
+
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search by grade, teacher or subject..."
+              placeholder="Type to search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900 focus:border-transparent"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch(); // optional: search on Enter
-              }}
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
+              onKeyDown={(e) => { if(e.key === "Enter") handleSearch(); }}
             />
           </div>
 
@@ -108,8 +93,7 @@ const Classes: React.FC = () => {
             className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors"
             onClick={handleSearch}
           >
-            <Search className="w-4 h-4 text-white" />
-            Search
+            <Search className="w-4 h-4 text-white" /> Search
           </button>
         </div>
 

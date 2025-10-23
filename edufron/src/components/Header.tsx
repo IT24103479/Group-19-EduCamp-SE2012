@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, User, UserPlus } from 'lucide-react';
+import { Menu, X, Search, User, UserPlus, UserCircle, Bell, BookOpen, GraduationCap, Shield } from 'lucide-react';
 import logo from "../assets/logo.jpg";
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isBurgerMenuOpen, setIsBurgerMenuOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const location = useLocation();
 
@@ -14,11 +15,22 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const toggleBurgerMenu = (): void => {
+    setIsBurgerMenuOpen(!isBurgerMenuOpen);
+  };
+
   const handleSearch = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    // Search functionality can be implemented here
     console.log('Searching for:', searchQuery);
   };
+
+  const burgerMenuItems = [
+    { name: 'My Profile', path: '/dashboard', icon: UserCircle },
+    { name: 'Announcements', path: '/announcements', icon: Bell },
+    { name: 'My Classes', path: '/my-enrollments', icon: BookOpen },
+    { name: 'Instructor', path: '/instructor', icon: GraduationCap },
+    { name: 'Admin', path: '/register/admin', icon: Shield },
+  ];
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
@@ -27,7 +39,7 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <img src={logo} alt="Logo" className="w-12 h-12 object-contain"/>
+              <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">Educamp</h1>
@@ -85,7 +97,7 @@ const Header: React.FC = () => {
             </div>
           </form>
 
-          {/* Auth Links */}
+          {/* Auth Links + Burger Menu */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/login"
@@ -101,9 +113,39 @@ const Header: React.FC = () => {
               <UserPlus className="w-4 h-4" />
               <span>Sign Up</span>
             </Link>
+
+            {/* Burger Dropdown */}
+            <div className="relative">
+              <button
+                onClick={toggleBurgerMenu}
+                className="p-2 rounded-md text-slate-700 hover:text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                aria-label="Toggle burger menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+
+              {isBurgerMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  {burgerMenuItems.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                        onClick={() => setIsBurgerMenuOpen(false)}
+                      >
+                        <IconComponent className="w-4 h-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
             className="md:hidden p-2 rounded-md text-slate-700 hover:text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -146,27 +188,28 @@ const Header: React.FC = () => {
             >
               Classes
             </Link>
-            <Link
-              to="/about"
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About Us
-            </Link>
-            <Link
-              to="/help"
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Help
-            </Link>
-            <Link
-              to="/enroll"
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Enroll
-            </Link>
+
+            {/* Quick Access (mobile burger) */}
+            <div className="border-t border-slate-200 pt-3 mt-3">
+              <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Quick Access
+              </div>
+              {burgerMenuItems.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <IconComponent className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
             <div className="border-t border-slate-200 pt-4 pb-3">
               <Link
                 to="/login"
@@ -185,6 +228,14 @@ const Header: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Overlay for burger menu */}
+      {isBurgerMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-25"
+          onClick={() => setIsBurgerMenuOpen(false)}
+        />
       )}
     </header>
   );

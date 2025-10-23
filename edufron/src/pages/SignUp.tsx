@@ -1,55 +1,127 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// ✅ Define validation schema
-const signUpSchema = z
-  .object({
-    firstName: z.string().min(2, 'First name must be at least 2 characters'),
-    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-    email: z.string().email('Please enter a valid email address'),
-    phone: z.string().min(10, 'Please enter a valid phone number'),
-    password: z.string().min(6, 'Password must be at least 6 characters long'),
-    confirmPassword: z.string(),
-    grade: z.string().min(1, 'Please select your grade'),
-    terms: z.boolean().refine((val) => val === true, 'You must accept the terms and conditions'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+// ✅ Validation schema (matches backend StudentRegistrationDto)
+const signUpSchema = z.object({
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phoneNumber: z.string().regex(/^\+?[0-9]{10,15}$/, 'Enter a valid phone number'),
+  dateOfBirth: z.string().min(1, 'Date of birth is required'),
+  gender: z.string().min(1, 'Gender is required'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, 
+      'Password must include uppercase, lowercase, number, and special character'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+}).refine((data) => {
+  const birthDate = new Date(data.dateOfBirth);
+  const today = new Date();
+  return birthDate < today;
+}, {
+  message: 'Date of birth must be in the past',
+  path: ['dateOfBirth'],
+});
 
-// ✅ Infer TypeScript type from schema
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 const SignUp: React.FC = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
   });
 
+  // ✅ Auto-login helper
+  const autoLogin = async (email: string, password: string) => {
+    try {
+      const res = await fetch('http://localhost:8081/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // important for cookie session
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await res.json();
+      console.log('Auto-login response:', result);
+
+      if (res.ok && result.success) {
+        localStorage.setItem('user', JSON.stringify(result.user));
+        localStorage.setItem('isAuthenticated', 'true');
+        toast.success('Welcome to EduCamp!');
+        navigate('/dashboard');
+        return true;
+      } else {
+        toast.error(result.message || 'Auto-login failed.');
+        return false;
+      }
+    } catch (err) {
+      console.error('Auto-login error:', err);
+      toast.error('Could not reach the server.');
+      return false;
+    }
+  };
+
+  // ✅ Registration submit
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success('Account created successfully!');
-      console.log('Sign up data:', data);
-    } catch (error) {
-      toast.error('Sign up failed. Please try again.');
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      };
+
+      console.log('Registering student...', payload);
+
+      const response = await fetch('http://localhost:8081/api/auth/register/student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      console.log('Registration response:', result);
+
+      if (response.ok && result.success) {
+        toast.success('Student account created successfully! Logging you in...');
+        const success = await autoLogin(data.email, data.password);
+
+        if (!success) {
+          toast.info('Please login manually.');
+          navigate('/login');
+        }
+      } else {
+        if (result.message?.includes('already registered')) {
+          toast.error('This email is already registered. Try logging in.');
+        } else if (result.errors) {
+          Object.values(result.errors).forEach((msg: any) => toast.error(msg));
+        } else {
+          toast.error(result.message || 'Registration failed. Try again.');
+        }
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      toast.error('Server unreachable or network error.');
     } finally {
       setIsLoading(false);
     }
@@ -58,48 +130,36 @@ const SignUp: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-
       <main className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+        <div className="max-w-2xl w-full space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
-            <p className="mt-2 text-slate-600">Join Educamp today</p>
+            <h2 className="text-3xl font-bold text-slate-900">Create Student Account</h2>
+            <p className="mt-2 text-slate-600">Join EduCamp as a student</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
               {/* First & Last Name */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-2">
-                    First Name
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">First Name *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input
-                      {...register('firstName')}
-                      type="text"
-                      id="firstName"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="First name"
-                    />
+                    <input {...register('firstName')} type="text"
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      placeholder="First name" />
                   </div>
                   {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-2">
-                    Last Name
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input
-                      {...register('lastName')}
-                      type="text"
-                      id="lastName"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="Last name"
-                    />
+                    <input {...register('lastName')} type="text"
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Last name" />
                   </div>
                   {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
                 </div>
@@ -107,80 +167,65 @@ const SignUp: React.FC = () => {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                  Email Address
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Email Address *</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    {...register('email')}
-                    type="email"
-                    id="email"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                  />
+                  <input {...register('email')} type="email"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Enter your email" />
                 </div>
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
 
-              {/* Phone */}
+              {/* Phone Number */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
-                  Phone Number
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number *</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    {...register('phone')}
-                    type="tel"
-                    id="phone"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    placeholder="Enter your phone number"
-                  />
+                  <input {...register('phoneNumber')} type="tel"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="e.g., +94712345678" />
                 </div>
-                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
+                {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber.message}</p>}
               </div>
 
-              {/* Grade */}
-              <div>
-                <label htmlFor="grade" className="block text-sm font-medium text-slate-700 mb-2">
-                  Grade
-                </label>
-                <select
-                  {...register('grade')}
-                  id="grade"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Select your grade</option>
-                  <option value="6">Grade 6</option>
-                  <option value="7">Grade 7</option>
-                  <option value="8">Grade 8</option>
-                  <option value="9">Grade 9</option>
-                  <option value="10">Grade 10</option>
-                  <option value="11">Grade 11</option>
-                </select>
-                {errors.grade && <p className="mt-1 text-sm text-red-600">{errors.grade.message}</p>}
+              {/* Date of Birth & Gender */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Date of Birth *</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input {...register('dateOfBirth')} type="date"
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+                  {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Gender *</label>
+                  <select {...register('gender')}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
+                </div>
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-                  Password
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Password *</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    {...register('password')}
+                  <input {...register('password')}
                     type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    placeholder="Create a password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Create a password" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
@@ -189,52 +234,33 @@ const SignUp: React.FC = () => {
 
               {/* Confirm Password */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
-                  Confirm Password
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password *</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    {...register('confirmPassword')}
+                  <input {...register('confirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
-                    id="confirmPassword"
-                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    placeholder="Confirm your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Confirm your password" />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>}
               </div>
 
-              {/* Terms */}
-              <div className="flex items-center">
-                <input
-                  {...register('terms')}
-                  id="terms"
-                  type="checkbox"
-                  className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded"
-                />
-                <label htmlFor="terms" className="ml-2 block text-sm text-slate-700">
-                  I agree to the{' '}
-                  <Link to="/terms" className="text-emerald-600 hover:text-emerald-500">
-                    Terms and Conditions
-                  </Link>
-                </label>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Note:</strong> A student profile will be automatically created and logged in.
+                </p>
               </div>
-              {errors.terms && <p className="mt-1 text-sm text-red-600">{errors.terms.message}</p>}
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
               >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? 'Creating Account...' : 'Create Student Account'}
               </button>
             </form>
 
@@ -249,7 +275,6 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );

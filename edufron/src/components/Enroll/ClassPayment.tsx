@@ -42,7 +42,7 @@ const ClassPayment: React.FC<ClassPaymentProps> = ({ userId, classId,
   return (
     <div className="bg-white p-6 rounded shadow">
       <button
-        className="bg-emerald-500 text-white px-4 py-2 rounded"
+        className="block w-full bg-emerald-500 text-white px-4 py-2 rounded text-center disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={handlePayment}
         disabled={loading}
       >

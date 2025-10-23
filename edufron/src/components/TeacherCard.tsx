@@ -1,19 +1,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, BookOpen, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Define Teacher type
-interface Teacher {
-  image: string;
+interface Subject {
+  id: number;
   name: string;
-  subject: string;
-  description: string;
-  experience: number;
-  qualifications: string;
-  rating: number | string;
 }
 
-// Props for TeacherCard
+interface Teacher {
+  id: number;
+  name: string;
+  subject?: Subject | null;
+  email?: string;
+  phone?: string;
+  address?: string;
+  qualification?: string;
+  b_day?: string;
+  j_date?: string;
+  image?: string;
+}
+
 interface TeacherCardProps {
   teacher: Teacher;
   index: number;
@@ -29,38 +35,25 @@ const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index }) => {
     >
       <div className="relative">
         <img
-          src={teacher.image}
+          src={teacher.image || 'https://via.placeholder.com/400x300?text=Teacher+Photo'}
           alt={teacher.name}
           className="w-full h-64 object-cover"
           loading="lazy"
         />
-        <div className="absolute top-4 right-4">
-          <div className="bg-white rounded-full px-3 py-1 flex items-center">
-            <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-            <span className="text-sm font-medium">{teacher.rating}</span>
-          </div>
-        </div>
       </div>
-      
+
       <div className="p-6">
         <h3 className="text-xl font-bold text-slate-900 mb-2">{teacher.name}</h3>
-        <p className="text-emerald-600 font-medium mb-3">{teacher.subject}</p>
-        <p className="text-slate-600 mb-4">{teacher.description}</p>
-        
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-slate-500">
-            <Award className="w-4 h-4 mr-2" />
-            <span>{teacher.experience} years experience</span>
-          </div>
-          <div className="flex items-center text-sm text-slate-500">
-            <BookOpen className="w-4 h-4 mr-2" />
-            <span>{teacher.qualifications}</span>
-          </div>
-        </div>
-        
-        <button className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-          View Profile
-        </button>
+        <p className="text-emerald-600 font-medium mb-3">
+          {teacher.subject?.name || 'No Subject Assigned'}
+        </p>
+        <p className="text-slate-600 mb-4">{teacher.qualification || 'N/A'}</p>
+
+        <Link to={`/teachers/${teacher.id}`}>
+          <button className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+            View Profile
+          </button>
+        </Link>
       </div>
     </motion.div>
   );

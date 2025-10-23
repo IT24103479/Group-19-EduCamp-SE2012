@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,18 +8,18 @@ import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// ✅ Zod schema
+// ✅ Validation schema
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  password: z.string().min(1, 'Password is required'),
 });
 
-// ✅ Infer TS type from schema
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -29,19 +29,88 @@ const Login: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // ✅ Main login function
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success('Login successful!');
-      console.log('Login data:', data);
-    } catch (error) {
-      toast.error('Login failed. Please try again.');
+      console.log('Attempting login...', data);
+
+      const response = await fetch('http://localhost:8081/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Important for cookie-based sessions
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Login response:', result);
+
+      if (response.ok && result.success) {
+        toast.success('Login successful!');
+        
+
+        // Store user info in localStorage
+        if (result.user) {
+          localStorage.setItem('user', JSON.stringify(result.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('sessionId', result.sessionId);
+        }
+
+        // ✅ Redirect user based on role
+        const role = result.user?.role?.toUpperCase();
+        switch (role) {
+          case 'STUDENT':
+            navigate('/dashboard');
+            break;
+          case 'TEACHER':
+            navigate('/teacher-dashboard');
+            break;
+          case 'ADMIN':
+            navigate('/admin');
+            break;
+          default:
+            navigate('/dashboard');
+        }
+      } else {
+        // Handle backend validation or session errors
+        if (result.message?.includes('Invalid email or password')) {
+          toast.error('Invalid email or password. Please try again.');
+        } else if (result.message?.includes('deactivated')) {
+          toast.error('Your account has been deactivated. Contact support.');
+        } else {
+          toast.error(result.message || 'Login failed. Please try again.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast.error('Cannot connect to server. Is the backend running?');
+      } else {
+        toast.error('Unexpected error. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ✅ Optional: test backend session endpoint
+  const testBackendConnection = async () => {
+    try {
+      const res = await fetch('http://localhost:8081/api/auth/me', {
+        credentials: 'include',
+      });
+      console.log('Backend /me test:', res.status);
+    } catch (err) {
+      console.error('Backend connection failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    testBackendConnection();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,17 +120,14 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-            <p className="mt-2 text-slate-600">Sign in to your account</p>
+            <p className="mt-2 text-slate-600">Sign in to your EduCamp account</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
                 </label>
                 <div className="relative">
@@ -70,7 +136,7 @@ const Login: React.FC = () => {
                     {...register('email')}
                     type="email"
                     id="email"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -81,10 +147,7 @@ const Login: React.FC = () => {
 
               {/* Password */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -93,7 +156,7 @@ const Login: React.FC = () => {
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     id="password"
-                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your password"
                   />
                   <button
@@ -109,7 +172,7 @@ const Login: React.FC = () => {
                 )}
               </div>
 
-              {/* Remember me + Forgot password */}
+              {/* Remember Me / Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
@@ -117,10 +180,7 @@ const Login: React.FC = () => {
                     type="checkbox"
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded"
                   />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-slate-700"
-                  >
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
                     Remember me
                   </label>
                 </div>
@@ -132,7 +192,7 @@ const Login: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Submit */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -142,14 +202,18 @@ const Login: React.FC = () => {
               </button>
             </form>
 
+            {/* Hint */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-center">
+              <p className="text-sm text-blue-700">
+                <strong>Note:</strong> Use your registered credentials to log in.
+              </p>
+            </div>
+
             {/* Signup Link */}
             <div className="mt-6 text-center">
               <p className="text-slate-600">
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  className="text-emerald-600 hover:text-emerald-500 font-medium"
-                >
+                Don’t have an account?{' '}
+                <Link to="/signup" className="text-emerald-600 hover:text-emerald-500 font-medium">
                   Sign up here
                 </Link>
               </p>

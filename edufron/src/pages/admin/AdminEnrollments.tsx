@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {getAllPayments,capturePayment,updatePayment,deletePayment } from "../../services/paymentService";
 import { useToast } from "../../hooks/use-toast";
-import { Payment } from "../../types/payment";
+import { payment } from "../../types/payment";
 import { useForm } from "react-hook-form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Button } from "../../components/ui/button";
@@ -13,19 +13,15 @@ import { Input } from "../../components/ui/input";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+
 
 export default function PaymentManager() {
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const { toast } = useToast();
+   
 
   const form = useForm({
     defaultValues: {
@@ -40,6 +36,12 @@ export default function PaymentManager() {
     try {
       const data = await getAllPayments();
       setPayments(data);
+      console.log(data);
+      const formattedData = data.map(p => ({
+  ...p,
+  status: p.paymentCompleted ? "Completed" : "Pending"
+}));
+      setPayments(formattedData);
     } catch (err) {
       console.error(err);
       toast({ title: "Error", description: "Failed to fetch payments." });
@@ -51,6 +53,7 @@ export default function PaymentManager() {
     fetchPayments();
   }, []);
 
+  
   // Capture PayPal payment
   const handleCapture = async (orderId: string) => {
     try {
@@ -98,6 +101,14 @@ export default function PaymentManager() {
       toast({ title: "Error", description: "Failed to update payment." });
     }
   };
+
+const filteredPayments = payments.filter((p) =>
+ // p.classId.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+  p.userId.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+  p.amount.toString().includes(searchTerm) ||
+  p.currency.toLowerCase().includes(searchTerm.toLowerCase()) 
+ // p.status?.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
 // ...existing code...
 // ...existing code...
@@ -182,6 +193,17 @@ export default function PaymentManager() {
         </Dialog>
       </div>
 
+ {/* 🔍 Search Bar */}
+      <div className="relative w-full sm:w-64">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Search payments..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+        />
+      </div>
       {/* Payments Table */}
       <Card className="shadow-card">
         <CardHeader>
@@ -201,54 +223,55 @@ export default function PaymentManager() {
                 <TableHead className="text-slate-600">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {payments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell>{payment.id}</TableCell>
-                  <TableCell>
-                    <Badge className="bg-sky-100 text-sky-700 border-sky-200">{payment.userId}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className="bg-sky-100 text-sky-700 border-sky-200">{payment.classId}</Badge>
-                  </TableCell>
-                  <TableCell>{payment.amount}</TableCell>
-                  <TableCell>{payment.currency}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        payment.status === "completed"
-                          ? "bg-sky-100 text-sky-700 border-sky-200"
-                          : payment.status === "pending"
-                          ? "bg-slate-100 text-slate-700 border-slate-200"
-                          : "bg-slate-100 text-slate-700 border-slate-200"
-                      }
-                    >
-                      {payment.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-sky-700 hover:bg-sky-100"
-                        onClick={() => handleEdit(payment)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-slate-700 hover:bg-slate-100"
-                        onClick={() => handleDelete(payment.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+<TableBody>
+  {filteredPayments.map((payment) => (
+    <TableRow key={payment.id}>
+      <TableCell>{payment.id}</TableCell>
+      <TableCell>
+        <Badge className="bg-sky-100 text-sky-700 border-sky-200">{payment.userId}</Badge>
+      </TableCell>
+      <TableCell>
+        <Badge className="bg-sky-100 text-sky-700 border-sky-200">{payment.classId}</Badge>
+      </TableCell>
+      <TableCell>{payment.amount}</TableCell>
+      <TableCell>{payment.currency}</TableCell>
+      <TableCell>
+        <Badge
+          className={
+            payment.status === "completed"
+              ? "bg-sky-100 text-sky-700 border-sky-200"
+              : payment.status === "pending"
+              ? "bg-slate-100 text-slate-700 border-slate-200"
+              : "bg-slate-100 text-slate-700 border-slate-200"
+          }
+        >
+          {payment.status}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-sky-700 hover:bg-sky-100"
+            onClick={() => handleEdit(payment)}
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-700 hover:bg-slate-100"
+            onClick={() => handleDelete(payment.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
           </Table>
         </CardContent>
       </Card>

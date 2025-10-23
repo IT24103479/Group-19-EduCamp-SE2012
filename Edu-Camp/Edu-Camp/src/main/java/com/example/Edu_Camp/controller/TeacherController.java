@@ -31,7 +31,7 @@ public class TeacherController {
     @PutMapping("/{id}")
     public Teacher updateTeacher(@PathVariable Long id, @RequestBody Teacher updated) {
         Teacher teacher = teacherRepository.findById(id).orElseThrow();
-        teacher.setName(updated.getName());
+       // teacher.setName(updated.getName());
         return teacherRepository.save(teacher);
     }
 

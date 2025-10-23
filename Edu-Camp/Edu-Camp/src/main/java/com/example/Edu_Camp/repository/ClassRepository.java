@@ -7,6 +7,7 @@ import java.util.List;
 //JPA autamatically generate SQL
 public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
     List<ClassEntity> findByGradeContainingIgnoreCase(String grade); //SELECT * FROM class_entity WHERE grade=?
-    List<ClassEntity> findByTeacher_NameContainingIgnoreCase(String name);
+    List<ClassEntity> findByTeacher_FirstNameContainingIgnoreCase(String firstName);
+    List<ClassEntity> findByTeacher_LastNameContainingIgnoreCase(String lastName);
     List<ClassEntity> findBySubjects_NameContainingIgnoreCase(String name);
 }

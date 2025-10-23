@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-public class User {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,10 +18,7 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -29,18 +27,22 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    @Column(updatable = false)
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // No-arg constructor (required by JPA)
     public User() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    // Full constructor
-    public User(String firstName, String lastName, String username, String email, String password, String role) {
+    public User(String firstName, String lastName, String email, String password, String role) {
+        this();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -48,25 +50,9 @@ public class User {
         this.role = role;
     }
 
-    // Convenience constructor with default role
-    public User(String firstName, String lastName, String username, String email, String password) {
-        this(firstName, lastName, username, email, password, "USER");
-    }
-
-    // JPA Lifecycle Callbacks
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
 
-    // Getters & Setters
+    // getters & setters...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -75,9 +61,6 @@ public class User {
 
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -88,18 +71,17 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    @Column(nullable = false)
-    private boolean active = true;
-
-    public boolean isActive() {
-        return active;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
 }

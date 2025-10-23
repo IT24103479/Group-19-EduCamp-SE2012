@@ -20,4 +20,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     // refer to the ClassEntity property name as defined in the entity class
     @Query("select e from Enrollment e where e.classEntity.class_id = :classId")
     List<Enrollment> findByClassId(@Param("classId") Long classId);
+
+    /**
+     * Find enrollments by student number.
+     * This query attempts to match either a denormalized studentNumber field on Enrollment
+     * or the Student entity's studentNumber (covers both designs).
+     */
+    @Query("select e from Enrollment e where e.studentNumber = :studentNumber or e.student.studentNumber = :studentNumber")
+    List<Enrollment> findByStudentNumber(@Param("studentNumber") String studentNumber);
 }

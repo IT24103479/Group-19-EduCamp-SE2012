@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Student extends User {
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "student_number", unique = true, nullable = false)
     private String studentNumber;
 
     private String phoneNumber;

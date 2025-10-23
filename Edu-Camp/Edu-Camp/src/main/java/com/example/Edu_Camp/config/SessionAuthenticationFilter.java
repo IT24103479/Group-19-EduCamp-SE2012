@@ -34,7 +34,11 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             "/teachers/**",
             "/payments/**",
             "/users/**",
-            "/api/admin/**"
+            "/api/admin/**",
+            "admin/**",
+            "/api/enrollments/**",
+            "/api/enrollments/class/**",
+            "admin/enrollments**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();

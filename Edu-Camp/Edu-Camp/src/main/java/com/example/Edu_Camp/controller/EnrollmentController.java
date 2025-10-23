@@ -41,6 +41,14 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getByClassId(classId));
     }
 
+    /**
+     * New: fetch all enrollments (no auth required here; secure as needed)
+     */
+    @GetMapping
+    public ResponseEntity<List<Enrollment>> getAllEnrollments() {
+        return ResponseEntity.ok(enrollmentService.getAllEnrollments());
+    }
+
     @PostMapping
     public ResponseEntity<?> createEnrollment(@RequestBody EnrollmentDTO dto) {
         try {
@@ -52,6 +60,38 @@ public class EnrollmentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create enrollment");
+        }
+    }
+
+    /**
+     * New: update an enrollment by id
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEnrollment(@PathVariable Long id, @RequestBody EnrollmentDTO dto) {
+        try {
+            Enrollment updated = enrollmentService.updateEnrollment(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update enrollment");
+        }
+    }
+
+    /**
+     * New: delete an enrollment by id
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEnrollment(@PathVariable Long id) {
+        try {
+            enrollmentService.deleteEnrollment(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete enrollment");
         }
     }
 }

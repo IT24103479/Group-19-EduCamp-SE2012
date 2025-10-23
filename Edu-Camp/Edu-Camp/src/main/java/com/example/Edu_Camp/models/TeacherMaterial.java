@@ -1,51 +1,55 @@
 package com.example.Edu_Camp.models;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "teacher_materials")
+@Table(name = "material")
 public class TeacherMaterial {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "file_name", nullable = false)
+    private String title;
+    private String description;
+    private String subject;
+    private String className;
     private String fileName;
 
     @Lob
-    @Column(name = "file_data", nullable = false)
+    @Column(columnDefinition = "MEDIUMBLOB")
     private byte[] fileData;
-
-    @Column(name = "content_type")
-    private String contentType;
-
-    @Column(name = "uploaded_at")
-    private LocalDateTime uploadedAt;
 
     public TeacherMaterial() {}
 
-    public TeacherMaterial(String fileName, byte[] fileData, String contentType) {
+    public TeacherMaterial(String title, String description, String subject, String className, String fileName, byte[] fileData) {
+        this.title = title;
+        this.description = description;
+        this.subject = subject;
+        this.className = className;
         this.fileName = fileName;
         this.fileData = fileData;
-        this.contentType = contentType;
-        this.uploadedAt = LocalDateTime.now();
     }
 
+    // --- Getters & Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
+
+    public String getClassName() { return className; }
+    public void setClassName(String className) { this.className = className; }
 
     public String getFileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
 
     public byte[] getFileData() { return fileData; }
     public void setFileData(byte[] fileData) { this.fileData = fileData; }
-
-    public String getContentType() { return contentType; }
-    public void setContentType(String contentType) { this.contentType = contentType; }
-
-    public LocalDateTime getUploadedAt() { return uploadedAt; }
-    public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
 }
-

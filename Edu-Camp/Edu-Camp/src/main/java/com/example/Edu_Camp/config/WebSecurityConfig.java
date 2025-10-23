@@ -51,7 +51,11 @@ public class WebSecurityConfig {
                                 "/users/**",
                                 "/api/admin/**",
                                 "/api/enrollments/**",
-                                "/educamp/api/enrollments/**"
+                                "/educamp/api/enrollments/**",
+                                "/api/admin/enrollments/**",
+                                "/admin/enrollments/**",
+                                "/admin/**",
+                                "/api/enrollments/class/**"
                         ).permitAll()
 
                         // Allow POST login/register and other non-GET public endpoints

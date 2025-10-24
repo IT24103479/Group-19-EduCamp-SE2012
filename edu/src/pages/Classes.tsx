@@ -232,7 +232,7 @@ const Classes: React.FC = () => {
                       name: subjectNameRaw,
                       type: subjectNameRaw,
                       description: `Grade: ${cls.grade}\nTeacher: ${cls.teacher?.name}\nSchedule: ${cls.timetable}\n`,
-                      image: imageUrl,
+                      imageUrl: cls.imageUrl,
                       schedule: cls.timetable,
                       price: cls.fee,
                     }}

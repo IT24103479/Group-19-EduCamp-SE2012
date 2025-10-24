@@ -1,122 +1,101 @@
-import React, { useState } from "react";
-import type { ClassItem, Teacher, Subject } from "../../types";
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { toast } from "react-toastify";
 
-interface AddClassFormProps {
-  onClassAdded: (newClass: ClassItem) => void;
-  teachers: Teacher[];
-  subjects: Subject[];
-}
+/**
+ * AddClassForm
+ * - Sends payload shaped for the current backend (nested teacher object and subjects array of objects)
+ * - After successful creation, calls onClassAdded() so parent can refresh (we don't assume returned shape)
+ */
+const AddClassForm = ({ teachers = [], subjects = [], onClassAdded }) => {
+  const [name, setName] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [subjectId, setSubjectId] = useState("");
 
-const AddClassForm: React.FC<AddClassFormProps> = ({ onClassAdded, teachers, subjects }) => {
-  const [grade, setGrade] = useState("");
-  const [fee, setFee] = useState("");
-  const [timetable, setTimetable] = useState("");
-  const [teacherId, setTeacherId] = useState<number | "">("");
-  const [subjectId, setSubjectId] = useState<number | "">("");
+  // initialize selects when teacher/subject lists arrive
+  useEffect(() => {
+    if (teachers.length && teacherId === "") setTeacherId(String(teachers[0].id));
+    if (subjects.length && subjectId === "") setSubjectId(String(subjects[0].id));
+  }, [teachers, subjects]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (teacherId === "" || subjectId === "") return;
-
-    const teacher = teachers.find((t) => t.id === teacherId);
-    const subject = subjects.find((s) => s.id === subjectId);
-
-    if (!teacher || !subject) {
-      console.error("Selected teacher or subject not found");
+    if (!name.trim()) {
+      toast.error("Please enter a class name");
       return;
     }
 
-    const newClass: ClassItem = {
-      id: Date.now(), // temporary; backend should return real id
-      grade,
-      fee: parseFloat(fee),
-      timetable,
-      teacher,
-      subjects: [subject],
+    // Build payload matching existing backend createClass which expects ClassEntity with nested teacher and subjects
+    const payload: any = {
+      name: name.trim(),
+      grade: null,
+      fee: null,
+      timetable: null,
+      teacher: teacherId ? { id: Number(teacherId) } : null,
+      subjects: subjectId ? [{ id: Number(subjectId) }] : [],
     };
 
-    fetch("http://localhost:8081/classes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newClass),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Backend might return the created object directly or wrapped; prefer the returned value
-        const created = data && data.id ? data : newClass;
-        onClassAdded(created);
-        setGrade("");
-        setFee("");
-        setTimetable("");
-        setTeacherId("");
-        setSubjectId("");
-      })
-      .catch((err) => console.error(err));
+    try {
+      const res = await fetch("http://localhost:8081/classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Failed to create class");
+      }
+
+      // Backend may return the saved entity (ClassEntity). We refresh via parent to get DTO fields consistently.
+      await res.json().catch(() => null);
+
+      onClassAdded && onClassAdded();
+      // reset form
+      setName("");
+      if (teachers.length) setTeacherId(String(teachers[0].id));
+      if (subjects.length) setSubjectId(String(subjects[0].id));
+      toast.success("Class created");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add class");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded bg-gray-50 mb-4">
-      <h2 className="text-lg font-bold mb-4">Add New Class</h2>
-
+    <form onSubmit={handleSubmit} className="mb-4 p-4 border rounded bg-white">
       <div className="mb-2">
-        <label>Grade:</label>
+        <label className="block text-sm font-medium">Class name</label>
         <input
-          type="text"
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-          className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
-          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-1 block w-full border px-2 py-1"
+          placeholder="Enter class name"
         />
       </div>
 
       <div className="mb-2">
-        <label>Fee:</label>
-        <input
-          type="number"
-          value={fee}
-          onChange={(e) => setFee(e.target.value)}
-          className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
-          required
-        />
-      </div>
-
-      <div className="mb-2">
-        <label>Timetable:</label>
-        <input
-          type="text"
-          value={timetable}
-          onChange={(e) => setTimetable(e.target.value)}
-          className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
-          required
-        />
-      </div>
-
-      <div className="mb-2">
-        <label>Teacher:</label>
+        <label className="block text-sm font-medium">Teacher</label>
         <select
           value={teacherId}
-          onChange={(e) => setTeacherId(e.target.value === "" ? "" : Number(e.target.value))}
-          className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
-          required
+          onChange={(e) => setTeacherId(e.target.value)}
+          className="mt-1 block w-full border px-2 py-1"
         >
-          <option value="">-- Select Teacher --</option>
           {teachers.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name}
+              {`${t.firstName ?? ""} ${t.lastName ?? ""}`.trim() || t.email || t.id}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="mb-4">
-        <label>Subject:</label>
+      <div className="mb-2">
+        <label className="block text-sm font-medium">Subject</label>
         <select
           value={subjectId}
-          onChange={(e) => setSubjectId(e.target.value === "" ? "" : Number(e.target.value))}
-          className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
-          required
+          onChange={(e) => setSubjectId(e.target.value)}
+          className="mt-1 block w-full border px-2 py-1"
         >
-          <option value="">-- Select Subject --</option>
           {subjects.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -125,11 +104,17 @@ const AddClassForm: React.FC<AddClassFormProps> = ({ onClassAdded, teachers, sub
         </select>
       </div>
 
-      <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700">
-        Add Class
+      <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">
+        Add class
       </button>
     </form>
   );
+};
+
+AddClassForm.propTypes = {
+  teachers: PropTypes.array,
+  subjects: PropTypes.array,
+  onClassAdded: PropTypes.func,
 };
 
 export default AddClassForm;

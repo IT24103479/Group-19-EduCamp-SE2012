@@ -1,122 +1,94 @@
-import React, { useState } from "react";
-import type { ClassItem, Teacher, Subject } from "../types";
+import React from "react";
+import PropTypes from "prop-types";
 
-interface ClassTableProps {
-  classes: ClassItem[];
-  teachers: Teacher[];
-  subjects: Subject[];
-  onDelete: (id: number) => void;
-  onUpdate: (updatedClass: ClassItem) => void;
-}
-
-const ClassTable: React.FC<ClassTableProps> = ({
-  classes,
-  teachers,
-  subjects,
-  onDelete,
-  onUpdate,
-}) => {
-  const [editingClassId, setEditingClassId] = useState<number | null>(null);
-  const [editedGrade, setEditedGrade] = useState("");
-  const [editedFee, setEditedFee] = useState("");
-  const [editedTimetable, setEditedTimetable] = useState("");
-  const [editedTeacherId, setEditedTeacherId] = useState<number | "">("");
-  const [editedSubjectId, setEditedSubjectId] = useState<number | "">("");
-
-  const startEditing = (cls: ClassItem) => {
-    setEditingClassId(cls.id);
-    setEditedGrade(cls.grade);
-    setEditedFee(cls.fee.toString());
-    setEditedTimetable(cls.timetable);
-    setEditedTeacherId(cls.teacher?.user_id || "");
-    setEditedSubjectId(cls.subjects?.[0]?.id || "");
+/**
+ * ClassTable
+ * - Expects classes to include:
+ *   - id, name
+ *   - teacherName (string) or teacherId
+ *   - subjectNames (array) or subjectIds
+ *
+ * This version prefers the teacherName/subjectNames returned by the backend DTO.
+ */
+const ClassTable = ({ classes = [], teachers = [], subjects = [], onDelete, onEdit }) => {
+  const lookupTeacherName = (cls) => {
+    if (cls.teacherName) return cls.teacherName;
+    if (cls.raw && (cls.raw.teacher_name || cls.raw.teacherName)) return cls.raw.teacher_name ?? cls.raw.teacherName;
+    const id = cls.teacherId ?? (cls.raw && (cls.raw.teacher_id ?? (cls.raw.teacher && cls.raw.teacher.id)));
+    if (id == null) return "";
+    const t = teachers.find((x) => String(x.id) === String(id));
+    return t ? `${t.firstName ?? ""} ${t.lastName ?? ""}`.trim() : String(id);
   };
 
-  const cancelEditing = () => setEditingClassId(null);
-
-  const saveEdit = async (cls: ClassItem) => {
-    const updatedClass = {
-      ...cls,
-      grade: editedGrade,
-      fee: parseFloat(editedFee),
-      timetable: editedTimetable,
-      teacher: teachers.find(t => t.user_id === editedTeacherId),
-      subjects: editedSubjectId ? [{ id: editedSubjectId, name: subjects.find(s => s.id === editedSubjectId)?.name || "" }] : [],
-    };
-
-    try {
-      const res = await fetch(`http://localhost:8081/classes/${cls.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedClass),
-      });
-      if (!res.ok) throw new Error("Failed to update class");
-      const data = await res.json();
-      onUpdate(data);
-      setEditingClassId(null);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update class");
-    }
+  const lookupSubjectName = (cls) => {
+    // backend DTO may include subjectNames array
+    if (Array.isArray(cls.subjectNames) && cls.subjectNames.length > 0) return cls.subjectNames.join(", ");
+    if (cls.raw && Array.isArray(cls.raw.subjectNames) && cls.raw.subjectNames.length > 0) return cls.raw.subjectNames.join(", ");
+    // fallback: try subjectIds and lookup in subjects list
+    const ids = cls.subjectIds ?? (cls.raw && (cls.raw.subjectIds ?? cls.raw.subjectIds)) ?? (cls.raw && cls.raw.subjects ? cls.raw.subjects.map((s) => s.id) : []);
+    if (!ids || ids.length === 0) return "";
+    const names = ids.map((id) => {
+      const s = subjects.find((x) => String(x.id) === String(id));
+      return s ? s.name : String(id);
+    });
+    return names.join(", ");
   };
-
-  if (!classes.length) return <p>No classes found.</p>;
 
   return (
-    <table className="min-w-full bg-white border rounded overflow-hidden mt-4">
-      <thead className="bg-gray-100">
-        <tr>
-          <th>Grade</th>
-          <th>Fee</th>
-          <th>Teacher</th>
-          <th>Subjects</th>
-          <th>Timetable</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {classes.map(cls => (
-          <tr key={cls.id ?? cls.grade + cls.timetable}>
-            {editingClassId === cls.id ? (
-              <>
-                <td><input value={editedGrade} onChange={e => setEditedGrade(e.target.value)} className="w-full px-2 py-1 border rounded bg-white"/></td>
-                <td><input type="number" value={editedFee} onChange={e => setEditedFee(e.target.value)} className="w-full px-2 py-1 border rounded bg-white"/></td>
-                <td>
-                  <select value={editedTeacherId} onChange={e => setEditedTeacherId(Number(e.target.value))} className="w-full px-2 py-1 border rounded bg-white">
-                    <option value="">-- Select Teacher --</option>
-                    {teachers.map(t => <option key={t.user_id} value={t.user_id}>{t.name}</option>)}
-                  </select>
-                </td>
-                <td>
-                  <select value={editedSubjectId} onChange={e => setEditedSubjectId(Number(e.target.value))} className="w-full px-2 py-1 border rounded bg-white">
-                    <option value="">-- Select Subject --</option>
-                    {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                </td>
-                <td><input value={editedTimetable} onChange={e => setEditedTimetable(e.target.value)} className="w-full px-2 py-1 border rounded bg-white"/></td>
-                <td className="flex gap-2">
-                  <button onClick={() => saveEdit(cls)} className="bg-green-600 text-white px-2 py-1 rounded">Save</button>
-                  <button onClick={cancelEditing} className="bg-gray-400 text-white px-2 py-1 rounded">Cancel</button>
-                </td>
-              </>
-            ) : (
-              <>
-                <td>{cls.grade}</td>
-                <td>{cls.fee}</td>
-                <td>{cls.teacher?.name || "No teacher"}</td>
-                <td>{cls.subjects?.map(s => s.name).join(", ") || "No subjects"}</td>
-                <td>{cls.timetable}</td>
-                <td className="flex gap-2">
-                  <button onClick={() => startEditing(cls)} className="bg-blue-600 text-white px-2 py-1 rounded">Edit</button>
-                  <button onClick={() => onDelete(cls.id!)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
-                </td>
-              </>
-            )}
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 border">ID</th>
+            <th className="px-4 py-2 border">Name</th>
+            <th className="px-4 py-2 border">Teacher</th>
+            <th className="px-4 py-2 border">Subject(s)</th>
+            <th className="px-4 py-2 border">Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {classes.map((cls) => (
+            <tr key={cls.id ?? `${cls.name}-${Math.random()}`}>
+              <td className="px-4 py-2 border">{cls.id ?? ""}</td>
+              <td className="px-4 py-2 border">{cls.name ?? ""}</td>
+              <td className="px-4 py-2 border">{lookupTeacherName(cls)}</td>
+              <td className="px-4 py-2 border">{lookupSubjectName(cls)}</td>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => onEdit && onEdit(cls)}
+                  className="mr-2 px-2 py-1 bg-blue-500 text-white rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => onDelete && onDelete(Number(cls.id))}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+
+          {classes.length === 0 && (
+            <tr>
+              <td colSpan="5" className="px-4 py-2 border text-center text-gray-500">
+                No classes found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
+};
+
+ClassTable.propTypes = {
+  classes: PropTypes.array,
+  teachers: PropTypes.array,
+  subjects: PropTypes.array,
+  onDelete: PropTypes.func,
+  onEdit: PropTypes.func,
 };
 
 export default ClassTable;

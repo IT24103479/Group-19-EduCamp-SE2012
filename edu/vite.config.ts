@@ -60,10 +60,32 @@ export default defineConfig({
      fs: {
       allow: ['.'],
     },
-    proxy: {},
-
-    
+        proxy: {
+      "/classes": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/students": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
+      "api/payments": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
+      "api/enrollments": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
+      // 👆 Add or remove individual endpoints as needed
+    },
   },
+
+  
   // 👇 crucial part
   optimizeDeps: {},
 

@@ -101,7 +101,7 @@ const EditEnrollmentForm: React.FC<Props> = ({ enrollment, classes = [], student
       if (enrolledAt && enrolledAt !== "") {
         dto.enrolledAt = enrolledAt.length === 16 ? `${enrolledAt}:00` : enrolledAt;
       }
-
+      console.log("EditEnrollmentForm.update dto", dto);
       if (Object.keys(dto).length === 0) {
         toast.info("No changes to save.");
         setSaving(false);

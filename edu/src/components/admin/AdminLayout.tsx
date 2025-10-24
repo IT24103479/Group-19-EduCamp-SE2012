@@ -2,7 +2,6 @@ import { useState,useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
-  Users, 
   GraduationCap, 
   BookOpen, 
   UserCheck,
@@ -32,7 +31,6 @@ const adminNavItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "classes", label: "Classes", icon: BookOpen },
   { path: "teachers", label: "Teachers", icon: GraduationCap },
-  { path: "users", label: "Users", icon: Users },
   { path: "enrollments", label: "Enrollments", icon: UserCheck },
 ];
 
@@ -41,7 +39,7 @@ export default function AdminLayout() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profile, setProfile] = useState<AdminProfileProps | null>(null);
   const location = useLocation();
-  const userId = 5; // replace with actual logic to get the logged-in user's ID
+  const userId = 29; // replace with actual logic to get the logged-in user's ID
 
   const isActiveRoute = (path: string) => {
     if (path === "/admin") {
@@ -51,20 +49,20 @@ export default function AdminLayout() {
   };
 
   useEffect(() => {
-  const fetchProfile = async () => {
-    const res = await fetch(`http://localhost:8081/api/admin/${userId}`);
-    const data = await res.json();
-    console.log('Fetched admin profile:', data); // ✅ check here
-    setProfile(data);
-  };
-  fetchProfile();
-}, []);
+    const fetchProfile = async () => {
+      const res = await fetch(`http://localhost:8081/api/admin/${userId}`);
+      const data = await res.json();
+      console.log('Fetched admin profile:', data); // ✅ check here
+      setProfile(data);
+    };
+    fetchProfile();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-muted/30">
       <>
-    {profile && <AdminProfile profile={profile} isProfileOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />}
-  </>
+        {profile && <AdminProfile profile={profile} isProfileOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />}
+      </>
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -87,10 +85,11 @@ export default function AdminLayout() {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <div><h1 className="text-lg font-semibold text-foreground">EduCamp</h1>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">EduCamp</h1>
                 <p className="text-xs text-muted-foreground">Vidura Higher Education Institute</p>
-                </div>
-                 </div>
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -165,39 +164,6 @@ export default function AdminLayout() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="relative">
-                    <Bell className="w-5 h-5" />
-                    <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs bg-destructive text-destructive-foreground p-0 flex items-center justify-center">
-                      3
-                    </Badge>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-50 border border-border shadow-lg" align="end">
-                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                 {/* <DropdownMenuItem
-  onClick={() => setIsProfileOpen(true)}
->
-  <Settings className="mr-2 h-4 w-4" />
-  <span>Profile Settings</span>
-</DropdownMenuItem> */}
-                  <DropdownMenuItem>
-                    <div className="flex flex-col space-y-1">
-                      <p className="inline-block bg-sky-200 text-sky-800 px-3 py-1 rounded-full">New enrollment request</p>
-                      <p className="text-xs text-muted-foreground">John Doe wants to join Mathematics class</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <div className="flex flex-col space-y-1">
-                      <p className="inline-block bg-sky-200 text-sky-800 px-3 py-1 rounded-full">Teacher application</p>
-                      <p className="text-xs text-muted-foreground">Sarah Smith applied for Physics position</p>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
               {/* User Menu */}
               <DropdownMenu>
@@ -220,9 +186,9 @@ export default function AdminLayout() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
-  <Settings className="mr-2 h-4 w-4" />
-  <span>Profile</span>
-</DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -233,10 +199,10 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-            <AdminProfile
-  isOpen={isProfileOpen}
-  onClose={() => setIsProfileOpen(false)}
-/>
+        <AdminProfile
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+        />
         {/* Page Content */}
         <main className="p-1 flex-1 ">
           <Outlet />
@@ -245,5 +211,5 @@ export default function AdminLayout() {
       
     </div>
     
-      );
+  );
 }

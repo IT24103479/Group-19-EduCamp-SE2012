@@ -1,13 +1,19 @@
-import React, { useEffect,useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import TeacherCard from '../components/TeacherCard';
-import { Search, Filter } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import TeacherCard from "../components/TeacherCard";
+import { Search, Filter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface Subject {
+  id: number;
+  name: string;
+}
 
 interface Teacher {
   id: number;
   name: string;
-  subject: string;
+  subject: Subject;
   email: string;
   phone: string;
   address: string;
@@ -19,33 +25,37 @@ interface Teacher {
 
 const Teachers: React.FC = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("all");
   const [loading, setLoading] = useState(true);
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
-    fetch('http://localhost:8081/teachers')
+    fetch("http://localhost:8080/teachers")
       .then((res) => res.json())
       .then((data: Teacher[]) => {
         setTeachers(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Error fetching teachers:', err);
+        console.error("Error fetching teachers:", err);
         setLoading(false);
       });
   }, []);
 
-  const subjects = ['all', ...Array.from(new Set(teachers.map(t => t.subject)))];
+  // Get unique subject names
+  const subjects = ["all", ...Array.from(new Set(teachers.map((t) => t.subject?.name)))];
 
   const filteredTeachers = teachers.filter((teacher) => {
+    const subjectName = teacher.subject?.name || "";
+
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      subjectName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesSubject =
-      selectedSubject === 'all' ||
-      teacher.subject.toLowerCase() === selectedSubject.toLowerCase();
+      selectedSubject === "all" ||
+      subjectName.toLowerCase() === selectedSubject.toLowerCase();
 
     return matchesSearch && matchesSubject;
   });
@@ -55,10 +65,14 @@ const Teachers: React.FC = () => {
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Title Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Our Expert Teachers</h1>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            Our Expert Teachers
+          </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            Meet our dedicated team of qualified educators committed to your academic success
+            Meet our dedicated team of qualified educators committed to your
+            academic success.
           </p>
         </div>
 
@@ -84,7 +98,7 @@ const Teachers: React.FC = () => {
               >
                 {subjects.map((subject) => (
                   <option key={subject} value={subject}>
-                    {subject === 'all' ? 'All Subjects' : subject}
+                    {subject === "all" ? "All Subjects" : subject}
                   </option>
                 ))}
               </select>
@@ -97,10 +111,11 @@ const Teachers: React.FC = () => {
           <div className="text-center py-12">Loading teachers...</div>
         ) : filteredTeachers.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-500 text-lg">No teachers found matching your criteria.</p>
+            <p className="text-slate-500 text-lg">
+              No teachers found matching your criteria.
+            </p>
           </div>
-        ) : 
-   (
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredTeachers.map((teacher, index) => (
               <TeacherCard key={teacher.id} teacher={teacher} index={index} />

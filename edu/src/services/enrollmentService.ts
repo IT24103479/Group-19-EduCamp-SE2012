@@ -211,6 +211,7 @@ export async function getAllEnrollments(): Promise<Enrollment[]> {
   }
 
   const payload = await handleResponse(res);
+  console.debug('[ENROLLMENT SERVICE] GET', url, '-> payload:', payload);
   if (!payload) return [];
 
   // canonicalize payload shapes
@@ -338,29 +339,41 @@ export async function createEnrollment(dto: { studentId?: number; userId?: numbe
 export async function getMyEnrollments(): Promise<Enrollment[]> {
   return getAllEnrollments();
 }
-const baseUrl = "/api/enrollments";
 
 /**
  * PUT /api/enrollments/{id}
  * Throws an Error with the server response text for better debugging.
  */
+/**
+ * PUT http://localhost:8081/api/enrollments/{id}
+ * Throws an Error with the server response text for better debugging.
+ */
 export async function updateEnrollment(id: string | number, dto: any) {
+    const headers = {
+    'Content-Type': 'application/json',
+    ...getAuthHeader(),
+    ...getSessionHeader(),
+  };
+  const baseUrl = "http://localhost:8081/api/enrollments"; // ✅ full backend URL
+
   const res = await fetch(`${baseUrl}/${id}`, {
+    
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(dto),
   });
 
+  console.log("updateEnrollment response status:", res.status, res.statusText);
+
   if (!res.ok) {
-    // try to parse JSON error first, fallback to text
     const ct = res.headers.get("content-type") ?? "";
     let bodyText = "";
+
     try {
       if (ct.includes("application/json")) {
         const json = await res.json();
-        // JSON may be { message: "..."} or just an object. stringify important fields.
         bodyText = JSON.stringify(json);
-        console.log("Parsed error body as JSON:", bodyText);
+        console.error("Parsed error body as JSON:", bodyText);
       } else {
         bodyText = await res.text();
       }
@@ -368,11 +381,64 @@ export async function updateEnrollment(id: string | number, dto: any) {
       bodyText = `Failed to read error body: ${err}`;
       console.error(bodyText);
     }
+
     throw new Error(`HTTP ${res.status} ${res.statusText} - ${bodyText}`);
   }
 
   return res.json();
 }
+
+/**
+ * DELETE /api/enrollments/{id}
+ * Throws an Error with the server response text for better debugging.
+ */
+export async function deleteEnrollment(id: string | number) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...getAuthHeader(),
+    ...getSessionHeader(),
+  };
+  const baseUrl = "http://localhost:8081/api/enrollments"; // ✅ full backend URL
+
+  const res = await fetch(`${baseUrl}/${id}`, {
+    method: "DELETE",
+    headers,
+  });
+
+  console.log("deleteEnrollment response status:", res.status, res.statusText);
+
+  if (!res.ok) {
+    const ct = res.headers.get("content-type") ?? "";
+    let bodyText = "";
+
+    try {
+      if (ct.includes("application/json")) {
+        const json = await res.json();
+        bodyText = JSON.stringify(json);
+        console.error("Parsed error body as JSON:", bodyText);
+      } else {
+        bodyText = await res.text();
+      }
+    } catch (err) {
+      bodyText = `Failed to read error body: ${err}`;
+      console.error(bodyText);
+    }
+
+    throw new Error(`HTTP ${res.status} ${res.statusText} - ${bodyText}`);
+  }
+
+  // 204 No Content is common for DELETE; handle it gracefully
+  if (res.status === 204) return null;
+
+  // If server returns JSON or text on successful delete, return it
+  const ct = res.headers.get("content-type") ?? "";
+  if (ct.includes("application/json")) {
+    return res.json();
+  } else {
+    return res.text();
+  }
+}
+
 export default {
   getAllEnrollments,
   getById,

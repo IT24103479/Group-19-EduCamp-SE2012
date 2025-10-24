@@ -12,6 +12,7 @@ import AdminTeachers from "./pages/admin/AdminTeachers";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminEnrollments from "./pages/admin/AdminEnrollments";
 import ClassRecords from "./pages/admin/ClassRecords";
+import TeacherRecords from "./pages/admin/TeacherRecords";
 import AdminProfile from "./pages/admin/AdminProfile";
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
@@ -41,7 +42,7 @@ const AdminApp: React.FC = () => {
               
                 <Route index element={<AdminDashboard />} />
                 <Route path="classes" element={<ClassRecords />} />
-                <Route path="teachers" element={<AdminTeachers />} />
+                <Route path="teachers" element={<TeacherRecords />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="enrollments" element={<AdminEnrollments />} />
 

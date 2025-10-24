@@ -23,21 +23,48 @@ const AddClassForm: React.FC = () => {
     timetable: "",
   });
 
+    function getAuthHeader(): Record<string, string> {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function getSessionHeader(): Record<string, string> {
+    const sessionId = localStorage.getItem("sessionId");
+    return sessionId ? { "X-Session-Id": sessionId } : {};
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeader(),
+    ...getSessionHeader(),
+  };
+
   useEffect(() => {
     fetchTeachers();
   }, []);
 
-  const fetchTeachers = async () => {
-    try {
-      const res = await fetch("http://localhost:8081/api/teachers");
-      const data = await res.json();
-      setTeachers(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      setTeachers([]);
-      toast.error("Failed to fetch teachers");
-    }
-  };
+const fetchTeachers = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/api/teachers", { headers });
+    const data = await res.json();
+    let teacherList: any[] = [];
+    if (Array.isArray(data)) teacherList = data;
+    else if (data.success && Array.isArray(data.teachers)) teacherList = data.teachers;
+    else teacherList = [];
+
+    setTeachers(
+      teacherList.map((t: any) => ({
+        id: t.id ?? 0,
+        firstName: t.firstName ?? "",
+        lastName: t.lastName ?? "",
+      }))
+    );
+  } catch (err) {
+    console.error(err);
+    setTeachers([]);
+    toast.error("Failed to fetch teachers");
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

@@ -5,21 +5,23 @@ import TeacherCard from "../components/TeacherCard";
 import { Search, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface Subject {
+export interface Subject {
   id: number;
   name: string;
 }
 
-interface Teacher {
+export interface Teacher {
   id: number;
-  name: string;
-  subject: Subject;
-  email: string;
-  phone: string;
-  address: string;
-  qualification: string;
-  b_day: string;
-  j_date: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string; // fallback for combined name
+  subject?: Subject | null;
+  email?: string;
+  phone?: string;
+  address?: string;
+  qualification?: string;
+  b_day?: string;
+  j_date?: string;
   image?: string;
 }
 
@@ -30,33 +32,100 @@ const Teachers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  function getAuthHeader(): Record<string, string> {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function getSessionHeader(): Record<string, string> {
+    const sessionId = localStorage.getItem("sessionId");
+    return sessionId ? { "X-Session-Id": sessionId } : {};
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeader(),
+    ...getSessionHeader(),
+  };
+
   useEffect(() => {
-    fetch("http://localhost:8081/api/teachers")
-      .then((res) => res.json())
-      .then((data: Teacher[]) => {
+    const fetchTeachers = async () => {
+      try {
+        const res = await fetch("http://localhost:8081/api/teachers", { headers });
+        const data = await res.json();
         console.log("Fetched teachers:", data);
-        setTeachers(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+
+        // 🚨 Handle unauthorized
+        if (data.success === false && data.message === "Not authenticated") {
+          console.warn("User not authenticated. Redirect to login...");
+          
+        }
+
+        let teacherList: any[] = [];
+
+        //  Handle { success: true, teachers: [...] }
+        if (data.success && Array.isArray(data.teachers)) {
+          teacherList = data.teachers;
+        }
+        //  Fallback for plain arrays or wrapped in data.data
+        else if (Array.isArray(data)) {
+          teacherList = data;
+        } else if (Array.isArray(data.data)) {
+          teacherList = data.data;
+        } else {
+          console.error("Unexpected teacher data format:", data);
+          teacherList = [];
+        }
+
+        // 🧩 Normalize teacher fields
+        const formatted = teacherList.map((t: any) => ({
+          id: t.id ?? t.teacher_id ?? 0,
+          firstName: t.firstName ?? t.first_name ?? "",
+          lastName: t.lastName ?? t.last_name ?? "",
+          name:
+            t.name ??
+            `${t.firstName ?? t.first_name ?? ""} ${t.lastName ?? t.last_name ?? ""}`.trim(),
+          subject: t.subject ?? null,
+          email: t.email ?? "",
+          phone: t.phoneNumber ?? t.phone ?? "",
+          address: t.address ?? "",
+          qualification: t.qualification ?? "",
+          b_day: t.b_day ?? "",
+          j_date: t.j_date ?? "",
+          image: t.image ?? "",
+        }));
+
+        setTeachers(formatted);
+      } catch (err) {
         console.error("Error fetching teachers:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchTeachers();
   }, []);
 
-  // Get unique subject names
-  const subjects = ["all", ...Array.from(new Set(teachers.map((t) => t.subject?.name)))];
+  //  Get unique subject names
+  const subjects = [
+    "all",
+    ...Array.from(new Set(teachers.map((t) => t.subject?.name).filter(Boolean))),
+  ];
 
+  // 🔍 Apply filtering
   const filteredTeachers = teachers.filter((teacher) => {
-    const subjectName = teacher.subject?.name || "";
+    const subjectName = teacher.subject?.name?.toLowerCase() ?? "";
+    const teacherName =
+      teacher.name?.toLowerCase() ??
+      `${teacher.firstName ?? ""} ${teacher.lastName ?? ""}`.toLowerCase();
 
     const matchesSearch =
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subjectName.toLowerCase().includes(searchTerm.toLowerCase());
+      teacherName.includes(searchTerm.toLowerCase()) ||
+      subjectName.includes(searchTerm.toLowerCase());
 
     const matchesSubject =
       selectedSubject === "all" ||
-      subjectName.toLowerCase() === selectedSubject.toLowerCase();
+      subjectName === selectedSubject.toLowerCase();
 
     return matchesSearch && matchesSubject;
   });

@@ -17,11 +17,25 @@ const ClassRecords: React.FC = () => {
     fetchSubjects();
   }, []);
 
-  const sessionId = localStorage.getItem("sessionId");
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const getSessionHeader = () => {
+    const sessionId = localStorage.getItem("sessionId");
+    return sessionId ? { "X-Session-Id": sessionId } : {};
+  };
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeader(),
+    ...getSessionHeader(),
+  };
 
   const fetchClasses = async () => {
     try {
-      const res = await fetch("http://localhost:8081/classes");
+      const res = await fetch("http://localhost:8081/classes", { headers });
       const data = await res.json();
       const formatted = data.map((cls: any) => ({ ...cls, id: cls.id ?? cls.class_id }));
       setClasses(formatted);
@@ -31,19 +45,41 @@ const ClassRecords: React.FC = () => {
     }
   };
 
-  const fetchTeachers = async () => {
-    try {
-      const res = await fetch("http://localhost:8081/api/teachers");
-      setTeachers(await res.json());
-    } catch (err) {
-      console.error(err);
-    }
-  };
+const fetchTeachers = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/api/teachers", { headers });
+    const data = await res.json();
+    console.log("Fetched teachers:", data);
+
+    let teacherList: any[] = [];
+    if (Array.isArray(data)) teacherList = data;
+    else if (data.success && Array.isArray(data.teachers)) teacherList = data.teachers;
+    else teacherList = [];
+
+    const formatted: Teacher[] = teacherList.map((t: any) => ({
+      id: t.id ?? 0,
+      firstName: t.firstName ?? "",
+      lastName: t.lastName ?? "",
+      email: t.email ?? "",
+      phone: t.phoneNumber ?? "",
+      qualification: t.qualification ?? "",
+      b_day: t.dateOfBirth ?? "",
+      j_date: t.joinDate ?? "",
+      subject: t.subjectName ? { id: 0, name: t.subjectName } : null, // id 0 placeholder if needed
+    }));
+
+    setTeachers(formatted);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const fetchSubjects = async () => {
     try {
-      const res = await fetch("http://localhost:8081/subjects");
-      setSubjects(await res.json());
+      const res = await fetch("http://localhost:8081/subjects", { headers });
+      const data = await res.json();
+      setSubjects(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     }
@@ -92,15 +128,11 @@ const ClassRecords: React.FC = () => {
     try {
       const res = await fetch(`http://localhost:8081/classes/${cls.id}`, {
         method: "PUT",
-         credentials: "include",
-        headers: { "Content-Type": "application/json",
-           "Cookie": `JSESSIONID=${sessionId}`,
-         },
+        headers,
         body: JSON.stringify(updatedClass),
       });
       if (!res.ok) throw new Error("Failed to update class");
       const data = await res.json();
-      console.log("Updated class response:", data);
       setClasses(prev => prev.map(c => (c.id === cls.id ? data : c)));
       setEditingId(null);
       setEditData({});
@@ -114,7 +146,7 @@ const ClassRecords: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
-      const res = await fetch(`http://localhost:8081/classes/${id}`, { method: "DELETE", credentials: "include" });
+      const res = await fetch(`http://localhost:8081/classes/${id}`, { method: "DELETE", headers });
       if (!res.ok) throw new Error("Failed to delete class");
       setClasses(prev => prev.filter(c => c.id !== id));
       toast.success("Class deleted!");
@@ -192,7 +224,11 @@ const ClassRecords: React.FC = () => {
                         className="w-full px-2 py-1 border rounded bg-white"
                       >
                         <option value="">-- Select Subject --</option>
-                        {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        {subjects.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td className="p-2 border border-gray-300">
@@ -223,7 +259,9 @@ const ClassRecords: React.FC = () => {
                     <td className="p-2 border border-gray-300">{cls.grade}</td>
                     <td className="p-2 border border-gray-300">{cls.fee}</td>
                     <td className="p-2 border border-gray-300">{getTeacherFullName(cls.teacher)}</td>
-                    <td className="p-2 border border-gray-300">{cls.subjects.map(s => s.name).join(", ") || "No subjects"}</td>
+                    <td className="p-2 border border-gray-300">
+                      {cls.subjects.map(s => s.name).join(", ") || "No subjects"}
+                    </td>
                     <td className="p-2 border border-gray-300">{cls.timetable}</td>
                     <td className="p-2 border border-gray-300 flex gap-2">
                       <button

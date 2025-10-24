@@ -66,8 +66,8 @@ public class AuthService {
             errors.put("email", "Email is already registered");
         }
 
-        if (teacherRepository.existsByEmployeeId(registrationDto.getEmployeeId())) {
-            errors.put("employeeId", "Employee ID already exists");
+        if (registrationDto.getPassword().length() < 8) {
+            errors.put("password", "Password must be at least 8 characters long");
         }
 
         return errors;
@@ -124,6 +124,14 @@ public class AuthService {
     @Transactional
     public AuthResponseDto registerTeacher(TeacherRegistrationDto registrationDto) {
         try {
+            if (userRepository.existsByEmail(registrationDto.getEmail())) {
+                throw new RuntimeException("Email already registered");
+            }
+
+            // Generate teacher number automatically
+            String teacherNumber = generateTeacherNumber();
+
+            // Generate temporary password and send login link
             String tempPassword = generateTemporaryPassword();
             String encodedPassword = passwordEncoder.encode(tempPassword);
 
@@ -131,23 +139,28 @@ public class AuthService {
                     registrationDto.getFirstName(),
                     registrationDto.getLastName(),
                     registrationDto.getEmail().toLowerCase(),
-                    encodedPassword,
-                    registrationDto.getDepartment(),
-                    registrationDto.getEmployeeId()
+                    encodedPassword, // Use temporary password
+                    teacherNumber, // Use auto-generated number instead of registrationDto.getTeacherNumber()
+                    registrationDto.getPhoneNumber(),
+                    registrationDto.getQualification(),
+                    registrationDto.getDateOfBirth(),
+                    registrationDto.getImage(),
+                    registrationDto.getSubjectName()
             );
 
             Teacher savedTeacher = teacherRepository.save(teacher);
 
+            // Send login email with temporary password
             emailService.sendTeacherLoginLink(savedTeacher.getEmail(), tempPassword);
 
             UserDto userDto = convertToUserDto(savedTeacher);
-
-            return new AuthResponseDto(true, "Teacher registration successful. Login link sent to email.", userDto);
+            return new AuthResponseDto(true, "Teacher registration successful. Login credentials sent to email.", userDto);
 
         } catch (Exception e) {
             throw new RuntimeException("Teacher registration failed: " + e.getMessage(), e);
         }
     }
+
 
     @Transactional
     public AuthResponseDto registerAdmin(AdminRegistrationDto registrationDto) {
@@ -228,6 +241,24 @@ public class AuthService {
         return studentNumber;
     }
 
+    private String generateTeacherNumber() {
+        String year = String.valueOf(LocalDateTime.now().getYear());
+        long totalTeachers = teacherRepository.count();
+        int nextNumber = (int) (totalTeachers + 1);
+        String teacherNumber = String.format("TCH%s%03d", year, nextNumber);
+
+        int attempts = 0;
+        while (teacherRepository.existsByTeacherNumber(teacherNumber) && attempts < 50) {
+            nextNumber++;
+            teacherNumber = String.format("TCH%s%03d", year, nextNumber);
+            attempts++;
+        }
+        if (teacherRepository.existsByTeacherNumber(teacherNumber)) {
+            teacherNumber = "TCH" + year + "X" + System.currentTimeMillis() % 10000;
+        }
+        return teacherNumber;
+    }
+
     private String generateTemporaryPassword() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
@@ -245,7 +276,11 @@ public class AuthService {
         if (user instanceof Student) {
             userDto.setStudentNumber(((Student) user).getStudentNumber());
         } else if (user instanceof Teacher) {
-            userDto.setEmployeeId(((Teacher) user).getEmployeeId());
+            Teacher t = (Teacher) user;
+            userDto.setTeacherNumber(t.getTeacherNumber());
+            userDto.setPhoneNumber(t.getPhoneNumber());
+            userDto.setQualification(t.getQualification());
+            userDto.setSubjectName(t.getSubjectName());
         } else if (user instanceof Admin) {
             userDto.setAdminLevel(((Admin) user).getAdminLevel());
         }

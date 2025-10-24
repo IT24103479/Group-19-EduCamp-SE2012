@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/error",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/admin-teachers"
                         ).permitAll()
 
                         // Authenticated endpoints - require valid session but no specific role

@@ -58,7 +58,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ✅ Session is valid — authenticate user in Spring Security context
+        //  Session is valid — authenticate user in Spring Security context
         User user = sessionService.getUserFromSession(sessionId);
         if (user != null) {
             // Create authorities based on user role

@@ -36,13 +36,18 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     private final SessionService sessionService;
     private static final Logger logger = LoggerFactory.getLogger(SessionAuthenticationFilter.class);
 
+
     // Public GET-only endpoints (Ant-style patterns)
     private static final List<String> PUBLIC_GET_PATTERNS = List.of(
             "/subjects/**",
             "/classes/**",
+            "/classes",
             "/teachers/**",
             "/api/teachers/**",
+            "/api/teachers",
             "/payments/**",
+            "/api/enrollments",
+            "/api/payments",
             "/users/**",
             "/api/admin/**",
             "/admin/**",
@@ -111,6 +116,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
+        String normalized = path.endsWith("/") ? path : path + "/";
+
         // Allow OPTIONS and existing public paths as before
         if ("OPTIONS".equalsIgnoreCase(method)) {
             return true;
@@ -129,7 +136,11 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         if ("GET".equalsIgnoreCase(method)) {
             for (String pattern : PUBLIC_GET_PATTERNS) {
                 if (pathMatcher.match(pattern, path)) {
+                    logger.debug("Matched public pattern (GET): {}", pattern);
                     return true;
+                }
+                else {
+                    logger.debug("No match for public pattern (GET): {} against {}", pattern, path);
                 }
             }
         }
@@ -141,6 +152,11 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 && !DEV_PUBLIC_WRITE_PATTERNS.isEmpty()) {
             for (String pattern : DEV_PUBLIC_WRITE_PATTERNS) {
                 if (pathMatcher.match(pattern, path)) return true;
+                else {
+                    logger.debug("No match for dev public pattern (write): {} against {}", pattern, path);
+                }
+                logger.debug("Matched dev public pattern (write): {}", pattern);
+                return true;
             }
         }
 

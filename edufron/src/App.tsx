@@ -17,6 +17,10 @@ import Classes from './pages/Classes';
 import StudentDashboard from './pages/StudentDashboard';
 import Profile from './pages/Profile';
 import Submissions from './pages/Submissions';
+import AddTeacherForm from './pages/AddTeacherForm';
+import TeacherRecords from './pages/TeacherRecords';
+import TeacherAssignments from './pages/TeacherAssignments';
+
 const App: React.FC = () => {
   return (
     <Theme appearance="inherit" radius="large" scaling="100%">
@@ -35,6 +39,9 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/submissions" element={<Submissions />} />
+            <Route path="/register/teacher" element={<AddTeacherForm />} />
+            <Route path="/admin-teachers" element={<TeacherRecords/>} />
+            <Route path="/TeacherAssignments" element={<TeacherAssignments/>} />
           </Routes>
 
           <ToastContainer

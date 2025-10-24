@@ -1,36 +1,47 @@
-export interface AvailableAssignment {
-  assignmentId: number;
-  assignmentTitle: string;
-  className?: string;
-  dueDate?: string;
-  maxPoints?: number;
-  status: string;
-}
-
+// types/submission.ts
 export interface StudentSubmission {
   id: number;
   assignmentId: number;
   assignmentTitle: string;
-  className?: string;
-  fileName: string;
+  enrollmentId: number;
   filePath: string;
+  fileName: string;
   fileSize: number;
-  comments: string;
-  status: 'SUBMITTED' | 'GRADED' | 'LATE';
-  grade: number | null;
-  feedback: string;
+  comments?: string;
   submittedAt: string;
-  gradedAt: string | null;
+  gradedAt?: string;
+  status: 'SUBMITTED' | 'GRADED' | 'LATE';
+  grade?: number;
+  feedback?: string;
   studentName: string;
-  late: boolean;
-  dueDate?: string;
+  studentNumber: string;
+  className?: string;
   maxPoints?: number;
+  late?: boolean;
 }
 
-export interface ApiResponse<T> {
+export interface AvailableAssignment {
+  id: number;
+  title: string;
+  description?: string;
+  dueDate: string;
+  maxPoints: number;
+  classId: number;
+  className?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionResponse {
   success: boolean;
   message: string;
-  data?: T;
-  assignments?: T[];
-  submissions?: T[];
+  submission?: StudentSubmission;
+  submissions?: StudentSubmission[];
+}
+
+export interface AssignmentResponse {
+  success: boolean;
+  message: string;
+  assignments?: AvailableAssignment[];
+  assignment?: AvailableAssignment;
 }

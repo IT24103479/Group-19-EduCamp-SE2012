@@ -99,7 +99,7 @@ const Header: React.FC = () => {
               className="flex items-center space-x-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <UserPlus className="w-4 h-4" />
-              <span>Sign Up</span>
+              <span>Register</span>
             </Link>
           </div>
 

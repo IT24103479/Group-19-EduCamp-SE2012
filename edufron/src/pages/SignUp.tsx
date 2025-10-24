@@ -208,8 +208,6 @@ const SignUp: React.FC = () => {
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
                   </select>
                   {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
                 </div>
@@ -260,7 +258,7 @@ const SignUp: React.FC = () => {
                 disabled={isLoading}
                 className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
               >
-                {isLoading ? 'Creating Account...' : 'Create Student Account'}
+                {isLoading ? 'Creating Account...' : 'Register to EduCamp'}
               </button>
             </form>
 

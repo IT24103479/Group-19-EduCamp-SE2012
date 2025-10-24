@@ -11,7 +11,10 @@ public class UserDto {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private String studentNumber;
-    private String employeeId;
+    private String teacherNumber;
+    private String phoneNumber;
+    private String qualification;
+    private String subjectName;
     private String adminLevel;
 
     // getters & setters
@@ -39,8 +42,17 @@ public class UserDto {
     public String getStudentNumber() { return studentNumber; }
     public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
 
-    public String getEmployeeId() { return employeeId; }
-    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+    public String getTeacherNumber() { return teacherNumber; }
+    public void setTeacherNumber(String teacherNumber) { this.teacherNumber = teacherNumber; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getQualification() { return qualification; }
+    public void setQualification(String qualification) { this.qualification = qualification; }
+
+    public String getSubjectName() { return subjectName; }
+    public void setSubjectName(String subjectName) { this.subjectName = subjectName; }
 
     public String getAdminLevel() { return adminLevel; }
     public void setAdminLevel(String adminLevel) { this.adminLevel = adminLevel; }

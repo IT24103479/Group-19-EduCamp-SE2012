@@ -1,6 +1,7 @@
 package com.example.Edu_Camp.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -8,65 +9,71 @@ import java.time.LocalDateTime;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Teacher extends User {
 
-    private String department;
+    @Column(unique = true, nullable = false)
+    private String teacherNumber;
+
+    @Column(nullable = false)
     private String phoneNumber;
-    private String employeeId;
 
-    private String subject;
-    private String phone;
-    private String b_day;
     private String qualification;
-    private String j_date;
 
-    @Column(length = 1000) // optional: increase column size for longer URLs/base64
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
     private String image;
+
+    @Column(name = "subject_name")
+    private String subjectName;
+
+    @Column(name = "join_date")
+    private LocalDate joinDate;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Teacher(String firstName, String lastName, String email, String password,
-                   String department, String employeeId) {
-        super(firstName, lastName, email, password, "TEACHER");
-        this.department = department;
-        this.employeeId = employeeId;
+    public Teacher() {
+        super();
+        this.joinDate = LocalDate.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Teacher() {
-        super();
+    public Teacher(String firstName, String lastName, String email, String password,
+                   String teacherNumber, String phoneNumber, String qualification,
+                   LocalDate dateOfBirth, String image, String subjectName) {
+        super(firstName, lastName, email, password, "TEACHER");
+        this.teacherNumber = teacherNumber;
+        this.phoneNumber = phoneNumber;
+        this.qualification = qualification;
+        this.dateOfBirth = dateOfBirth;
+        this.image = image;
+        this.subjectName = subjectName;
+        this.joinDate = LocalDate.now();
         this.updatedAt = LocalDateTime.now();
     }
-    // getters & setters...
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
+
+    public String getTeacherNumber() { return teacherNumber; }
+    public void setTeacherNumber(String teacherNumber) { this.teacherNumber = teacherNumber; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getEmployeeId() { return employeeId; }
-    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-
-
-    public String getSubject() { return subject; }
-    public void setSubject(String subject) { this.subject = subject; }
-
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-
     public String getQualification() { return qualification; }
     public void setQualification(String qualification) { this.qualification = qualification; }
 
-    public String getB_day() { return b_day; }
-    public void setB_day(String b_day) { this.b_day = b_day; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public String getJ_date() { return j_date; }
-    public void setJ_date(String j_date) { this.j_date = j_date; }
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
 
+    public String getSubjectName() { return subjectName; }
+    public void setSubjectName(String subjectName) { this.subjectName = subjectName; }
 
+    public LocalDate getJoinDate() { return joinDate; }
+    public void setJoinDate(LocalDate joinDate) { this.joinDate = joinDate; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     @PreUpdate
     public void preUpdate() {

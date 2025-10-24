@@ -1,21 +1,36 @@
 package com.example.Edu_Camp.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-    public void sendTeacherLoginLink(String email, String tempPassword) {
-        // Minimal implementation: in production, integrate with SMTP or external provider.
-        logger.info("sendTeacherLoginLink -> To: {} | Temporary password: {}", email, tempPassword);
+    private final JavaMailSender mailSender;
+
+    @Autowired
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
     }
 
-    // Optional helper for other email types
-    public void sendGenericEmail(String to, String subject, String body) {
-        logger.info("sendGenericEmail -> To: {} | Subject: {} | Body: {}", to, subject, body);
+    public void sendTeacherLoginLink(String email, String temporaryPassword) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your Teacher Account Login Details");
+        message.setText(
+                "Welcome to EduCamp!\n\n" +
+                        "Your account has been created successfully.\n\n" +
+                        "Login Details:\n" +
+                        "Email: " + email + "\n" +
+                        "Temporary Password: " + temporaryPassword + "\n\n" +
+                        "Please login and change your password immediately.\n\n" +
+                        "Best regards,\n" +
+                        "EduCamp Team"
+        );
+
+        mailSender.send(message);
     }
 }
 

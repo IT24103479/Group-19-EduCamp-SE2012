@@ -69,7 +69,7 @@ const Login: React.FC = () => {
             navigate('/teacher-dashboard');
             break;
           case 'ADMIN':
-            navigate('/admin');
+            //navigate('/admin');
             break;
           default:
             navigate('/dashboard');
@@ -96,13 +96,14 @@ const Login: React.FC = () => {
     }
   };
 
-  // ✅ Optional: test backend session endpoint
+  //  Optional: test backend session endpoint
   const testBackendConnection = async () => {
     try {
       const res = await fetch('http://localhost:8081/api/auth/me', {
         credentials: 'include',
       });
       console.log('Backend /me test:', res.status);
+       console.log('Document cookies:', document.cookie);
     } catch (err) {
       console.error('Backend connection failed:', err);
     }

@@ -19,7 +19,7 @@ const TeacherRecords: React.FC = () => {
   // Fetch all teachers
   const fetchTeachers = async () => {
     try {
-      const response = await fetch("http://localhost:8080/teachers");
+      const response = await fetch("http://localhost:8081/api/teachers");
       const data = await response.json();
       setTeachers(data);
     } catch (error) {
@@ -45,7 +45,7 @@ const TeacherRecords: React.FC = () => {
   // Save edited teacher to backend
   const handleSave = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:8080/teachers/teachers/${id}`, {
+      const response = await fetch(`http://localhost:8081/api/teachers/teachers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editData),
@@ -65,7 +65,7 @@ const TeacherRecords: React.FC = () => {
   // Delete teacher
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this teacher?")) return;
-    await fetch(`http://localhost:8080/teachers/${id}`, { method: "DELETE" });
+    await fetch(`http://localhost:8081/api/teachers/${id}`, { method: "DELETE" });
     fetchTeachers();
   };
 

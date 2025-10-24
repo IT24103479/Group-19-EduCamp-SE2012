@@ -18,8 +18,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByPaymentId(@Param("paymentId") Long paymentId);
 
     // refer to the ClassEntity property name as defined in the entity class
-    @Query("select e from Enrollment e where e.classEntity.class_id = :classId")
-    List<Enrollment> findByClassId(@Param("classId") Long classId);
+    @Query("select e from Enrollment e where e.classEntity.id = :classId")
+    List<Enrollment> findByClassId(@Param("classId") Long id);
 
     /**
      * Find enrollments by student number.

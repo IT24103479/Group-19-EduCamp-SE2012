@@ -53,7 +53,7 @@ const AdminSignUp: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('isAuthenticated', 'true');
         toast.success('Welcome to EduCamp Admin!');
-        navigate('/admin');
+        
         return true;
       } else {
         toast.error(result.message || 'Auto-login failed.');

@@ -1,5 +1,7 @@
 package com.example.Edu_Camp.models;
 
+import com.example.Edu_Camp.models.Subject;
+
 import jakarta.persistence.*; //map java objects to database tables
 import java.util.List;
 import com.example.Edu_Camp.models.Teacher;
@@ -18,6 +20,7 @@ public class ClassEntity {
 
     @Column(nullable=false)
     private double fee;
+
 
     @Column(nullable=false, length=1000)
     private String timetable;
@@ -56,4 +59,6 @@ public class ClassEntity {
 
     public List<Subject> getSubjects() { return subjects; }
     public void setSubjects(List<Subject> subjects) { this.subjects = subjects; }
+
+
 }

@@ -155,7 +155,7 @@ export default function AdminTeachers() {
   };
 
   useEffect(() => {
-  axios.get("http://localhost:8081/teachers")
+  axios.get("http://localhost:8081/api/teachers")
     .then(res => {
       setTeachers(res.data);
       console.log(res.data);
@@ -167,7 +167,7 @@ export default function AdminTeachers() {
 
  const handleEdit = async (teacherId: number) => {
   try {
-    const res = await axios.get(`http://localhost:8081/teachers/${teacherId}`);
+    const res = await axios.get(`http://localhost:8081/api/teachers/${teacherId}`);
     const teacher = res.data;
     setEditingTeacher(teacher);
     form.reset({

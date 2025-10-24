@@ -17,12 +17,21 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.AntPathMatcher;
+import java.util.Set;
 
 import java.io.IOException;
 import java.util.List;
 
 @Component
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
+
+    // DEV writable public patterns (adjust for development use; leave empty to disable)
+    private static final List<String> DEV_PUBLIC_WRITE_PATTERNS = List.of(
+            // Example: allow POST/PUT/DELETE to dev-only endpoints
+            "/dev/public/**",
+            "/api/dev/**"
+    );
 
     private final SessionService sessionService;
     private static final Logger logger = LoggerFactory.getLogger(SessionAuthenticationFilter.class);
@@ -32,13 +41,14 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             "/subjects/**",
             "/classes/**",
             "/teachers/**",
+            "/api/teachers/**",
             "/payments/**",
             "/users/**",
             "/api/admin/**",
-            "admin/**",
+            "/admin/**",
             "/api/enrollments/**",
             "/api/enrollments/class/**",
-            "admin/enrollments**"
+            "/admin/enrollments/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -121,6 +131,16 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 if (pathMatcher.match(pattern, path)) {
                     return true;
                 }
+            }
+        }
+
+        // Allow POST, PUT and DELETE to configured dev public write patterns (if any)
+        if (("POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method))
+                && !DEV_PUBLIC_WRITE_PATTERNS.isEmpty()) {
+            for (String pattern : DEV_PUBLIC_WRITE_PATTERNS) {
+                if (pathMatcher.match(pattern, path)) return true;
             }
         }
 

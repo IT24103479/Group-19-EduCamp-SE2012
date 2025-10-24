@@ -3,7 +3,6 @@ package com.example.Edu_Camp.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,12 +18,12 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+public class SecurityConfig {
 
     private final SessionAuthenticationFilter sessionAuthenticationFilter;
 
     @Autowired
-    public WebSecurityConfig(SessionAuthenticationFilter sessionAuthenticationFilter) {
+    public SecurityConfig(SessionAuthenticationFilter sessionAuthenticationFilter) {
         this.sessionAuthenticationFilter = sessionAuthenticationFilter;
     }
 
@@ -40,25 +39,9 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-// (replace only the authorizeHttpRequests(...) part in your existing class)
                 .authorizeHttpRequests(authz -> authz
-                        // Allow GET (fetch) without auth for resource endpoints:
-                        .requestMatchers(HttpMethod.GET,
-                                "/subjects/**",
-                                "/classes/**",
-                                "/teachers/**",
-                                "/payments/**",
-                                "/users/**",
-                                "/api/admin/**",
-                                "/api/enrollments/**",
-                                "/educamp/api/enrollments/**",
-                                "/api/admin/enrollments/**",
-                                "/admin/enrollments/**",
-                                "/admin/**",
-                                "/api/enrollments/class/**"
-                        ).permitAll()
 
-                        // Allow POST login/register and other non-GET public endpoints
+                        // Public endpoints (all HTTP methods)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register/**",
@@ -68,10 +51,23 @@ public class WebSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/webjars/**",
                                 "/api/payments/",
-                                "/api/payments/capture/"
+                                "/api/payments/capture/",
+                                "/subjects/**",
+                                "/classes/**",
+                                "/teachers/**",
+                                "/api/teachers/**",
+                                "/users/**",
+                                "/api/admin/**",
+                                "/api/enrollments/**",
+                                "/educamp/api/enrollments/**",
+                                "/api/admin/enrollments/**",
+                                "/admin/enrollments/**",
+                                "/admin/**",
+                                "/api/enrollments/class/**",
+                                "/admin-teachers"
                         ).permitAll()
 
-                        // Authenticated endpoints - require valid session but no specific role
+                        // Authenticated endpoints (any logged-in user)
                         .requestMatchers(
                                 "/api/auth/me",
                                 "/api/auth/logout"
@@ -89,7 +85,7 @@ public class WebSecurityConfig {
                         // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                // Keep the custom session filter, but make sure it skips public paths (see filter changes)
+                // Custom session filter
                 .addFilterBefore(sessionAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
 

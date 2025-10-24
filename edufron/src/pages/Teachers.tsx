@@ -31,9 +31,10 @@ const Teachers: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8080/teachers")
+    fetch("http://localhost:8081/api/teachers")
       .then((res) => res.json())
       .then((data: Teacher[]) => {
+        console.log("Fetched teachers:", data);
         setTeachers(data);
         setLoading(false);
       })

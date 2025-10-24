@@ -1,6 +1,6 @@
 package com.example.Edu_Camp.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class Subject {
     private String name;
 
     @ManyToMany(mappedBy = "subjects")
-    @JsonIgnore   // <-- prevent circular JSON
+    @JsonBackReference  // <-- prevent circular JSON
     private List<ClassEntity> classes;
 
     public Subject() {}

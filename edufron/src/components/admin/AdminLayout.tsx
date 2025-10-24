@@ -9,7 +9,7 @@ import {
   X,
   Settings,
   LogOut,
-  Bell
+  
 } from "lucide-react";
 import { Button } from "../ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -42,8 +42,8 @@ export default function AdminLayout() {
   const userId = 29; // replace with actual logic to get the logged-in user's ID
 
   const isActiveRoute = (path: string) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
+    if (path === "/admin/") {
+      return location.pathname === "/admin/";
     }
     return location.pathname.startsWith(path);
   };
@@ -52,7 +52,7 @@ export default function AdminLayout() {
     const fetchProfile = async () => {
       const res = await fetch(`http://localhost:8081/api/admin/${userId}`);
       const data = await res.json();
-      console.log('Fetched admin profile:', data); // ✅ check here
+      console.log('Fetched admin profile:', data); 
       setProfile(data);
     };
     fetchProfile();
@@ -164,7 +164,6 @@ export default function AdminLayout() {
             </div>
 
             <div className="flex items-center space-x-4">
-
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

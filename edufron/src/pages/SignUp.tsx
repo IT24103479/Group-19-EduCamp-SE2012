@@ -164,7 +164,6 @@ const SignUp: React.FC = () => {
                   {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
                 </div>
               </div>
-
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Email Address *</label>

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-// ✅ Validation schema for editable fields
+// Validation schema for editable fields
 const profileSchema = z.object({
   phoneNumber: z.string()
     .min(10, 'Phone number must be at least 10 characters')
@@ -62,7 +62,7 @@ const Profile: React.FC = () => {
     resolver: zodResolver(profileSchema),
   });
 
-  // ✅ Secure fetch helper (handles session expiry globally)
+  // Secure fetch helper (handles session expiry globally)
   const secureFetch = async (url: string, options: RequestInit = {}) => {
     const response = await fetch(url, { 
       ...options, 
@@ -83,7 +83,7 @@ const Profile: React.FC = () => {
     return response;
   };
 
-  // ✅ Verify session before fetching profile
+  //  Verify session before fetching profile
   useEffect(() => {
     const verifyAndFetchProfile = async () => {
       try {

@@ -20,6 +20,8 @@ import Submissions from './pages/Submissions';
 import AddTeacherForm from './pages/AddTeacherForm';
 import TeacherRecords from './pages/TeacherRecords';
 import TeacherAssignments from './pages/TeacherAssignments';
+import TeacherDashboard from './pages/TeacherDashboard';
+import Resources from './pages/Resources';
 
 const App: React.FC = () => {
   return (
@@ -42,6 +44,8 @@ const App: React.FC = () => {
             <Route path="/register/teacher" element={<AddTeacherForm />} />
             <Route path="/admin-teachers" element={<TeacherRecords/>} />
             <Route path="/TeacherAssignments" element={<TeacherAssignments/>} />
+            <Route path="/TeacherDashboard" element={<TeacherDashboard/>} />
+            <Route path="/Resources" element={<Resources/>} />
           </Routes>
 
           <ToastContainer

@@ -14,7 +14,7 @@ const StudentDashboard: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // ✅ Load and verify session
+  //  Load and verify session
   useEffect(() => {
     const verifySession = async () => {
       try {
@@ -49,7 +49,7 @@ const StudentDashboard: React.FC = () => {
     verifySession();
   }, []);
 
-  // ✅ Logout function
+  //  Logout function
   const handleLogout = async () => {
     try {
       await fetch('http://localhost:8081/api/auth/logout', {

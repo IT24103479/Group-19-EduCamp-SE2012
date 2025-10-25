@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Download, Eye, Star, Users, X, Calendar, FileUp } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
 
 interface Assignment {
@@ -324,22 +322,17 @@ const TeacherAssignments: React.FC = () => {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading assignments...</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+        <p className="mt-4 text-slate-600">Loading assignments...</p>
       </div>
-      <Footer />
     </div>
   );
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header & Create Button */}
         <div className="mb-8 flex justify-between items-center">
           <div>
@@ -568,7 +561,7 @@ const TeacherAssignments: React.FC = () => {
             )}
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Create Assignment Modal */}
       {isCreateModalOpen && (
@@ -762,8 +755,6 @@ const TeacherAssignments: React.FC = () => {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };

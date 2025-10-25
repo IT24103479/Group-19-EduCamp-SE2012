@@ -22,22 +22,15 @@ import java.util.Set;
 
 import java.io.IOException;
 import java.util.List;
-
 @Component
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
-    // DEV writable public patterns (adjust for development use; leave empty to disable)
+    // DEV writable public patterns (optional)
     private static final List<String> DEV_PUBLIC_WRITE_PATTERNS = List.of(
-            // Example: allow POST/PUT/DELETE to dev-only endpoints
             "/dev/public/**",
             "/api/dev/**"
     );
 
-    private final SessionService sessionService;
-    private static final Logger logger = LoggerFactory.getLogger(SessionAuthenticationFilter.class);
-
-
-    // Public GET-only endpoints (Ant-style patterns)
     private static final List<String> PUBLIC_GET_PATTERNS = List.of(
             "/subjects/**",
             "/classes/**",
@@ -56,6 +49,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             "/admin/enrollments/**"
     );
 
+    private final SessionService sessionService;
+    private static final Logger logger = LoggerFactory.getLogger(SessionAuthenticationFilter.class);
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Autowired
@@ -69,7 +64,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip authentication for public endpoints
         if (isPublicEndpoint(request)) {
             logger.debug("Public endpoint - skipping authentication: {} {}", request.getMethod(), request.getRequestURI());
             filterChain.doFilter(request, response);
@@ -77,7 +71,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String sessionId = extractSessionId(request);
-
         if (sessionId == null) {
             logger.warn("Missing session ID for: {} {}", request.getMethod(), request.getRequestURI());
             sendUnauthorizedError(response, "Missing session ID");
@@ -90,22 +83,18 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ✅ Session is valid — authenticate user in Spring Security context
+        // Set SecurityContext for valid session
         User user = sessionService.getUserFromSession(sessionId);
         if (user != null) {
-            // Create authorities based on user role
             List<SimpleGrantedAuthority> authorities = List.of(
                     new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase())
             );
 
-            // Build authentication token
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(user, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            // Set authentication in security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             logger.debug("Authenticated user '{}' with role '{}' for {}", user.getEmail(), user.getRole(), request.getRequestURI());
         }
 
@@ -116,12 +105,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        String normalized = path.endsWith("/") ? path : path + "/";
-
-        // Allow OPTIONS and existing public paths as before
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            return true;
-        }
+        if ("OPTIONS".equalsIgnoreCase(method)) return true;
         if ((path.startsWith("/api/auth/register") && "POST".equalsIgnoreCase(method))
                 || (path.equals("/api/auth/login") && "POST".equalsIgnoreCase(method))
                 || path.startsWith("/public/")
@@ -132,31 +116,24 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // Allow GETs to configured public GET patterns
+        // Public GET paths
         if ("GET".equalsIgnoreCase(method)) {
             for (String pattern : PUBLIC_GET_PATTERNS) {
                 if (pathMatcher.match(pattern, path)) {
                     logger.debug("Matched public pattern (GET): {}", pattern);
                     return true;
                 }
-                else {
-                    logger.debug("No match for public pattern (GET): {} against {}", pattern, path);
-                }
             }
         }
 
-        // Allow POST, PUT and DELETE to configured dev public write patterns (if any)
-        if (("POST".equalsIgnoreCase(method)
-                || "PUT".equalsIgnoreCase(method)
-                || "DELETE".equalsIgnoreCase(method))
+        // Public POST/PUT/DELETE dev paths
+        if (("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "DELETE".equalsIgnoreCase(method))
                 && !DEV_PUBLIC_WRITE_PATTERNS.isEmpty()) {
             for (String pattern : DEV_PUBLIC_WRITE_PATTERNS) {
-                if (pathMatcher.match(pattern, path)) return true;
-                else {
-                    logger.debug("No match for dev public pattern (write): {} against {}", pattern, path);
+                if (pathMatcher.match(pattern, path)) {
+                    logger.debug("Matched dev public pattern (write): {}", pattern);
+                    return true;
                 }
-                logger.debug("Matched dev public pattern (write): {}", pattern);
-                return true;
             }
         }
 
@@ -164,7 +141,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractSessionId(HttpServletRequest request) {
-        // Check cookies first
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("sessionId".equals(cookie.getName())) {
@@ -174,14 +150,12 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // Check Authorization header
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             logger.debug("Extracted session ID from Authorization header");
             return authHeader.substring(7);
         }
 
-        // Check custom header
         String sessionHeader = request.getHeader("X-Session-Id");
         if (sessionHeader != null) {
             logger.debug("Extracted session ID from X-Session-Id header");
@@ -202,27 +176,20 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Skip filter for OPTIONS, static resources, and public GET paths
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // Skip filter for OPTIONS, public static resources, and matching public GET patterns
-        boolean shouldNotFilter = "OPTIONS".equalsIgnoreCase(method)
-                || path.startsWith("/public/")
-                || path.contains("."); // static resources with extensions
+        if ("OPTIONS".equalsIgnoreCase(method) || path.startsWith("/public/") || path.contains(".")) {
+            return true;
+        }
 
-        if (!shouldNotFilter && "GET".equalsIgnoreCase(method)) {
+        if ("GET".equalsIgnoreCase(method)) {
             for (String pattern : PUBLIC_GET_PATTERNS) {
-                if (pathMatcher.match(pattern, path)) {
-                    shouldNotFilter = true;
-                    break;
-                }
+                if (pathMatcher.match(pattern, path)) return true;
             }
         }
 
-        if (shouldNotFilter) {
-            logger.debug("Skipping filter for: {} {}", request.getMethod(), path);
-        }
-
-        return shouldNotFilter;
+        return false;
     }
 }

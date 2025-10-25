@@ -13,7 +13,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/materials")
-@CrossOrigin(origins = "*") // adjust as needed
+@CrossOrigin(
+        origins = "http://localhost:5173",
+        allowCredentials = "true"
+)// adjust as needed
 public class MaterialController {
 
     @Autowired

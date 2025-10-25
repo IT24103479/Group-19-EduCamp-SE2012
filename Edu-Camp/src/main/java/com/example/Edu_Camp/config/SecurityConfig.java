@@ -50,7 +50,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/webjars/**",
-                                "/api/payments/",
+                                "/api/payments/**",
                                 "/api/payments/capture/",
                                 "/subjects/**",
                                 "/classes/**",
@@ -64,7 +64,9 @@ public class SecurityConfig {
                                 "/admin/enrollments/**",
                                 "/admin/**",
                                 "/api/enrollments/class/**",
-                                "/admin-teachers"
+                                "/admin-teachers",
+                                "/api/materials/**",
+                                "/api/materials"
                         ).permitAll()
 
                         // Authenticated endpoints (any logged-in user)

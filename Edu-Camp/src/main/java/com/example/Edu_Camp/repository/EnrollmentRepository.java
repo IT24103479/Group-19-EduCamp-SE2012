@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -28,4 +29,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
      */
     @Query("select e from Enrollment e where e.studentNumber = :studentNumber or e.student.studentNumber = :studentNumber")
     List<Enrollment> findByStudentNumber(@Param("studentNumber") String studentNumber);
+
+
+    @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId AND e.classEntity.class_id = :classId")
+    Optional<Enrollment> findByStudentIdAndClassId(@Param("studentId") Long studentId,
+                                                   @Param("classId") Long classId);
 }

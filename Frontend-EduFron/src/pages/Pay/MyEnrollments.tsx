@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import enrollmentService, { type Enrollment } from "../../services/enrollmentService";
 import Header from '../../components/Header';
-
+import { API_BASE } from "../../lib/api";
 type ClassInfo = {
   id: string | number;
   name?: string;
@@ -51,7 +51,7 @@ const MyEnrollments: React.FC = () => {
 
     const fetchEnrollmentsForStudent = async () => {
       try {
-        const url = `VITE_BACKEND_URL/api/enrollments/student/${encodeURIComponent(
+        const url = `${API_BASE}/api/enrollments/student/${encodeURIComponent(
           studentId
         )}`;
 
@@ -140,7 +140,7 @@ const MyEnrollments: React.FC = () => {
       try {
         // fetch class info in parallel
         const promises = uniqueIds.map(async (classId) => {
-          const url = `VITE_BACKEND_URL/api/enrollments/class/${encodeURIComponent(classId)}`;
+          const url = `${API_BASE}/api/enrollments/class/${encodeURIComponent(classId)}`;
           try {
             const res = await fetch(url, {
               method: "GET",

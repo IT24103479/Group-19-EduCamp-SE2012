@@ -20,7 +20,7 @@ import { Badge } from "../../components/ui/badge";
 import { Search, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import EditEnrollmentForm, { Enrollment } from "../../components/admin/EditEnrollmentForm";
-
+import { API_BASE } from "../../lib/api";
 type ClassOption = { id: number; name?: string; grade?: string; label?: string };
 type StudentOption = { id: number; studentNumber?: string; firstName?: string; lastName?: string };
 type PaymentOption = { id: number; amount?: number; currency?: string; description?: string };

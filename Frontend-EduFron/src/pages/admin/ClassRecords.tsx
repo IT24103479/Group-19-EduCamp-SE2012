@@ -3,7 +3,8 @@ import type { ClassItem, Teacher, Subject } from "../../types";
 import AddClassForm from "../../components/AddClassForm";
 import { toast } from "react-toastify";
 import { Trash, Edit } from "lucide-react";
-import { Button } from "../..//components/ui/button";
+import { Button } from "../../components/ui/button";
+import { API_BASE } from "../../lib/api";
 
 const ClassRecords: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -14,9 +15,13 @@ const ClassRecords: React.FC = () => {
   const [editData, setEditData] = useState<Partial<ClassItem>>({});
 
   useEffect(() => {
-    fetchClasses();
-    fetchTeachers();
-    fetchSubjects();
+    const controller = new AbortController();
+
+    fetchClasses(controller.signal);
+    fetchTeachers(controller.signal);
+    fetchSubjects(controller.signal);
+
+    return () => controller.abort();
   }, []);
 
   const getAuthHeader = () => {
@@ -29,32 +34,43 @@ const ClassRecords: React.FC = () => {
     return sessionId ? { "X-Session-Id": sessionId } : {};
   };
 
-  const headers = {
+  // build headers per-request so we pick up latest token/session
+  const buildHeaders = () => ({
     "Content-Type": "application/json",
     ...getAuthHeader(),
     ...getSessionHeader(),
-  };
+  });
 
-  const fetchClasses = async () => {
+  const fetchClasses = async (signal?: AbortSignal) => {
     try {
-      const res = await fetch("VITE_BACKEND_URL/classes", { headers });
+      const res = await fetch(`${API_BASE}/classes`, { headers: buildHeaders(), signal });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Failed to fetch classes: ${res.status} ${text}`);
+      }
       const data = await res.json();
-      const formatted = data.map((cls: any) => ({
+      const formatted = (Array.isArray(data) ? data : []).map((cls: any) => ({
         ...cls,
         id: cls.id ?? cls.class_id ?? 0,
         teacher: cls.teacher ?? null,
         subjects: cls.subjects ?? [],
       }));
       setClasses(formatted);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
       console.error(err);
       toast.error("Failed to fetch classes");
     }
   };
 
-  const fetchTeachers = async () => {
+  const fetchTeachers = async (signal?: AbortSignal) => {
     try {
-      const res = await fetch("VITE_BACKEND_URL/api/teachers", { headers });
+      const res = await fetch(`${API_BASE}/api/teachers`, { headers: buildHeaders(), signal });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn(`Failed to fetch teachers: ${res.status} ${text}`);
+        return;
+      }
       const data = await res.json();
       let teacherList: any[] = [];
       if (Array.isArray(data)) teacherList = data;
@@ -73,17 +89,24 @@ const ClassRecords: React.FC = () => {
       }));
 
       setTeachers(formatted);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
       console.error(err);
     }
   };
 
-  const fetchSubjects = async () => {
+  const fetchSubjects = async (signal?: AbortSignal) => {
     try {
-      const res = await fetch("VITE_BACKEND_URL/subjects", { headers });
+      const res = await fetch(`${API_BASE}/subjects`, { headers: buildHeaders(), signal });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn(`Failed to fetch subjects: ${res.status} ${text}`);
+        return;
+      }
       const data = await res.json();
       setSubjects(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
       console.error(err);
     }
   };
@@ -102,18 +125,18 @@ const ClassRecords: React.FC = () => {
     });
   };
 
-   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === "fee") {
-      setEditData(prev => ({ ...prev, [name]: value === "" ? undefined : Number(value) }));
+      setEditData((prev) => ({ ...prev, [name]: value === "" ? undefined : Number(value) }));
     } else if (name === "teacher") {
-      const teacher = teachers.find(t => t.id === Number(value)) ?? null;
-      setEditData(prev => ({ ...prev, teacher }));
+      const teacher = teachers.find((t) => t.id === Number(value)) ?? null;
+      setEditData((prev) => ({ ...prev, teacher }));
     } else if (name === "subject") {
-      const subject = subjects.find(s => s.id === Number(value)) ?? null;
-      setEditData(prev => ({ ...prev, subjects: subject ? [subject] : [] }));
+      const subject = subjects.find((s) => s.id === Number(value)) ?? null;
+      setEditData((prev) => ({ ...prev, subjects: subject ? [subject] : [] }));
     } else {
-      setEditData(prev => ({ ...prev, [name]: value }));
+      setEditData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -128,21 +151,23 @@ const ClassRecords: React.FC = () => {
     };
 
     try {
-      const res = await fetch(`VITE_BACKEND_URL/classes/${cls.id}`, {
+      const res = await fetch(`${API_BASE}/classes/${cls.id}`, {
         method: "PUT",
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(updatedClass),
-      
       });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Failed to update class: ${res.status} ${text}`);
+      }
+
       const data = await res.json();
-      console.log(data);
-      if (!res.ok) throw new Error("Failed to update class");
-      
       const normalized = {
-  ...data,
-  id: data.id ?? data.class_id, // ensure consistent id key
-};
-      setClasses(prev => prev.map(c => (c.id === cls.id ? normalized : c)));
+        ...data,
+        id: data.id ?? data.class_id,
+      };
+      setClasses((prev) => prev.map((c) => (c.id === cls.id ? normalized : c)));
       setEditingId(null);
       setEditData({});
       toast.success("Class updated!");
@@ -156,18 +181,19 @@ const ClassRecords: React.FC = () => {
     if (!id || id === 0) return toast.error("Invalid class ID");
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
-      const res = await fetch(`VITE_BACKEND_URL/classes/${id}`, {
+      const res = await fetch(`${API_BASE}/classes/${id}`, {
         method: "DELETE",
-        headers,
+        headers: buildHeaders(),
       });
       if (!res.ok) throw new Error("Failed to delete class");
-      setClasses(prev => prev.filter(c => c.id !== id));
+      setClasses((prev) => prev.filter((c) => c.id !== id));
       toast.success("Class deleted!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete class");
     }
   };
+
   return (
     <div className="p-4 bg-gradient-to-br from-green-50 via-sky-50 to-yellow-50 min-h-screen space-y-4">
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Class Records</h1>
@@ -176,9 +202,7 @@ const ClassRecords: React.FC = () => {
         teachers={teachers}
         subjects={subjects}
         classes={classes}
-        onClassAdded={newClass =>
-          setClasses(prev => [...prev, { ...newClass, id: newClass.id ?? 0 }])
-        }
+        onClassAdded={(newClass) => setClasses((prev) => [...prev, { ...newClass, id: newClass.id ?? 0 }])}
       />
 
       <div className="overflow-x-auto bg-white rounded-lg shadow-card mt-4">
@@ -194,7 +218,7 @@ const ClassRecords: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {classes.map(cls => (
+            {classes.map((cls) => (
               <tr key={cls.id} className="hover:bg-slate-50">
                 {editingId === cls.id ? (
                   <>
@@ -223,7 +247,7 @@ const ClassRecords: React.FC = () => {
                         className="w-full px-2 py-1 border rounded bg-white"
                       >
                         <option value="">-- Select Teacher --</option>
-                        {teachers.map(t => (
+                        {teachers.map((t) => (
                           <option key={t.id} value={t.id}>
                             {getTeacherFullName(t)}
                           </option>
@@ -238,7 +262,7 @@ const ClassRecords: React.FC = () => {
                         className="w-full px-2 py-1 border rounded bg-white"
                       >
                         <option value="">-- Select Subject --</option>
-                        {subjects.map(s => (
+                        {subjects.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
@@ -261,11 +285,7 @@ const ClassRecords: React.FC = () => {
                       >
                         Save
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setEditingId(null)}
-                      >
+                      <Button size="sm" variant="secondary" onClick={() => setEditingId(null)}>
                         Cancel
                       </Button>
                     </td>
@@ -276,12 +296,11 @@ const ClassRecords: React.FC = () => {
                     <td className="p-2 border border-slate-200">{cls.fee}</td>
                     <td className="p-2 border border-slate-200">{getTeacherFullName(cls.teacher)}</td>
                     <td className="p-2 border border-slate-200">
-                      {cls.subjects.map(s => s.name).join(", ") || "No subjects"}
+                      {cls.subjects.map((s) => s.name).join(", ") || "No subjects"}
                     </td>
                     <td className="p-2 border border-slate-200">{cls.timetable}</td>
                     <td className="p-2 border border-slate-200 flex gap-2">
                       <Button
-                      
                         variant="ghost"
                         size="sm"
                         className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"

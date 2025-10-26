@@ -48,7 +48,7 @@ const SignUp: React.FC = () => {
   // ✅ Auto-login helper
   const autoLogin = async (email: string, password: string) => {
     try {
-      const res = await fetch('VITE_BACKEND_URL/api/auth/login', {
+      const res = await fetch('${API_BASE}/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // important for cookie session
@@ -92,7 +92,7 @@ const SignUp: React.FC = () => {
 
       console.log('Registering student...', payload);
 
-      const response = await fetch('VITE_BACKEND_URL/api/auth/register/student', {
+      const response = await fetch('${API_BASE}/api/auth/register/student', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

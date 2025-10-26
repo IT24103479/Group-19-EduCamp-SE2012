@@ -43,7 +43,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "../../hooks/use-toast";
-
+import { API_BASE } from "../../lib/api";
 
 
 interface Teacher {
@@ -155,7 +155,7 @@ export default function AdminTeachers() {
   };
 
   useEffect(() => {
-  axios.get("VITE_BACKEND_URL/api/teachers")
+  axios.get(`${API_BASE}/api/teachers`)
     .then(res => {
       setTeachers(res.data);
       console.log(res.data);
@@ -167,7 +167,7 @@ export default function AdminTeachers() {
 
  const handleEdit = async (teacherId: number) => {
   try {
-    const res = await axios.get(`VITE_BACKEND_URL/api/teachers/${teacherId}`);
+    const res = await axios.get(`${API_BASE}/api/teachers/${teacherId}`);
     const teacher = res.data;
     setEditingTeacher(teacher);
     form.reset({

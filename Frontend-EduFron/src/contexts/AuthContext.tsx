@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE } from "../lib/api";
 
 interface User {
   id: string;
@@ -33,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user from session on mount
   useEffect(() => {
     axios
-      .get("VITE_BACKEND_URL/api/auth/me")
+      .get(`${API_BASE}/api/auth/me`)
       .then((res) => {
         console.log("🔑 /me response:", res.data);
         if (res.data?.authenticated) {
@@ -55,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionId(null);
     localStorage.removeItem(SESSION_ID_KEY);
     // Optionally call backend to destroy session
-    axios.post("VITE_BACKEND_URL/educamp/api/auth/logout", {});
+    axios.post(`${API_BASE}/educamp/api/auth/logout``, {});
   };
 
   const value: AuthContextType = {

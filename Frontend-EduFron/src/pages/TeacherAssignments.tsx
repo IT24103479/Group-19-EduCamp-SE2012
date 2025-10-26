@@ -62,7 +62,7 @@ const TeacherAssignments: React.FC = () => {
     file: null as File | null,
   });
 
-  const API_BASE_URL = 'VITE_BACKEND_URL/api/teachers';
+  const API_BASE_URL = '${API_BASE}/api/teachers';
 
   useEffect(() => {
     fetchData();

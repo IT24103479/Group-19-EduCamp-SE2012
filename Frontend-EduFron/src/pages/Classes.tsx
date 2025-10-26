@@ -5,6 +5,7 @@ import ClassCard from "../components/ClassCard";
 import { Search, Filter } from "lucide-react";
 import { subjectImages } from "../utils/subjectImages";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../lib/api";
 
 export interface Subject {
   id: number;
@@ -39,7 +40,7 @@ const Classes: React.FC = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("VITE_BACKEND_URL/classes");
+        const res = await fetch(`${API_BASE}/classes`);
         let data = await res.json();
 
         // Normalize backend fields and map teacher

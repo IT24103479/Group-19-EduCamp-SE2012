@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import SubjectCard from "../components/SubjectCard";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { subjectImages } from "../utils/subjectImages";
+import { api } from "../lib/api";
 
 interface Subject {
   id: number;
@@ -38,9 +38,9 @@ const Subjects: React.FC = () => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const res = await axios.get<Subject[]>("VITE_BACKEND_URL/subjects");
-        setSubjects(res.data);
-        setFilteredSubjects(res.data);
+        const res = await api.get<Subject[]>("/subjects");
+        setSubjects(res.data ?? []);
+        setFilteredSubjects(res.data ?? []);
       } catch (err) {
         console.error("Error fetching subjects:", err);
       }
@@ -49,9 +49,8 @@ const Subjects: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
-    const filtered = subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = subjects.filter((s) => s.name.toLowerCase().includes(term));
     setFilteredSubjects(filtered);
   };
 
@@ -61,18 +60,21 @@ const Subjects: React.FC = () => {
     setModalOpen(true);
     setLoading(true);
     try {
-      const res = await axios.get<ClassItem[]>("VITE_BACKEND_URL/classes");
-      // Map backend teacher data correctly
-      const mappedClasses = res.data.map((cls) => ({
+      const res = await api.get<ClassItem[]>("/classes");
+      const mappedClasses = (res.data ?? []).map((cls: any) => ({
         ...cls,
         teacher: cls.teacher
-          ? { id: cls.teacher.id, firstName: cls.teacher.firstName, lastName: cls.teacher.lastName }
+          ? {
+              id: cls.teacher.id,
+              firstName: cls.teacher.firstName ?? "",
+              lastName: cls.teacher.lastName ?? "",
+            }
           : null,
         subjects: cls.subjects ?? [],
-        id: cls.id ?? cls.id ?? 0,
+        id: cls.id ?? cls.class_id ?? 0,
       }));
       const filtered = mappedClasses.filter((cls) =>
-        cls.subjects.some((s) => s.id === subject.id)
+        (cls.subjects ?? []).some((s) => s.id === subject.id)
       );
       setClasses(filtered);
     } catch (err) {
@@ -103,7 +105,7 @@ const Subjects: React.FC = () => {
             placeholder="Search subjects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900 focus:border-transparent"
+            className="w-full max-w-xl pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900 focus:border-transparent"
           />
           <button
             className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
@@ -119,7 +121,7 @@ const Subjects: React.FC = () => {
             <div key={subject.id} className="flex flex-col">
               <SubjectCard
                 name={subject.name}
-                image={subjectImages[subject.name]}
+                image={subjectImages[subject.name] || subjectImages["default"]}
               />
               <button
                 className="mt-2 bg-green-600 text-white py-1 rounded-lg hover:bg-green-700 transition-colors"

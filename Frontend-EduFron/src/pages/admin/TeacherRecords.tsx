@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../..//components/ui/button";
 import { Edit, Trash2, Save, X } from "lucide-react";
+import { API_BASE } from "../../lib/api";
 
 interface Teacher {
   id: number;
@@ -24,7 +25,7 @@ const TeacherRecords: React.FC = () => {
   // Fetch all teachers
   const fetchTeachers = async () => {
     try {
-      const response = await fetch("VITE_BACKEND_URL/api/teachers", {
+      const response = await fetch(`${API_BASE}/api/teachers`, {
         method: "GET",
         credentials: "include",
       });
@@ -58,7 +59,7 @@ const TeacherRecords: React.FC = () => {
   // Save edited teacher
   const handleSave = async (id: number) => {
     try {
-      const response = await fetch(`VITE_BACKEND_URL/api/teachers/${id}`, {
+      const response = await fetch(`${API_BASE}/api/teachers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -83,7 +84,7 @@ const TeacherRecords: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this teacher?")) return;
 
     try {
-      const response = await fetch(`VITE_BACKEND_URL/api/teachers/${id}`, {
+      const response = await fetch(`${API_BASE}/api/teachers/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

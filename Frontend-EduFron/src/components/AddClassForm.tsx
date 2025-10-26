@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { ClassItem, Teacher, Subject } from "../types";
 import { toast } from "react-toastify";
+import { API_BASE } from "../lib/api";
 
 interface AddClassFormProps {
   teachers: Teacher[];
@@ -51,7 +52,7 @@ const AddClassForm: React.FC<AddClassFormProps> = ({
     };
 
     try {
-      const res = await fetch("VITE_BACKEND_URL/classes", {
+      const res = await fetch(`${API_BASE}/classes`, {
         method: "POST",
         headers,
         body: JSON.stringify(newClass),

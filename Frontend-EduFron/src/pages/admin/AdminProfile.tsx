@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Edit2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 //import type { AdminModalProps, AdminProfileData } from '../../types/ProfileProps';
-
+import { API_BASE } from '../../lib/api';
 type AdminProfileData = {
   id?: number | null;
   userId?: number | null;
@@ -79,7 +79,7 @@ const AdminProfile: React.FC<AdminModalProps> = ({ id, userId, isOpen, onClose }
     const fetchProfile = async () => {
       try {
         console.log('AdminProfile: fetching admin for uid =', uid);
-        const res = await fetch(`VITE_BACKEND_URL/api/admin/${uid}`, {
+        const res = await fetch(`${API_BASE}/api/admin/${uid}`, {
           credentials: 'include',
         });
 

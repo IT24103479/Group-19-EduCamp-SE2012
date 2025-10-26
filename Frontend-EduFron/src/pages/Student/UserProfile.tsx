@@ -47,7 +47,7 @@ const UserProfile: React.FC = () => {
         setLoading(true);
         
         // Fetch payments for the user
-        const paymentsResponse = await fetch('VITE_BACKEND_URL/api/payments');
+        const paymentsResponse = await fetch('${API_BASE}/api/payments');
         if (!paymentsResponse.ok) throw new Error('Failed to fetch payments');
         
         const allPayments: PaymentRequest[] = await paymentsResponse.json();
@@ -55,7 +55,7 @@ const UserProfile: React.FC = () => {
         setPayments(userPayments);
 
         // Fetch all classes
-        const classesResponse = await fetch('VITE_BACKEND_URL/classes');
+        const classesResponse = await fetch('${API_BASE}/classes');
         if (!classesResponse.ok) throw new Error('Failed to fetch classes');
         
         const allClasses: ClassItem[] = await classesResponse.json();

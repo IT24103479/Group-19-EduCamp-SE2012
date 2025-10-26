@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { API_BASE } from "../lib/api";
 
 const AddTeacherForm: React.FC = () => {
   const [teacher, setTeacher] = useState({
@@ -41,7 +42,7 @@ const AddTeacherForm: React.FC = () => {
     };
 
     try {
-      const response = await fetch("VITE_BACKEND_URL/teachers", {
+      const response = await fetch(`${API_BASE}/teachers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

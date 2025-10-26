@@ -2,23 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { API_BASE } from "../lib/api";
 
 /**
  * Teacher registration form.
- * Behaviour added:
- * - On mount: if a logged in user exists (localStorage.user or /api/auth/me),
- *   redirect immediately to the correct dashboard:
- *     - TEACHER -> /teacher-dashboard
- *     - ADMIN   -> /admin-dashboard
  *
- * - After successful registration, attempt auto-login with the created credentials.
- *   If the login response indicates role TEACHER (or role includes TEACHER),
- *   redirect to /teacher-dashboard immediately.
- *
- * Notes:
- * - Uses credentials: 'include' for cookie/session-based auth where appropriate.
- * - Persists minimal session info (sessionId, user, isAuthenticated) to localStorage when returned.
- * - Adjust dashboard routes if your app uses different paths.
+ * Fixes / improvements applied:
+ * - Fixed broken string interpolation in fetch calls (used backticks).
+ * - Added response.ok checks and better error messages.
+ * - Used credentials: "include" where appropriate.
+ * - Added AbortController for the "me" check to avoid memory leaks.
+ * - Small defensive guards and clearer localStorage handling in assessLoginResponse.
+ * - Kept behavior: try auto-login after successful registration and redirect by role.
  */
 
 const AddTeacherForm: React.FC = () => {
@@ -36,9 +31,8 @@ const AddTeacherForm: React.FC = () => {
 
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // React Router navigation hook
+  const navigate = useNavigate();
 
-  // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -46,12 +40,10 @@ const AddTeacherForm: React.FC = () => {
     setTeacher((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword((s) => !s);
   };
 
-  // Inspect a login-style response and redirect based on role.
   const assessLoginResponse = (res: any): boolean => {
     if (!res) return false;
 
@@ -59,8 +51,9 @@ const AddTeacherForm: React.FC = () => {
       if (res.sessionId) localStorage.setItem("sessionId", String(res.sessionId));
       if (res.user) localStorage.setItem("user", JSON.stringify(res.user));
       if (res.success !== undefined) localStorage.setItem("isAuthenticated", String(Boolean(res.success)));
+      if (res.token) localStorage.setItem("token", String(res.token));
     } catch {
-      /* ignore localStorage errors */
+      // ignore localStorage errors
     }
 
     const roleRaw = res?.user?.role;
@@ -78,15 +71,21 @@ const AddTeacherForm: React.FC = () => {
     return false;
   };
 
-  // Attempt to auto-login after registration (returns parsed response or null)
   const autoLogin = async (email: string, password: string): Promise<any | null> => {
     try {
-      const res = await fetch("VITE_BACKEND_URL/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+
+      if (!res.ok) {
+        // return parsed error when available
+        const errText = await res.text().catch(() => "");
+        console.warn("Auto-login failed:", res.status, errText);
+        return null;
+      }
 
       const result = await res.json();
       return result;
@@ -96,11 +95,11 @@ const AddTeacherForm: React.FC = () => {
     }
   };
 
-  // On mount: if current user is already logged-in, redirect (teacher/admin)
   useEffect(() => {
+    const controller = new AbortController();
+
     const checkLoggedInAndRedirect = async () => {
       try {
-        // 1) Check localStorage.user first
         const stored = localStorage.getItem("user");
         if (stored) {
           const user = JSON.parse(stored);
@@ -115,44 +114,54 @@ const AddTeacherForm: React.FC = () => {
           }
         }
 
-        // 2) Fallback: call /me to verify server session (useful for cookie-based auth)
-        const r = await fetch("VITE_BACKEND_URL/api/auth/me", {
+        const r = await fetch(`${API_BASE}/api/auth/me`, {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
         });
 
-        if (r.ok) {
-          const me = await r.json();
-          if (me?.success && me?.user?.role) {
-            const role = String(me.user.role).toUpperCase();
-            try {
-              localStorage.setItem("user", JSON.stringify(me.user));
-              localStorage.setItem("isAuthenticated", "true");
-              if (me.sessionId) localStorage.setItem("sessionId", String(me.sessionId));
-            } catch {}
-            if (role === "TEACHER" || role.includes("TEACHER")) {
-              navigate("/teacher-dashboard");
-              return;
-            }
-            if (role === "ADMIN" || role.includes("ADMIN")) {
-              navigate("/admin-dashboard");
-              return;
-            }
+        if (!r.ok) return; // not logged in / no session
+
+        const me = await r.json();
+        if (me?.success && me?.user?.role) {
+          try {
+            localStorage.setItem("user", JSON.stringify(me.user));
+            localStorage.setItem("isAuthenticated", "true");
+            if (me.sessionId) localStorage.setItem("sessionId", String(me.sessionId));
+            if (me.token) localStorage.setItem("token", String(me.token));
+          } catch {
+            /* ignore localStorage errors */
+          }
+          const role = String(me.user.role).toUpperCase();
+          if (role === "TEACHER" || role.includes("TEACHER")) {
+            navigate("/teacher-dashboard");
+            return;
+          }
+          if (role === "ADMIN" || role.includes("ADMIN")) {
+            navigate("/admin-dashboard");
+            return;
           }
         }
       } catch (err) {
-        // ignore errors; user is likely not logged in
+        if ((err as any)?.name === "AbortError") return;
+        // ignore other errors
       }
     };
 
     checkLoggedInAndRedirect();
+
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!teacher.firstName || !teacher.lastName || !teacher.email || !teacher.password) {
+      setMessage("Please fill the required fields");
+      return;
+    }
 
     const payload = {
       firstName: teacher.firstName,
@@ -167,38 +176,29 @@ const AddTeacherForm: React.FC = () => {
     };
 
     try {
-      const response = await fetch(
-        "VITE_BACKEND_URL/api/auth/register/teacher",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          credentials: "include", // include cookies if your auth returns them
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/auth/register/teacher`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
 
-      const data = await response.json();
-
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.message || "Failed to register teacher");
+        const msg = data?.message || data?.error || `Failed to register teacher (status ${response.status})`;
+        throw new Error(msg);
       }
 
       // Try auto-login for the newly created teacher
       const loginResult = await autoLogin(payload.email, payload.password);
 
       if (loginResult) {
-        // If login response indicates TEACHER (or ADMIN) redirect immediately
         const redirected = assessLoginResponse(loginResult);
-        if (redirected) {
-          // already redirected
-          return;
-        }
+        if (redirected) return;
       }
 
-      // Fallback (if auto-login not available or not redirecting)
       setMessage(`✅ Teacher registered successfully! Redirecting...`);
 
-      // Clear form
       setTeacher({
         firstName: "",
         lastName: "",
@@ -211,13 +211,10 @@ const AddTeacherForm: React.FC = () => {
         password: "",
       });
 
-      // Redirect to homepage as a fallback after 2 seconds
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      setTimeout(() => navigate("/"), 2000);
     } catch (error: any) {
-      console.error(error);
-      setMessage(` Failed to register teacher: ${error?.message || String(error)}`);
+      console.error("Registration error:", error);
+      setMessage(`Failed to register teacher: ${error?.message || String(error)}`);
     }
   };
 
@@ -232,7 +229,6 @@ const AddTeacherForm: React.FC = () => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* First Name */}
           <div>
             <label className="block font-semibold mb-1">First Name:</label>
             <input
@@ -246,7 +242,6 @@ const AddTeacherForm: React.FC = () => {
             />
           </div>
 
-          {/* Last Name */}
           <div>
             <label className="block font-semibold mb-1">Last Name:</label>
             <input
@@ -260,7 +255,6 @@ const AddTeacherForm: React.FC = () => {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block font-semibold mb-1">Email:</label>
             <input
@@ -274,7 +268,6 @@ const AddTeacherForm: React.FC = () => {
             />
           </div>
 
-          {/* Phone Number */}
           <div>
             <label className="block font-semibold mb-1">Phone Number:</label>
             <input
@@ -283,12 +276,10 @@ const AddTeacherForm: React.FC = () => {
               value={teacher.phoneNumber}
               onChange={handleChange}
               placeholder="Phone Number"
-              required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
-          {/* Qualification */}
           <div>
             <label className="block font-semibold mb-1">Qualification:</label>
             <input
@@ -297,12 +288,10 @@ const AddTeacherForm: React.FC = () => {
               value={teacher.qualification}
               onChange={handleChange}
               placeholder="Qualification"
-              required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
-          {/* Date of Birth */}
           <div>
             <label className="block font-semibold mb-1">Date of Birth:</label>
             <input
@@ -310,12 +299,10 @@ const AddTeacherForm: React.FC = () => {
               name="dateOfBirth"
               value={teacher.dateOfBirth}
               onChange={handleChange}
-              required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
-          {/* Image URL (Optional) */}
           <div>
             <label className="block font-semibold mb-1">Image URL (Optional):</label>
             <input
@@ -328,14 +315,12 @@ const AddTeacherForm: React.FC = () => {
             />
           </div>
 
-          {/* Subject Name */}
           <div>
             <label className="block font-semibold mb-1">Subject Name:</label>
             <select
               name="subjectName"
               value={teacher.subjectName}
               onChange={handleChange}
-              required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">-- Choose Subject --</option>
@@ -343,15 +328,14 @@ const AddTeacherForm: React.FC = () => {
               <option value="Science">Science</option>
               <option value="English">English</option>
               <option value="ICT">ICT</option>
-              <option value="History">Business and Accounting</option>
-              <option value="Geography">Tamil</option>
-              <option value="Physics">Dancing</option>
-              <option value="Chemistry">Drama</option>
-              <option value="Biology">Maths(English)</option>
+              <option value="Business and Accounting">Business and Accounting</option>
+              <option value="Tamil">Tamil</option>
+              <option value="Dancing">Dancing</option>
+              <option value="Drama">Drama</option>
+              <option value="Maths(English)">Maths(English)</option>
             </select>
           </div>
 
-          {/* Password with visibility toggle */}
           <div>
             <label className="block font-semibold mb-1">Password:</label>
             <div className="relative">
@@ -369,6 +353,7 @@ const AddTeacherForm: React.FC = () => {
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,7 +372,6 @@ const AddTeacherForm: React.FC = () => {
             </p>
           </div>
 
-          {/* Submit button */}
           <button
             type="submit"
             className="w-full bg-emerald-500 text-white p-2 rounded hover:bg-emerald-600 transition duration-200 font-semibold"
@@ -403,6 +387,7 @@ const AddTeacherForm: React.FC = () => {
                 ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
                 : "bg-red-100 text-red-700 border border-red-300"
             }`}
+            role="status"
           >
             {message}
           </div>

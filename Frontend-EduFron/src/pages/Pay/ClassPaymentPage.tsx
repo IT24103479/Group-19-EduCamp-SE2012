@@ -4,7 +4,7 @@ import ClassPayment from "../../components/Enroll/ClassPayment";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from '../../components/Header';
-
+import { API_BASE } from "../../lib/api";
 interface LocationState {
   classId?: number | string;
 }
@@ -37,7 +37,7 @@ const ClassPaymentPage: React.FC = () => {
     setError("");
 
     axios
-      .get("VITE_BACKEND_URL/classes")
+      .get(`${API_BASE}/classes`)
       .then((res) => {
         console.log("classes API response:", res.data);
 

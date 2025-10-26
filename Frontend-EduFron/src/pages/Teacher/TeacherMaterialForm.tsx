@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { API_BASE } from "../lib/api"; // adjust path if this file is nested (e.g. "../../lib/api")
 
 interface Material {
   id: number;
@@ -20,26 +21,33 @@ const TeacherMaterialForm: React.FC = () => {
   const [materials, setMaterials] = useState<Material[]>([]);
 
   // Fetch uploaded materials
-  const fetchMaterials = async () => {
+  const fetchMaterials = async (signal?: AbortSignal) => {
     try {
-      const response = await fetch("VITE_BACKEND_URL/api/materials", {
+      const response = await fetch(`${API_BASE}/api/materials`, {
         method: "GET",
-        credentials: "include", // ✅ send cookies with request
+        credentials: "include", // send cookies with request
+        signal,
       });
 
-      if (!response.ok) throw new Error("Failed to fetch materials");
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error(`Failed to fetch materials: ${response.status} ${text}`);
+      }
 
       const data = await response.json();
       console.log("Fetched materials:", data);
-      setMaterials(data);
-    } catch (err) {
+      setMaterials(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
       console.error(err);
       toast.error("Failed to load materials");
     }
   };
 
   useEffect(() => {
-    fetchMaterials();
+    const controller = new AbortController();
+    fetchMaterials(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // Handle upload
@@ -53,28 +61,32 @@ const TeacherMaterialForm: React.FC = () => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
-      const base64File = (reader.result as string).split(",")[1]; // remove prefix
-      const payload = {
-        title,
-        description,
-        subject,
-        className,
-        fileName: file.name,
-        fileData: base64File,
-      };
-      console.log("Upload payload:", payload);
-
       try {
-        const response = await fetch("VITE_BACKEND_URL/api/materials", {
+        const result = reader.result as string;
+        const base64File = result.split(",")[1] ?? ""; // remove prefix if present
+        const payload = {
+          title,
+          description,
+          subject,
+          className,
+          fileName: file.name,
+          fileData: base64File,
+        };
+        console.log("Upload payload:", { ...payload, fileData: "[base64]" });
+
+        const response = await fetch(`${API_BASE}/api/materials`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // ✅ send session cookie
+          credentials: "include", // send session cookie
           body: JSON.stringify(payload),
         });
 
         console.log("Upload response status:", response.status);
 
-        if (!response.ok) throw new Error("Upload failed");
+        if (!response.ok) {
+          const text = await response.text().catch(() => "");
+          throw new Error(`Upload failed: ${response.status} ${text}`);
+        }
 
         toast.success("Material uploaded successfully!");
         setTitle("");
@@ -82,11 +94,17 @@ const TeacherMaterialForm: React.FC = () => {
         setSubject("");
         setClassName("");
         setFile(null);
+        // refresh list
         fetchMaterials();
       } catch (err) {
         console.error(err);
         toast.error("Upload failed!");
       }
+    };
+
+    reader.onerror = (err) => {
+      console.error("File read error", err);
+      toast.error("Failed to read file");
     };
   };
 
@@ -95,15 +113,18 @@ const TeacherMaterialForm: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this material?")) return;
 
     try {
-      const response = await fetch(`VITE_BACKEND_URL/api/materials/${id}`, {
+      const response = await fetch(`${API_BASE}/api/materials/${id}`, {
         method: "DELETE",
-        credentials: "include", // ✅ send cookie too
+        credentials: "include", // send cookie too
       });
 
-      if (!response.ok) throw new Error("Delete failed");
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error(`Delete failed: ${response.status} ${text}`);
+      }
 
       toast.success("Material deleted successfully!");
-      setMaterials(materials.filter((m) => m.id !== id));
+      setMaterials((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
       console.error(err);
       toast.error("Delete failed!");
@@ -112,59 +133,74 @@ const TeacherMaterialForm: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4 text-emerald-700">
-        Upload Teaching Materials
-      </h2>
+      <h2 className="text-2xl font-bold mb-4 text-emerald-700">Upload Teaching Materials</h2>
 
       {/* Upload Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        Title :
-        <input
-          placeholder="Title*"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        Description :
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        Subject :
-        <select
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        >
-          <option value="">-- Choose Subject --</option>
-          <option value="Mathematics">Mathematics</option>
-          <option value="Science">Science</option>
-          <option value="English">English</option>
-          <option value="ICT">ICT</option>
-        </select>
-        Class :
-        <select
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
-          className="w-full border p-2 rounded"
-        >
-          <option value="">-- Choose Grade --</option>
-          <option value="Grade 6">Grade 6</option>
-          <option value="Grade 7">Grade 7</option>
-          <option value="Grade 8">Grade 8</option>
-          <option value="Grade 9">Grade 9</option>
-          <option value="Grade 10">Grade 10</option>
-          <option value="Grade 11">Grade 11</option>
-        </select>
-        Select File* :
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-          className="w-full border p-2 rounded"
-        />
+        <div>
+          <label className="block font-medium">Title</label>
+          <input
+            placeholder="Title*"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full border p-2 rounded"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Description</label>
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full border p-2 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Subject</label>
+          <select
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="w-full border p-2 rounded"
+            required
+          >
+            <option value="">-- Choose Subject --</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Science">Science</option>
+            <option value="English">English</option>
+            <option value="ICT">ICT</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block font-medium">Class</label>
+          <select
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
+            className="w-full border p-2 rounded"
+            required
+          >
+            <option value="">-- Choose Grade --</option>
+            <option value="Grade 6">Grade 6</option>
+            <option value="Grade 7">Grade 7</option>
+            <option value="Grade 8">Grade 8</option>
+            <option value="Grade 9">Grade 9</option>
+            <option value="Grade 10">Grade 10</option>
+            <option value="Grade 11">Grade 11</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block font-medium">Select File*</label>
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+            className="w-full border p-2 rounded"
+            required
+          />
+        </div>
 
         <button
           type="submit"

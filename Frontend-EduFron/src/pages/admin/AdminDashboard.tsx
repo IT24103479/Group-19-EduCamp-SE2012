@@ -13,7 +13,7 @@ import {
 } from "../../components/ui/table";
 import { useToast } from "../../hooks/use-toast";
 import { process } from  "../../types/process";
-
+import { API_BASE } from "../../lib/api";
 type StatItem = {
   title: string;
   value: string;
@@ -32,7 +32,7 @@ type TeacherRow = {
   joined?: string;
 };
 
-const API_BASE = process.env.REACT_APP_API_URL ?? "VITE_BACKEND_URL";
+
 
 export default function AdminDashboard(): JSX.Element {
   const { toast } = useToast();

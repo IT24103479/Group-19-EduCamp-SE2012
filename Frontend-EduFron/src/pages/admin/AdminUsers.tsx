@@ -42,6 +42,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "../../hooks/use-toast";
+import { API_BASE } from "../../lib/api";
 
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -84,7 +85,7 @@ export default function AdminUsers() {
   });
 
 useEffect(() => {
-  axios.get("VITE_BACKEND_URL/educamp/api/auth/me")
+  axios.get(`${API_BASE}/educamp/api/auth/me`)
     .then(res => {
       const user = res.data.user; // your /me endpoint returns { authenticated: true, user: {...} }
       if (user) {

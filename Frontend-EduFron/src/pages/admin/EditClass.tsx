@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE } from "../../lib/api";
 
 interface Teacher {
   id: number;
@@ -39,7 +40,7 @@ const EditClass: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classRes = await fetch(`VITE_BACKEND_URL/classes/${id}`);
+        const classRes = await fetch(`${API_BASE}/classes/${id}`);
         if (!classRes.ok) throw new Error("Failed to fetch class");
         const classJson: ClassData = await classRes.json();
         setClassData(classJson);
@@ -50,11 +51,11 @@ const EditClass: React.FC = () => {
         setTeacherId(classJson.teacher?.id ?? null);
         setSubjectId(classJson.subjects?.[0]?.id ?? null);
 
-        const teacherRes = await fetch("VITE_BACKEND_URL/teachers");
+        const teacherRes = await fetch(`${API_BASE}/teachers`);
         const teacherJson = await teacherRes.json();
         setTeachers(teacherJson);
 
-        const subjectRes = await fetch("VITE_BACKEND_URL/subjects");
+        const subjectRes = await fetch(`${API_BASE}/subjects`);
         const subjectJson = await subjectRes.json();
         setSubjects(subjectJson);
       } catch (err) {
@@ -92,7 +93,7 @@ const EditClass: React.FC = () => {
     };
 
     try {
-      const res = await fetch(`VITE_BACKEND_URL/classes/${id}`, {
+      const res = await fetch(`${API_BASE}/classes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedClass),

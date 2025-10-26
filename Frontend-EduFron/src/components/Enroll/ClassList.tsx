@@ -3,6 +3,7 @@ import { createPayment } from "../../services/paymentService";
 import { PaymentDTO } from "../../types/payment";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
+import { API_BASE } from "../../lib/api";
 
 interface ClassItem {
   id: number;
@@ -19,7 +20,7 @@ const ClassList: React.FC = () => {
 useEffect(() => {
   console.log("🔍 Fetching available classes...");
   axios
-    .get("VITE_BACKEND_URL/classes")
+    .get(`${API_BASE}/classes`)
     .then((res) => {
       console.log("✅ Classes response:", res.data);
       setClasses(res.data);

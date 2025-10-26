@@ -9,6 +9,7 @@ import {
 } from "../../services/enrollmentService";
 import { useAuth } from "../../contexts/AuthContext";
 
+
 type Enrollment = ServiceEnrollment & {
   displayStatus?: string;
   // className and classGrade are provided by the service.normalizeEnrollment

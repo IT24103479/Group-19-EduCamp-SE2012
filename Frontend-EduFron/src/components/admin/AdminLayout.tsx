@@ -26,6 +26,7 @@ import Sidebar from '../Sidebar';
 import Topbar from '../Topbar';
 import AdminProfile from "../../pages/admin/AdminProfile";
 import type { AdminProfileProps } from "../../types/ProfileProps";
+import { API_BASE } from "../../lib/api";
 const adminNavItems = [
   { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/admin/classes", label: "Classes", icon: BookOpen },
@@ -49,7 +50,7 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await fetch(`VITE_BACKEND_URL/api/admin/${userId}`);
+      const res = await fetch(`${API_BASE}/api/admin/${userId}`);
       const data = await res.json();
       console.log('Fetched admin profile:', data); 
       setProfile(data);

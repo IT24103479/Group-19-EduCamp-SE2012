@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { ClassItem, Teacher, Subject } from "../../types";
 import { toast } from "react-toastify";
-
+import { API_BASE } from "../../lib/api";
 interface EditClassFormProps {
   classData: ClassItem;
   classes: ClassItem[];
@@ -20,8 +20,8 @@ const EditClassForm: React.FC<EditClassFormProps> = ({ classData, classes, onCla
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
   useEffect(() => {
-    fetch("VITE_BACKEND_URL/teachers").then(r => r.json()).then(setTeachers).catch(console.error);
-    fetch("VITE_BACKEND_URL/subjects").then(r => r.json()).then(setSubjects).catch(console.error);
+    fetch(`${API_BASE}/teachers`).then(r => r.json()).then(setTeachers).catch(console.error);
+    fetch(`${API_BASE}/subjects`).then(r => r.json()).then(setSubjects).catch(console.error);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +38,7 @@ const EditClassForm: React.FC<EditClassFormProps> = ({ classData, classes, onCla
     };
 
     try {
-      const res = await fetch(`VITE_BACKEND_URL/classes/${classData.id}`, {
+      const res = await fetch(`${API_BASE}/classes/${classData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedClass),

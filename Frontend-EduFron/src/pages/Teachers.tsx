@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import TeacherCard from "../components/TeacherCard";
 import { Search, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../lib/api";
 
 export interface Subject {
   id: number;
@@ -51,7 +52,7 @@ const Teachers: React.FC = () => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const res = await fetch("VITE_BACKEND_URL/api/teachers", { headers });
+        const res = await fetch(`${API_BASE}/api/teachers`, { headers });
         const data = await res.json();
         console.log("Fetched teachers:", data);
 

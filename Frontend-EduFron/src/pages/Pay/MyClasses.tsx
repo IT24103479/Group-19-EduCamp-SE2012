@@ -4,6 +4,7 @@ import enrollmentService, { type Enrollment } from "../../services/enrollmentSer
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Header from '../../components/Header';
+import { API_BASE } from "../../lib/api";
 
 export default function MyClasses() {
   const { user } = useAuth();
@@ -68,7 +69,7 @@ export default function MyClasses() {
     let mounted = true;
     // Fetch all classes (the backend in other parts of this app exposes /classes)
     axios
-      .get("VITE_BACKEND_URL/classes")
+      .get(`${API_BASE}/classes`)
       .then((res) => {
         if (!mounted) return;
         const classes: any[] = res.data ?? [];
@@ -114,7 +115,7 @@ export default function MyClasses() {
     try {
       // Try the specific student endpoint used by the backend: /api/enrollments/student/{studentId}
       const res = await axios.get<Enrollment[]>(
-        `VITE_BACKEND_URL/api/enrollments/student/${sid}`
+        `${API_BASE}/api/enrollments/student/${sid}`
       );
       const data = res.data ?? [];
       setGuestEnrollments(data);
@@ -271,7 +272,7 @@ export default function MyClasses() {
                       <button
                         onClick={() => {
                           axios
-                            .get(`VITE_BACKEND_URL/classes`)
+                            .get(`${API_BASE}/classes`)
                             .then((res) => {
                               const w = window.open();
                               if (w) w.document.write(`<pre>${JSON.stringify(res.data, null, 2)}</pre>`);

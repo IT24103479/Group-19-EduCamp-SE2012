@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "../../hooks/use-toast";
 
+
 import {
   Card,
   CardContent,
@@ -84,6 +85,8 @@ const classSchema = z.object({
   subjectIds: z.array(z.string()).min(1, "At least one subject is required"),
 });
 
+const API_BASE = (import.meta.env.${API_BASE} as string) ?? "http://localhost:8081";
+
 type ClassFormData = z.infer<typeof classSchema>;
 
 export default function AdminClasses() {
@@ -101,10 +104,9 @@ export default function AdminClasses() {
 
   useEffect(() => {
     Promise.all([
-      axios.get<Teacher[]>("VITE_BACKEND_URL/teachers"),
-      axios.get<Subject[]>("VITE_BACKEND_URL/subjects"),
-      axios.get<any[]>("VITE_BACKEND_URL/classes"),
-      
+      axios.get<Teacher[]>(`${API_BASE}/teachers`),
+      axios.get<Subject[]>(`${API_BASE}/subjects`),
+      axios.get<any[]>(`${API_BASE}/classes`),
     ])
       .then(([teachersRes, subjectsRes, classesRes]) => {
         setTeachers(teachersRes.data);
@@ -182,7 +184,7 @@ console.log("Payload:", payload);
 
 
     if (editingClass) {
-      axios.put(`VITE_BACKEND_URL/classes/${editingClass.id}`, payload)
+      axios.put(`${API_BASE}/classes/${editingClass.id}`, payload)
         .then((res) => {
           setClasses(classes.map((cls) => (cls.id === editingClass.id ? res.data : cls)));
           toast({
@@ -203,7 +205,7 @@ console.log("Payload:", payload);
         });
         console.log("PUT payload:", payload);
     } else {
-      axios.post("VITE_BACKEND_URL/classes", { ...payload, enrolled: 0 })
+      axios.post(`${API_BASE}/classes`, { ...payload, enrolled: 0 })
         .then((res) => {
           setClasses([...classes, res.data]);
           toast({
@@ -243,7 +245,7 @@ subjectIds: cls.subjectIds?.map(String) || [],
   };
 
   const handleDelete = (id: string | number) => {
-    fetch(`VITE_BACKEND_URL/classes/${id}`, {
+    fetch(`${API_BASE}/classes/${id}`, {
       method: "DELETE",
     })
       .then((res) => {

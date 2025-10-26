@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import { API_BASE } from "../../lib/api";
 
 interface Material {
   id: number;
@@ -20,7 +21,7 @@ const ViewResources: React.FC = () => {
   // 🔹 Fetch materials from backend
   useEffect(() => {
     axios
-      .get("VITE_BACKEND_URL/api/materials")
+      .get(`${API_BASE}/api/materials`)
       .then((response) => {
         setMaterials(response.data);
         setLoading(false);
@@ -103,7 +104,7 @@ const ViewResources: React.FC = () => {
                   <strong>Class:</strong> {material.className || "N/A"}
                 </p>
                 <a
-                  href={`VITE_BACKEND_URL/api/materials/${material.id}`}
+                  href={`${API_BASE}/api/materials/${material.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-3 inline-block text-white bg-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-700"

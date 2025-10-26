@@ -35,7 +35,7 @@ const Login: React.FC = () => {
     try {
       console.log('Attempting login...', data);
 
-      const response = await fetch('VITE_BACKEND_URL/api/auth/login', {
+      const response = await fetch('${API_BASE}/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Important for cookie-based sessions
@@ -99,7 +99,7 @@ const Login: React.FC = () => {
   //  Optional: test backend session endpoint
   const testBackendConnection = async () => {
     try {
-      const res = await fetch('VITE_BACKEND_URL/api/auth/me', {
+      const res = await fetch('${API_BASE}/api/auth/me', {
         credentials: 'include',
       });
       console.log('Backend /me test:', res.status);

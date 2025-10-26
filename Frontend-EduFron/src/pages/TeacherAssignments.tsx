@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Download, Eye, Star, Users, X, Calendar, FileUp } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { API_BASE } from '../lib/api';
 
 interface Assignment {
   id: number;
@@ -62,7 +63,7 @@ const TeacherAssignments: React.FC = () => {
     file: null as File | null,
   });
 
-  const API_BASE_URL = '${API_BASE}/api/teachers';
+  const API_BASE_URL = `${API_BASE}/api/teachers`;
 
   useEffect(() => {
     fetchData();

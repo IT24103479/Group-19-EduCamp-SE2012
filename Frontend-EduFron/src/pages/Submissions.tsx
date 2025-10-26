@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SubmissionModal from '../components/SubmissionModal';
 import { toast } from 'react-toastify';
+import { API_BASE } from '../lib/api';
 
 interface Assignment {
   id: number;
@@ -54,7 +55,7 @@ const Submissions: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<{ id: number; title: string } | null>(null);
 
-  const API_BASE_URL = '${API_BASE}/api/students';
+  const API_BASE_URL = `${API_BASE}/api/students`;
 
   useEffect(() => {
     fetchData();

@@ -16,7 +16,7 @@ const StudentDashboard: React.FC = () => {
   useEffect(() => {
     const verifySession = async () => {
       try {
-        const res = await fetch('http://localhost:8081/api/auth/me', {
+        const res = await fetch('VITE_BACKEND_URL/api/auth/me', {
           credentials: 'include',
         });
 
@@ -54,7 +54,7 @@ const StudentDashboard: React.FC = () => {
   // Fetch today's classes
   const fetchTodaysClasses = async () => {
     try {
-      const res = await fetch('http://localhost:8081/api/students/today-classes', {
+      const res = await fetch('VITE_BACKEND_URL/api/students/today-classes', {
         credentials: 'include',
       });
 
@@ -74,7 +74,7 @@ const StudentDashboard: React.FC = () => {
   // Logout function
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8081/api/auth/logout', {
+      await fetch('VITE_BACKEND_URL/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

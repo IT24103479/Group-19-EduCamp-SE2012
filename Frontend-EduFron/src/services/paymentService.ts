@@ -1,7 +1,7 @@
 import axios from "axios";
 import { type PaymentDTO } from "../types/payment";
 
-const API_URL = "http://localhost:8081/api/payments";
+const API_URL = "VITE_BACKEND_URL/api/payments";
 
 export const getAllPayments = async () => {
   const res = await axios.get(API_URL, { withCredentials: true });

@@ -87,7 +87,7 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const verifyAndFetchProfile = async () => {
       try {
-        const meResponse = await fetch('http://localhost:8081/api/auth/me', {
+        const meResponse = await fetch('VITE_BACKEND_URL/api/auth/me', {
           credentials: 'include',
         });
 
@@ -112,7 +112,7 @@ const Profile: React.FC = () => {
     try {
       setIsLoading(true);
 
-      const response = await secureFetch('http://localhost:8081/api/students/profile');
+      const response = await secureFetch('VITE_BACKEND_URL/api/students/profile');
       console.log('Profile API Response Status:', response.status);
 
       if (response.ok) {
@@ -143,7 +143,7 @@ const Profile: React.FC = () => {
     try {
       console.log('Submitting profile data:', data);
       
-      const response = await secureFetch('http://localhost:8081/api/students/profile', {
+      const response = await secureFetch('VITE_BACKEND_URL/api/students/profile', {
         method: 'PUT',
         body: JSON.stringify(data),
       });

@@ -81,7 +81,7 @@ const AddTeacherForm: React.FC = () => {
   // Attempt to auto-login after registration (returns parsed response or null)
   const autoLogin = async (email: string, password: string): Promise<any | null> => {
     try {
-      const res = await fetch("http://localhost:8081/api/auth/login", {
+      const res = await fetch("VITE_BACKEND_URL/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -116,7 +116,7 @@ const AddTeacherForm: React.FC = () => {
         }
 
         // 2) Fallback: call /me to verify server session (useful for cookie-based auth)
-        const r = await fetch("http://localhost:8081/api/auth/me", {
+        const r = await fetch("VITE_BACKEND_URL/api/auth/me", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -168,7 +168,7 @@ const AddTeacherForm: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8081/api/auth/register/teacher",
+        "VITE_BACKEND_URL/api/auth/register/teacher",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

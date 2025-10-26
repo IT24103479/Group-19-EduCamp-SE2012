@@ -37,7 +37,7 @@ const ClassRecords: React.FC = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await fetch("http://localhost:8081/classes", { headers });
+      const res = await fetch("VITE_BACKEND_URL/classes", { headers });
       const data = await res.json();
       const formatted = data.map((cls: any) => ({
         ...cls,
@@ -54,7 +54,7 @@ const ClassRecords: React.FC = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch("http://localhost:8081/api/teachers", { headers });
+      const res = await fetch("VITE_BACKEND_URL/api/teachers", { headers });
       const data = await res.json();
       let teacherList: any[] = [];
       if (Array.isArray(data)) teacherList = data;
@@ -80,7 +80,7 @@ const ClassRecords: React.FC = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await fetch("http://localhost:8081/subjects", { headers });
+      const res = await fetch("VITE_BACKEND_URL/subjects", { headers });
       const data = await res.json();
       setSubjects(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -128,7 +128,7 @@ const ClassRecords: React.FC = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:8081/classes/${cls.id}`, {
+      const res = await fetch(`VITE_BACKEND_URL/classes/${cls.id}`, {
         method: "PUT",
         headers,
         body: JSON.stringify(updatedClass),
@@ -156,7 +156,7 @@ const ClassRecords: React.FC = () => {
     if (!id || id === 0) return toast.error("Invalid class ID");
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
-      const res = await fetch(`http://localhost:8081/classes/${id}`, {
+      const res = await fetch(`VITE_BACKEND_URL/classes/${id}`, {
         method: "DELETE",
         headers,
       });

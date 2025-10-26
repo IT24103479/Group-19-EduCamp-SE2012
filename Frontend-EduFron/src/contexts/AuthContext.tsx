@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user from session on mount
   useEffect(() => {
     axios
-      .get("http://localhost:8081/api/auth/me")
+      .get("VITE_BACKEND_URL/api/auth/me")
       .then((res) => {
         console.log("🔑 /me response:", res.data);
         if (res.data?.authenticated) {
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionId(null);
     localStorage.removeItem(SESSION_ID_KEY);
     // Optionally call backend to destroy session
-    axios.post("http://localhost:8081/educamp/api/auth/logout", {});
+    axios.post("VITE_BACKEND_URL/educamp/api/auth/logout", {});
   };
 
   const value: AuthContextType = {

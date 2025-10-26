@@ -32,7 +32,7 @@ type TeacherRow = {
   joined?: string;
 };
 
-const API_BASE = process.env.REACT_APP_API_URL ?? "http://localhost:8081";
+const API_BASE = process.env.REACT_APP_API_URL ?? "VITE_BACKEND_URL";
 
 export default function AdminDashboard(): JSX.Element {
   const { toast } = useToast();

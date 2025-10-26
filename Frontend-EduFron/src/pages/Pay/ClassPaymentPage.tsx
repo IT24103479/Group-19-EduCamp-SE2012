@@ -37,7 +37,7 @@ const ClassPaymentPage: React.FC = () => {
     setError("");
 
     axios
-      .get("http://localhost:8081/classes")
+      .get("VITE_BACKEND_URL/classes")
       .then((res) => {
         console.log("classes API response:", res.data);
 

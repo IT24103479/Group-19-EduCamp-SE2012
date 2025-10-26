@@ -38,7 +38,7 @@ const Subjects: React.FC = () => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const res = await axios.get<Subject[]>("http://localhost:8081/subjects");
+        const res = await axios.get<Subject[]>("VITE_BACKEND_URL/subjects");
         setSubjects(res.data);
         setFilteredSubjects(res.data);
       } catch (err) {
@@ -61,7 +61,7 @@ const Subjects: React.FC = () => {
     setModalOpen(true);
     setLoading(true);
     try {
-      const res = await axios.get<ClassItem[]>("http://localhost:8081/classes");
+      const res = await axios.get<ClassItem[]>("VITE_BACKEND_URL/classes");
       // Map backend teacher data correctly
       const mappedClasses = res.data.map((cls) => ({
         ...cls,

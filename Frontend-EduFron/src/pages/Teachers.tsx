@@ -51,7 +51,7 @@ const Teachers: React.FC = () => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const res = await fetch("http://localhost:8081/api/teachers", { headers });
+        const res = await fetch("VITE_BACKEND_URL/api/teachers", { headers });
         const data = await res.json();
         console.log("Fetched teachers:", data);
 

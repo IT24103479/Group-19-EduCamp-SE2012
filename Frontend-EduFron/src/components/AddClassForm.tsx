@@ -18,7 +18,6 @@ const AddClassForm: React.FC<AddClassFormProps> = ({
   const [timetable, setTimetable] = useState("");
   const [teacherId, setTeacherId] = useState<number | "">("");
   const [subjectId, setSubjectId] = useState<number | "">("");
-
   const headers = {
     "Content-Type": "application/json",
     Authorization: localStorage.getItem("token")
@@ -52,7 +51,7 @@ const AddClassForm: React.FC<AddClassFormProps> = ({
     };
 
     try {
-      const res = await fetch("http://localhost:8081/classes", {
+      const res = await fetch("VITE_BACKEND_URL/classes", {
         method: "POST",
         headers,
         body: JSON.stringify(newClass),

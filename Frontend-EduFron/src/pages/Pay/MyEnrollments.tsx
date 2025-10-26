@@ -51,7 +51,7 @@ const MyEnrollments: React.FC = () => {
 
     const fetchEnrollmentsForStudent = async () => {
       try {
-        const url = `http://localhost:8081/api/enrollments/student/${encodeURIComponent(
+        const url = `VITE_BACKEND_URL/api/enrollments/student/${encodeURIComponent(
           studentId
         )}`;
 
@@ -140,7 +140,7 @@ const MyEnrollments: React.FC = () => {
       try {
         // fetch class info in parallel
         const promises = uniqueIds.map(async (classId) => {
-          const url = `http://localhost:8081/api/enrollments/class/${encodeURIComponent(classId)}`;
+          const url = `VITE_BACKEND_URL/api/enrollments/class/${encodeURIComponent(classId)}`;
           try {
             const res = await fetch(url, {
               method: "GET",

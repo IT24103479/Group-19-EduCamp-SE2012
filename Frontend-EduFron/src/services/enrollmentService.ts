@@ -20,7 +20,7 @@ export type Enrollment = {
   [key: string]: any;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) ?? 'http://localhost:8081';
+const API_BASE = (import.meta.env.VITE_API_BASE as string) ?? 'VITE_BACKEND_URL';
 const ENDPOINT = `${API_BASE}/api/enrollments`;
 
 function getAuthHeader(): Record<string, string> {
@@ -400,7 +400,7 @@ export async function updateEnrollment(id: string | number, dto: any) {
     ...getAuthHeader(),
     ...getSessionHeader(),
   };
-  const baseUrl = "http://localhost:8081/api/enrollments"; // ✅ full backend URL
+  const baseUrl = "VITE_BACKEND_URL/api/enrollments"; // ✅ full backend URL
 
   // If caller provided subjectNames, convert to subjects array so backend can accept it.
   const bodyDto: any = { ...dto };
@@ -451,7 +451,7 @@ export async function deleteEnrollment(id: string | number) {
     ...getAuthHeader(),
     ...getSessionHeader(),
   };
-  const baseUrl = "http://localhost:8081/api/enrollments"; // ✅ full backend URL
+  const baseUrl = "VITE_BACKEND_URL/api/enrollments"; // ✅ full backend URL
 
   const res = await fetch(`${baseUrl}/${id}`, {
     method: "DELETE",

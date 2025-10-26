@@ -24,7 +24,7 @@ const TeacherRecords: React.FC = () => {
   // Fetch all teachers
   const fetchTeachers = async () => {
     try {
-      const response = await fetch("http://localhost:8081/api/teachers", {
+      const response = await fetch("VITE_BACKEND_URL/api/teachers", {
         method: "GET",
         credentials: "include",
       });
@@ -58,7 +58,7 @@ const TeacherRecords: React.FC = () => {
   // Save edited teacher
   const handleSave = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/teachers/${id}`, {
+      const response = await fetch(`VITE_BACKEND_URL/api/teachers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -83,7 +83,7 @@ const TeacherRecords: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this teacher?")) return;
 
     try {
-      const response = await fetch(`http://localhost:8081/api/teachers/${id}`, {
+      const response = await fetch(`VITE_BACKEND_URL/api/teachers/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

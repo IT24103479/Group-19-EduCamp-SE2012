@@ -49,7 +49,7 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await fetch(`http://localhost:8081/api/admin/${userId}`);
+      const res = await fetch(`VITE_BACKEND_URL/api/admin/${userId}`);
       const data = await res.json();
       console.log('Fetched admin profile:', data); 
       setProfile(data);

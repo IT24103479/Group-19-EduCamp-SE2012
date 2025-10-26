@@ -19,7 +19,7 @@ const ClassList: React.FC = () => {
 useEffect(() => {
   console.log("🔍 Fetching available classes...");
   axios
-    .get("http://localhost:8081/classes")
+    .get("VITE_BACKEND_URL/classes")
     .then((res) => {
       console.log("✅ Classes response:", res.data);
       setClasses(res.data);

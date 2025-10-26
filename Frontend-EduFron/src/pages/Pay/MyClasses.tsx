@@ -68,7 +68,7 @@ export default function MyClasses() {
     let mounted = true;
     // Fetch all classes (the backend in other parts of this app exposes /classes)
     axios
-      .get("http://localhost:8081/classes")
+      .get("VITE_BACKEND_URL/classes")
       .then((res) => {
         if (!mounted) return;
         const classes: any[] = res.data ?? [];
@@ -114,7 +114,7 @@ export default function MyClasses() {
     try {
       // Try the specific student endpoint used by the backend: /api/enrollments/student/{studentId}
       const res = await axios.get<Enrollment[]>(
-        `http://localhost:8081/api/enrollments/student/${sid}`
+        `VITE_BACKEND_URL/api/enrollments/student/${sid}`
       );
       const data = res.data ?? [];
       setGuestEnrollments(data);
@@ -271,7 +271,7 @@ export default function MyClasses() {
                       <button
                         onClick={() => {
                           axios
-                            .get(`http://localhost:8081/classes`)
+                            .get(`VITE_BACKEND_URL/classes`)
                             .then((res) => {
                               const w = window.open();
                               if (w) w.document.write(`<pre>${JSON.stringify(res.data, null, 2)}</pre>`);

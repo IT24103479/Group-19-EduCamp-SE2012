@@ -79,7 +79,7 @@ const AdminProfile: React.FC<AdminModalProps> = ({ id, userId, isOpen, onClose }
     const fetchProfile = async () => {
       try {
         console.log('AdminProfile: fetching admin for uid =', uid);
-        const res = await fetch(`http://localhost:8081/api/admin/${uid}`, {
+        const res = await fetch(`VITE_BACKEND_URL/api/admin/${uid}`, {
           credentials: 'include',
         });
 

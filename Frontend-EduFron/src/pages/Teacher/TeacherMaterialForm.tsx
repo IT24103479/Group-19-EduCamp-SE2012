@@ -22,7 +22,7 @@ const TeacherMaterialForm: React.FC = () => {
   // Fetch uploaded materials
   const fetchMaterials = async () => {
     try {
-      const response = await fetch("http://localhost:8081/api/materials", {
+      const response = await fetch("VITE_BACKEND_URL/api/materials", {
         method: "GET",
         credentials: "include", // ✅ send cookies with request
       });
@@ -65,7 +65,7 @@ const TeacherMaterialForm: React.FC = () => {
       console.log("Upload payload:", payload);
 
       try {
-        const response = await fetch("http://localhost:8081/api/materials", {
+        const response = await fetch("VITE_BACKEND_URL/api/materials", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include", // ✅ send session cookie
@@ -95,7 +95,7 @@ const TeacherMaterialForm: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this material?")) return;
 
     try {
-      const response = await fetch(`http://localhost:8081/api/materials/${id}`, {
+      const response = await fetch(`VITE_BACKEND_URL/api/materials/${id}`, {
         method: "DELETE",
         credentials: "include", // ✅ send cookie too
       });

@@ -20,7 +20,7 @@ const ViewResources: React.FC = () => {
   // 🔹 Fetch materials from backend
   useEffect(() => {
     axios
-      .get("http://localhost:8081/api/materials")
+      .get("VITE_BACKEND_URL/api/materials")
       .then((response) => {
         setMaterials(response.data);
         setLoading(false);
@@ -103,7 +103,7 @@ const ViewResources: React.FC = () => {
                   <strong>Class:</strong> {material.className || "N/A"}
                 </p>
                 <a
-                  href={`http://localhost:8081/api/materials/${material.id}`}
+                  href={`VITE_BACKEND_URL/api/materials/${material.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-3 inline-block text-white bg-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-700"

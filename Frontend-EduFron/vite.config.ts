@@ -62,22 +62,22 @@ export default defineConfig({
     },
         proxy: {
       "/classes": {
-        target: "http://localhost:8081",
+        target: "VITE_BACKEND_URL",
         changeOrigin: true,
         secure: false,
       },
       "/students": {
-        target: "http://localhost:8081",
+        target: "VITE_BACKEND_URL",
         changeOrigin: true,
         secure: false,
       },
       "api/payments": {
-        target: "http://localhost:8081",
+        target: "VITE_BACKEND_URL",
         changeOrigin: true,
         secure: false,
       },
       "api/enrollments": {
-        target: "http://localhost:8081",
+        target: "VITE_BACKEND_URL",
         changeOrigin: true,
         secure: false,
       },

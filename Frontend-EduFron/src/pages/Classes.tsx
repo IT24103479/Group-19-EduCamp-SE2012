@@ -39,7 +39,7 @@ const Classes: React.FC = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("http://localhost:8081/classes");
+        const res = await fetch("VITE_BACKEND_URL/classes");
         let data = await res.json();
 
         // Normalize backend fields and map teacher

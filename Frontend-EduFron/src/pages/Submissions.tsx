@@ -54,7 +54,7 @@ const Submissions: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<{ id: number; title: string } | null>(null);
 
-  const API_BASE_URL = 'http://localhost:8081/api/students';
+  const API_BASE_URL = 'VITE_BACKEND_URL/api/students';
 
   useEffect(() => {
     fetchData();

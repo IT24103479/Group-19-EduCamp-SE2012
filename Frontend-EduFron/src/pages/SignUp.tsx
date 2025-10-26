@@ -7,6 +7,7 @@ import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { API_BASE } from '../lib/api';
 
 // ✅ Validation schema (matches backend StudentRegistrationDto)
 const signUpSchema = z.object({
@@ -92,7 +93,7 @@ const SignUp: React.FC = () => {
 
       console.log('Registering student...', payload);
 
-      const response = await fetch('${API_BASE}/api/auth/register/student', {
+      const response = await fetch(`${API_BASE}/api/auth/register/student`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

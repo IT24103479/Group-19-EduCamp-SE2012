@@ -20,7 +20,7 @@ export type Enrollment = {
   [key: string]: any;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) ?? '${API_BASE}';
+import { API_BASE } from "../lib/api";
 const ENDPOINT = `${API_BASE}/api/enrollments`;
 
 function getAuthHeader(): Record<string, string> {

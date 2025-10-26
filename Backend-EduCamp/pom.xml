@@ -78,6 +78,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.example.Edu_Camp.EduCampApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

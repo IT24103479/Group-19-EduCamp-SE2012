@@ -1,0 +1,48 @@
+# railway.toml - optional Railway-friendly TOML for your backend service.
+# NOTE: Railway does not require a TOML file to deploy, but this is a convenient
+# manifest you can keep in the repo for documentation and local workflows.
+# DO NOT store secrets in this file. Use the Railway UI or CLI to set secrets.
+
+name = "edu-camp-backend"
+service_root = "Backend-EduCamp"
+dockerfile = "Backend-EduCamp/Dockerfile"
+
+[build]
+type = "dockerfile"
+
+# Non-secret runtime env defaults. Override these on Railway or mark sensitive values as secrets.
+[env]
+SPRING_PROFILES_ACTIVE = "prod"
+SPRING_JPA_HIBERNATE_DDL_AUTO = "validate"
+SPRING_JPA_SHOW_SQL = "false"
+
+# Database (placeholder - set SPRING_DATASOURCE_PASSWORD as a secret)
+SPRING_DATASOURCE_URL = "jdbc:mysql://mysql.railway.internal:3306/railway?useSSL=true&serverTimezone=UTC"
+SPRING_DATASOURCE_USERNAME = "root"
+
+# PayPal (client id can be non-secret; secret MUST be set via Railway secrets)
+PAYPAL_CLIENT_ID = "REPLACE_WITH_PAYPAL_CLIENT_ID"
+PAYPAL_SECRET = "REPLACE_WITH_PAYPAL_SECRET"
+
+# Mail defaults (set SPRING_MAIL_PASSWORD as a secret)
+SPRING_MAIL_HOST = "smtp.sendgrid.net"
+SPRING_MAIL_PORT = "587"
+SPRING_MAIL_USERNAME = "apikey"
+SPRING_MAIL_SMTP_AUTH = "true"
+SPRING_MAIL_STARTTLS = "true"
+SPRING_MAIL_DEFAULT_ENCODING = "UTF-8"
+SPRING_MAIL_FROM = "no-reply@your-domain.com"
+
+# CORS / frontend allowed origins (comma-separated)
+ALLOWED_ORIGINS = "https://your-frontend-domain.com"
+
+# Service port - the container runs on this internal port (Railway will map it)
+[[ports]]
+internal = 8081
+
+# Health check (adjust path if your health endpoint differs)
+[healthcheck]
+path = "/actuator/health"
+interval_ms = 10000
+timeout_ms = 2000
+initial_delay_ms = 30000

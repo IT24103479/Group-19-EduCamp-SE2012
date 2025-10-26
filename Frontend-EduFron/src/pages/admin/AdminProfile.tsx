@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { X, Edit2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 //import type { AdminModalProps, AdminProfileData } from '../../types/ProfileProps';
-import { API_BASE } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
 type AdminProfileData = {
   id?: number | null;
   userId?: number | null;
@@ -53,6 +54,7 @@ const safeFormatDateTime = (value?: string | null) => {
  */
 const AdminProfile: React.FC<AdminModalProps> = ({ id, userId, isOpen, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuth();
 
   const [profile, setProfile] = useState<AdminProfileData>({
     id: undefined,
@@ -69,27 +71,18 @@ const AdminProfile: React.FC<AdminModalProps> = ({ id, userId, isOpen, onClose }
     joiningDate: null,
   });
 
-  // compute the id to fetch (prefer id prop, then userId, then fallback)
-  const uid = id ?? userId ?? 13;
+  // compute the id to fetch (prefer id prop, then userId, then current user's id)
+  const uid = id ?? userId ?? user?.id;
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !uid) return;
 
     let cancelled = false;
     const fetchProfile = async () => {
       try {
         console.log('AdminProfile: fetching admin for uid =', uid);
-        const res = await fetch(`${API_BASE}/api/admin/${uid}`, {
-          credentials: 'include',
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => '<no body>');
-          console.error('AdminProfile: fetch failed', res.status, text);
-          return;
-        }
-
-        const data = await res.json();
+        const res = await api.get(`/api/admin/${uid}`);
+        const data = res.data;
         console.log('AdminProfile: fetched data from backend', data);
         if (cancelled) return;
 
@@ -136,7 +129,7 @@ const AdminProfile: React.FC<AdminModalProps> = ({ id, userId, isOpen, onClose }
     return () => {
       cancelled = true;
     };
-  }, [uid, isOpen]);
+  }, [uid, isOpen, user]);
 
   const handleInputChange = (field: keyof AdminProfileData, value: any) => {
     setProfile(prev => ({ ...prev, [field]: value }));

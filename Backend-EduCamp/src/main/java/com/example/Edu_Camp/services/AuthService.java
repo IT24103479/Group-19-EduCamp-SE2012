@@ -31,7 +31,7 @@ public class AuthService {
                        AdminRepository adminRepository,
                        PasswordEncoder passwordEncoder,
                        SessionService sessionService,
-                       EmailService emailService) {
+                       @Autowired(required = false) EmailService emailService) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.teacherRepository = teacherRepository;
@@ -150,11 +150,13 @@ public class AuthService {
 
             Teacher savedTeacher = teacherRepository.save(teacher);
 
-            // Send login email with temporary password
-            emailService.sendTeacherLoginLink(savedTeacher.getEmail(), tempPassword);
+            // Send login email with temporary password - DISABLED FOR NOW
+            // if (emailService != null) {
+            //     emailService.sendTeacherLoginLink(savedTeacher.getEmail(), tempPassword);
+            // }
 
             UserDto userDto = convertToUserDto(savedTeacher);
-            return new AuthResponseDto(true, "Teacher registration successful. Login credentials sent to email.", userDto);
+            return new AuthResponseDto(true, "Teacher registration successful. Temporary password: " + tempPassword, userDto);
 
         } catch (Exception e) {
             throw new RuntimeException("Teacher registration failed: " + e.getMessage(), e);

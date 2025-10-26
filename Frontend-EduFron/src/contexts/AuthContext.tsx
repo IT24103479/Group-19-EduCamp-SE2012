@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
-import { API_BASE } from "../lib/api";
+import { api, API_BASE } from "../lib/api";
 
 interface User {
   id: string;
@@ -23,9 +22,6 @@ const SESSION_ID_KEY = 'sessionId';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Make axios send cookies by default (so backend session cookie is forwarded)
-axios.defaults.withCredentials = true;
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(() => localStorage.getItem(SESSION_ID_KEY));
@@ -33,20 +29,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fetch user from session on mount
   useEffect(() => {
-    axios
-      .get(`${API_BASE}/api/auth/me`)
+    api
+      .get(`/api/auth/me`)
       .then((res) => {
         console.log("🔑 /me response:", res.data);
-        if (res.data?.authenticated) {
+        if (res.data?.success && res.data?.user) {
           setUser(res.data.user);
-          setSessionId(res.data.sessionId);
-          localStorage.setItem(SESSION_ID_KEY, res.data.sessionId);
+          // Session ID is handled by cookies, no need to manually manage it
         } else {
           setUser(null);
         }
       })
       .catch((err) => {
-        console.error("❌ Failed to fetch /me:", err);
+        // 401 is expected when user is not logged in, don't log as error
+        if (err.response?.status === 401) {
+          console.log("No valid session found, user not authenticated");
+        } else {
+          console.error("❌ Failed to fetch /me:", err);
+        }
         setUser(null);
       });
   }, []);
@@ -55,12 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setSessionId(null);
     localStorage.removeItem(SESSION_ID_KEY);
-    // Optionally call backend to destroy session
-    axios.post(`${API_BASE}/educamp/api/auth/logout`, {});
+    // Call backend to destroy session
+    api.post(`/api/auth/logout`)
+      .catch((err) => console.error("Logout error:", err));
   };
 
   const value: AuthContextType = {
     user,
+    token: localStorage.getItem("token"),
+    sessionId,
     setUser,
     logout,
     isAuthenticated: !!user,

@@ -30,3 +30,20 @@ api.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
+// Add response interceptor to handle common errors
+api.interceptors.response.use((response) => {
+  return response;
+}, (error) => {
+  // Handle 401 Unauthorized errors
+  if (error.response?.status === 401) {
+    // Don't redirect automatically, let individual components handle it
+    console.log("Authentication required");
+    
+    // Clear invalid tokens
+    localStorage.removeItem("token");
+    localStorage.removeItem("sessionId");
+  }
+  
+  return Promise.reject(error);
+});

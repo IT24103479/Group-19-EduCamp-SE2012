@@ -9,4 +9,24 @@ export const API_BASE =
 export const api = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
+  withCredentials: true, // Include cookies
+});
+
+// Add request interceptor to include authentication headers
+api.interceptors.request.use((config) => {
+  // Add Bearer token if available
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // Add session ID if available
+  const sessionId = localStorage.getItem("sessionId");
+  if (sessionId) {
+    config.headers["X-Session-Id"] = sessionId;
+  }
+
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });

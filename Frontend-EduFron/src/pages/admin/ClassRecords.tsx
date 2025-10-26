@@ -97,7 +97,7 @@ const ClassRecords: React.FC = () => {
 
   const fetchSubjects = async (signal?: AbortSignal) => {
     try {
-      const res = await fetch(`${API_BASE}/subjects`, { headers: buildHeaders(), signal });
+      const res = await fetch(`${API_BASE}/api/subjects`, { headers: buildHeaders(), signal });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         console.warn(`Failed to fetch subjects: ${res.status} ${text}`);

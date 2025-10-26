@@ -55,7 +55,7 @@ const UserProfile: React.FC = () => {
         setPayments(userPayments);
 
         // Fetch all classes
-        const classesResponse = await fetch('${API_BASE}/classes');
+        const classesResponse = await fetch(`${API_BASE}/api/classes`);
         if (!classesResponse.ok) throw new Error('Failed to fetch classes');
         
         const allClasses: ClassItem[] = await classesResponse.json();

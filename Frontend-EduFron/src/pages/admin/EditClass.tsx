@@ -51,11 +51,11 @@ const EditClass: React.FC = () => {
         setTeacherId(classJson.teacher?.id ?? null);
         setSubjectId(classJson.subjects?.[0]?.id ?? null);
 
-        const teacherRes = await fetch(`${API_BASE}/teachers`);
+        const teacherRes = await fetch(`${API_BASE}/api/teachers`);
         const teacherJson = await teacherRes.json();
         setTeachers(teacherJson);
 
-        const subjectRes = await fetch(`${API_BASE}/subjects`);
+        const subjectRes = await fetch(`${API_BASE}/api/subjects`);
         const subjectJson = await subjectRes.json();
         setSubjects(subjectJson);
       } catch (err) {

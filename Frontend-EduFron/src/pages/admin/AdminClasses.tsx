@@ -104,8 +104,8 @@ export default function AdminClasses() {
 
   useEffect(() => {
     Promise.all([
-      axios.get<Teacher[]>(`${API_BASE}/teachers`),
-      axios.get<Subject[]>(`${API_BASE}/subjects`),
+      axios.get<Teacher[]>(`${API_BASE}/api/teachers`),
+      axios.get<Subject[]>(`${API_BASE}/api/subjects`),
       axios.get<any[]>(`${API_BASE}/classes`),
     ])
       .then(([teachersRes, subjectsRes, classesRes]) => {

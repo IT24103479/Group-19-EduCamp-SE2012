@@ -59,7 +59,7 @@ export default function AdminDashboard(): JSX.Element {
     try {
       const [classesRes, teachersRes, paymentsRes, studentsRes] = await Promise.all([
         fetch(`${API_BASE}/classes`),
-        fetch(`${API_BASE}/teachers`),
+        fetch(`${API_BASE}/api/teachers`),
         fetch(`${API_BASE}/api/payments`),
         fetch(`${API_BASE}/api/students`),
       ]);
@@ -116,7 +116,7 @@ export default function AdminDashboard(): JSX.Element {
   async function fetchTeachers() {
     setLoadingTeachers(true);
     try {
-      const res = await fetch(`${API_BASE}/teachers`);
+      const res = await fetch(`${API_BASE}/api/teachers`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const data = await res.json();
 

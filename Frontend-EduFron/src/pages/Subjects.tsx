@@ -38,7 +38,7 @@ const Subjects: React.FC = () => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const res = await api.get<Subject[]>("/subjects");
+        const res = await api.get<Subject[]>("/api/subjects");
         setSubjects(res.data ?? []);
         setFilteredSubjects(res.data ?? []);
       } catch (err) {

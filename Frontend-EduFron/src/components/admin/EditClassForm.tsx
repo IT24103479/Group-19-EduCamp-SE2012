@@ -20,8 +20,8 @@ const EditClassForm: React.FC<EditClassFormProps> = ({ classData, classes, onCla
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/teachers`).then(r => r.json()).then(setTeachers).catch(console.error);
-    fetch(`${API_BASE}/subjects`).then(r => r.json()).then(setSubjects).catch(console.error);
+    fetch(`${API_BASE}/api/teachers`).then(r => r.json()).then(setTeachers).catch(console.error);
+    fetch(`${API_BASE}/api/subjects`).then(r => r.json()).then(setSubjects).catch(console.error);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

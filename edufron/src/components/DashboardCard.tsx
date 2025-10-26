@@ -5,7 +5,7 @@ interface DashboardCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color: 'lime' | 'blue' | 'amber' | 'gray' | 'red';
+  color: 'lime' | 'blue' | 'amber' | 'gray' | 'red' | 'purple' | 'green';
   trend?: {
     value: number;
     isPositive: boolean;
@@ -24,7 +24,9 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
     blue: 'bg-blue-50 text-blue-600 border-blue-200',
     amber: 'bg-amber-50 text-amber-600 border-amber-200',
     gray: 'bg-gray-50 text-gray-600 border-gray-200',
-    red: 'bg-red-50 text-red-600 border-red-200'
+    red: 'bg-red-50 text-red-600 border-red-200',
+    purple: 'bg-purple-50 text-purple-600 border-purple-200',
+    green: 'bg-green-50 text-green-600 border-green-200'
   };
 
   const iconBgClasses = {
@@ -32,7 +34,13 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
     blue: 'bg-blue-100',
     amber: 'bg-amber-100',
     gray: 'bg-gray-100',
-    red: 'bg-red-100'
+    red: 'bg-red-100',
+    purple: 'bg-purple-100',
+    green: 'bg-green-100'
+  };
+
+  const getIconColor = (color: string) => {
+    return colorClasses[color].split(' ')[1];
   };
 
   return (
@@ -53,7 +61,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
           )}
         </div>
         <div className={`p-3 rounded-lg ${iconBgClasses[color]}`}>
-          <Icon className={`w-6 h-6 ${colorClasses[color].split(' ')[1]}`} />
+          <Icon className={`w-6 h-6 ${getIconColor(color)}`} />
         </div>
       </div>
     </div>

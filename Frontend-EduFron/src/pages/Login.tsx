@@ -77,20 +77,28 @@ const Login: React.FC = () => {
         }
       } else {
         // Handle backend validation or session errors
+        console.error('Login failed with response:', result);
+        
         if (result.message?.includes('Invalid email or password')) {
-          toast.error('Invalid email or password. Please try again.');
+          toast.error('Invalid email or password. Please check your credentials and try again.');
         } else if (result.message?.includes('deactivated')) {
           toast.error('Your account has been deactivated. Contact support.');
+        } else if (result.message?.includes('not found') || result.message?.includes('does not exist')) {
+          toast.error('No account found with this email. Please register first or check your email address.');
         } else {
           toast.error(result.message || 'Login failed. Please try again.');
         }
       }
     } catch (error: any) {
       console.error('Login error:', error);
+      
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        toast.error('Cannot connect to server. Is the backend running?');
+        toast.error('Cannot connect to server. Please check if the backend is running.');
+        console.error('Backend URL being used:', API_BASE);
+      } else if (error.name === 'SyntaxError') {
+        toast.error('Invalid response from server. Please try again.');
       } else {
-        toast.error('Unexpected error. Please try again.');
+        toast.error('Unexpected error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);

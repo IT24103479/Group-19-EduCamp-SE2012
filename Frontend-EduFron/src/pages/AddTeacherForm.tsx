@@ -197,7 +197,9 @@ const AddTeacherForm: React.FC = () => {
         if (redirected) return;
       }
 
-      setMessage(`✅ Teacher registered successfully! Redirecting...`);
+      // Show the success message from backend (includes temporary password)
+      const successMsg = data?.message || "Teacher registered successfully!";
+      setMessage(`✅ ${successMsg} Redirecting...`);
 
       setTeacher({
         firstName: "",

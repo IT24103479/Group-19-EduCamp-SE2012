@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionId(null);
     localStorage.removeItem(SESSION_ID_KEY);
     // Optionally call backend to destroy session
-    axios.post(`${API_BASE}/educamp/api/auth/logout``, {});
+    axios.post(`${API_BASE}/educamp/api/auth/logout`, {});
   };
 
   const value: AuthContextType = {

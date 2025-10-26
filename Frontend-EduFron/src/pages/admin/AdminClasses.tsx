@@ -85,7 +85,7 @@ const classSchema = z.object({
   subjectIds: z.array(z.string()).min(1, "At least one subject is required"),
 });
 
-const API_BASE = (import.meta.env.${API_BASE} as string) ?? "http://localhost:8081";
+const API_BASE = (import.meta.env.VITE_API_BASE as string) ?? "http://localhost:8081";
 
 type ClassFormData = z.infer<typeof classSchema>;
 

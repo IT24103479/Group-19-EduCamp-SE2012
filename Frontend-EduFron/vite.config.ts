@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react-swc";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
 import history from "connect-history-api-fallback";
-import { API_BASE } from "./src/lib/api";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,7 +30,7 @@ export default ({ mode = "development" } = {}) => {
   // default to your Railway production backend if no env set
   // trim any trailing slash to avoid double-slash when proxying
   const BACKEND_URL =
-    (env[API_BASE] || env.VITE_API_BASE || "https://group-19-educamp-se2012-production.up.railway.app/").replace(
+    (env.VITE_BACKEND_URL || "https://group-19-educamp-se2012-production.up.railway.app/").replace(
       /\/$/,
       ""
     );

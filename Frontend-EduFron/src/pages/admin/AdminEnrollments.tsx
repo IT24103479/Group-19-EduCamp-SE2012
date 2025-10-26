@@ -6,7 +6,7 @@ import {
   deleteEnrollment,
 } from "../../services/enrollmentService";
 import { useToast } from "../../hooks/use-toast";
-import type { Enrollment as ServiceEnrollment } from "../../types/enrollment";
+import type { EnrollmentDTO as ServiceEnrollment } from "../../types/enrollment";
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Search, Edit, Trash } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import EditEnrollmentForm, { Enrollment } from "../../components/admin/EditEnrollmentForm";
+import EditEnrollmentForm, { type Enrollment } from "../../components/admin/EditEnrollmentForm";
 import { API_BASE } from "../../lib/api";
 type ClassOption = { id: number; name?: string; grade?: string; label?: string };
 type StudentOption = { id: number; studentNumber?: string; firstName?: string; lastName?: string };
@@ -304,7 +304,6 @@ export default function EnrollmentManager(): JSX.Element {
                             subjectNames: subjectNames,
                             subjectDisplay: Array.isArray(subjectNames) ? subjectNames.join(", ") : (e.subjectDisplay ?? undefined),
                             subjects: e.subjects ?? e.raw?.classEntity?.subjects ?? undefined,
-                            primarySubject: Array.isArray(subjectNames) && subjectNames.length > 0 ? subjectNames[0] : undefined,
                             raw: e,
                           };
                           setEditing(normalized);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { API_BASE } from "../lib/api"; // adjust path if this file is nested (e.g. "../../lib/api")
+import { API_BASE } from "../../lib/api";
 
 interface Material {
   id: number;

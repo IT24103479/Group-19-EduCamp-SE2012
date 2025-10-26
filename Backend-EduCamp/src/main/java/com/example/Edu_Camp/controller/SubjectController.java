@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/subjects")
-@CrossOrigin(origins = "http://localhost:5173") // allow React frontend
+@RequestMapping("/api/subjects")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class SubjectController {
 
     private final SubjectRepository subjectRepository;

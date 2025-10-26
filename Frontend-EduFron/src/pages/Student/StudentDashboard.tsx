@@ -4,6 +4,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { BookOpen, Calendar, FileText, User, Settings, LogOut, CreditCard, Clock, Users, MapPin } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { API_BASE } from '../../lib/api';
 
 const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const StudentDashboard: React.FC = () => {
   useEffect(() => {
     const verifySession = async () => {
       try {
-        const res = await fetch('${API_BASE}/api/auth/me', {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
           credentials: 'include',
         });
 
@@ -54,7 +55,7 @@ const StudentDashboard: React.FC = () => {
   // Fetch today's classes
   const fetchTodaysClasses = async () => {
     try {
-      const res = await fetch('${API_BASE}/api/students/today-classes', {
+      const res = await fetch(`${API_BASE}/api/students/today-classes`, {
         credentials: 'include',
       });
 
@@ -74,7 +75,7 @@ const StudentDashboard: React.FC = () => {
   // Logout function
   const handleLogout = async () => {
     try {
-      await fetch('${API_BASE}/api/auth/logout', {
+      await fetch(`${API_BASE}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

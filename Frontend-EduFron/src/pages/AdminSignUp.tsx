@@ -7,6 +7,7 @@ import { Eye, EyeOff, Mail, Lock, User, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { API_BASE } from '../lib/api';
 
 // Validation schema (matches backend AdminRegistrationDto)
 const adminSignUpSchema = z.object({
@@ -82,7 +83,7 @@ const AdminSignUp: React.FC = () => {
         }
 
         // Fallback: call /me to ensure server session (if you use session cookies)
-        const r = await fetch('${API_BASE}/api/auth/me', {
+        const r = await fetch(`${API_BASE}/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -114,7 +115,7 @@ const AdminSignUp: React.FC = () => {
   // Auto-login helper: returns the parsed login response (or null on error).
   const autoLogin = async (email: string, password: string): Promise<any | null> => {
     try {
-      const res = await fetch('${API_BASE}/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -159,7 +160,7 @@ const AdminSignUp: React.FC = () => {
 
       console.log('Registering admin...', payload);
 
-      const response = await fetch('${API_BASE}/api/auth/register/admin', {
+      const response = await fetch(`${API_BASE}/api/auth/register/admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

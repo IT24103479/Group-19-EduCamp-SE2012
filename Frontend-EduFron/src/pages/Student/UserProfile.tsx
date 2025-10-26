@@ -6,6 +6,7 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { User, GraduationCap, Mail, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from "../../hooks/use-toast";
+import { API_BASE } from '../../lib/api';
 
 
 interface PaymentRequest {
@@ -47,7 +48,7 @@ const UserProfile: React.FC = () => {
         setLoading(true);
         
         // Fetch payments for the user
-        const paymentsResponse = await fetch('${API_BASE}/api/payments');
+        const paymentsResponse = await fetch(`${API_BASE}/api/payments`);
         if (!paymentsResponse.ok) throw new Error('Failed to fetch payments');
         
         const allPayments: PaymentRequest[] = await paymentsResponse.json();
@@ -55,7 +56,7 @@ const UserProfile: React.FC = () => {
         setPayments(userPayments);
 
         // Fetch all classes
-        const classesResponse = await fetch(`${API_BASE}/api/classes`);
+        const classesResponse = await fetch(`${API_BASE}/classes`);
         if (!classesResponse.ok) throw new Error('Failed to fetch classes');
         
         const allClasses: ClassItem[] = await classesResponse.json();

@@ -31,6 +31,8 @@ const AddTeacherForm: React.FC = () => {
 
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState<string>("");
+  const [showSuccessDetails, setShowSuccessDetails] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (
@@ -171,6 +173,10 @@ const AddTeacherForm: React.FC = () => {
       password: teacher.password,
     };
 
+    // Console log the temporary password for debugging purposes
+    console.log("Teacher Registration - Temporary Password:", teacher.password);
+    console.log("Teacher Registration Payload:", { ...payload, password: "[REDACTED]" });
+
     try {
       const response = await fetch(`${API_BASE}/api/auth/register/teacher`, {
         method: "POST",
@@ -193,9 +199,11 @@ const AddTeacherForm: React.FC = () => {
         if (redirected) return;
       }
 
-      // Show the success message from backend (includes temporary password)
+      // Show the success message from backend and display the temporary password
       const successMsg = data?.message || "Teacher registered successfully!";
-      setMessage(`✅ ${successMsg} Redirecting...`);
+      setGeneratedPassword(teacher.password);
+      setShowSuccessDetails(true);
+      setMessage(`✅ ${successMsg}`);
 
       setTeacher({
         firstName: "",
@@ -209,7 +217,7 @@ const AddTeacherForm: React.FC = () => {
         password: "",
       });
 
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate("/"), 10000);
     } catch (error: any) {
       console.error("Registration error:", error);
       setMessage(`Failed to register teacher: ${error?.message || String(error)}`);
@@ -452,14 +460,29 @@ const AddTeacherForm: React.FC = () => {
 
         {message && (
           <div
-            className={`mt-4 p-3 rounded text-center ${
+            className={`mt-4 p-3 rounded text-left ${
               message.startsWith("✅")
                 ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
                 : "bg-red-100 text-red-700 border border-red-300"
             }`}
             role="status"
           >
-            {message}
+            <div className="whitespace-pre-line">{message}</div>
+            
+            {/* Temporary Password Display */}
+            {showSuccessDetails && generatedPassword && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-yellow-800">📋 Temporary Password:</span>
+                </div>
+                <div className="bg-white p-2 rounded border font-mono text-lg tracking-wider text-center border-dashed border-yellow-300">
+                  {generatedPassword}
+                </div>
+                <p className="text-xs text-yellow-700 mt-2">
+                  ⚠️ Please save this password! The teacher will need it to log in.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

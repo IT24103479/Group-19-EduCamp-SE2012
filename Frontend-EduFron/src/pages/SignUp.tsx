@@ -149,7 +149,15 @@ const SignUp: React.FC = () => {
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input {...register('firstName')} type="text"
                       className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                      placeholder="First name" />
+                      placeholder="First name"
+                      style={{
+                        backgroundColor: 'white',
+                        backgroundImage: 'none',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '0 0',
+                        backgroundSize: 'auto',
+                        backgroundAttachment: 'scroll'
+                      }} />
                   </div>
                   {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
                 </div>
@@ -160,7 +168,15 @@ const SignUp: React.FC = () => {
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input {...register('lastName')} type="text"
                       className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                      placeholder="Last name" />
+                      placeholder="Last name"
+                      style={{
+                        backgroundColor: 'white',
+                        backgroundImage: 'none',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '0 0',
+                        backgroundSize: 'auto',
+                        backgroundAttachment: 'scroll'
+                      }} />
                   </div>
                   {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
                 </div>
@@ -173,7 +189,15 @@ const SignUp: React.FC = () => {
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input {...register('email')} type="email"
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Enter your email" />
+                    placeholder="Enter your email"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                 </div>
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
@@ -185,7 +209,15 @@ const SignUp: React.FC = () => {
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input {...register('phoneNumber')} type="tel"
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g., +94712345678" />
+                    placeholder="e.g., +94712345678"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                 </div>
                 {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber.message}</p>}
               </div>
@@ -197,7 +229,15 @@ const SignUp: React.FC = () => {
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input {...register('dateOfBirth')} type="date"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      style={{
+                        backgroundColor: 'white',
+                        backgroundImage: 'none',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '0 0',
+                        backgroundSize: 'auto',
+                        backgroundAttachment: 'scroll'
+                      }} />
                   </div>
                   {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth.message}</p>}
                 </div>
@@ -205,7 +245,15 @@ const SignUp: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Gender *</label>
                   <select {...register('gender')}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }}>
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -224,7 +272,15 @@ const SignUp: React.FC = () => {
                   <input {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Create a password" />
+                    placeholder="Create a password"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -241,7 +297,15 @@ const SignUp: React.FC = () => {
                   <input {...register('confirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
                     className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Confirm your password" />
+                    placeholder="Confirm your password"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                   <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

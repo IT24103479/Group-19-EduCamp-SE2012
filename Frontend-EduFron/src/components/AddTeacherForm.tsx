@@ -86,6 +86,14 @@ const AddTeacherForm: React.FC = () => {
             placeholder="Name"
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Email */}
@@ -98,6 +106,14 @@ const AddTeacherForm: React.FC = () => {
             placeholder="Email"
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Phone */}
@@ -110,6 +126,14 @@ const AddTeacherForm: React.FC = () => {
             placeholder="Phone Number"
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Qualification */}
@@ -122,6 +146,14 @@ const AddTeacherForm: React.FC = () => {
             placeholder="Qualification"
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Birthday */}
@@ -133,6 +165,14 @@ const AddTeacherForm: React.FC = () => {
             onChange={handleChange}
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Image */}
@@ -145,6 +185,14 @@ const AddTeacherForm: React.FC = () => {
             placeholder="Image URL or file name"
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           />
 
           {/* Subject dropdown */}
@@ -155,6 +203,14 @@ const AddTeacherForm: React.FC = () => {
             onChange={handleChange}
             required
             className="w-full border p-2 rounded"
+            style={{
+              backgroundColor: 'white',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 0',
+              backgroundSize: 'auto',
+              backgroundAttachment: 'scroll'
+            }}
           >
             <option value="">-- Choose Subject --</option>
             <option value="1">Mathematics</option>

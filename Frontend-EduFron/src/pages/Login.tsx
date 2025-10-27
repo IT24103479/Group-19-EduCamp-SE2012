@@ -148,6 +148,14 @@ const Login: React.FC = () => {
                     id="email"
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your email"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto', 
+                      backgroundAttachment: 'scroll'
+                    }}
                   />
                 </div>
                 {errors.email && (
@@ -168,6 +176,14 @@ const Login: React.FC = () => {
                     id="password"
                     className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your password"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }}
                   />
                   <button
                     type="button"

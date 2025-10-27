@@ -232,7 +232,15 @@ const AdminSignUp: React.FC = () => {
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input {...register('firstName')} type="text"
                       className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                      placeholder="First name" />
+                      placeholder="First name"
+                      style={{
+                        backgroundColor: 'white',
+                        backgroundImage: 'none',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '0 0',
+                        backgroundSize: 'auto',
+                        backgroundAttachment: 'scroll'
+                      }} />
                   </div>
                   {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
                 </div>
@@ -243,7 +251,15 @@ const AdminSignUp: React.FC = () => {
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input {...register('lastName')} type="text"
                       className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                      placeholder="Last name" />
+                      placeholder="Last name"
+                      style={{
+                        backgroundColor: 'white',
+                        backgroundImage: 'none',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '0 0',
+                        backgroundSize: 'auto',
+                        backgroundAttachment: 'scroll'
+                      }} />
                   </div>
                   {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
                 </div>
@@ -256,7 +272,15 @@ const AdminSignUp: React.FC = () => {
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input {...register('email')} type="email"
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Enter your email" />
+                    placeholder="Enter your email"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                 </div>
                 {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
@@ -267,7 +291,15 @@ const AdminSignUp: React.FC = () => {
                 <div className="relative">
                   <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <select {...register('adminLevel')}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }}>
                     <option value="">Select Admin Level</option>
                     <option value="SUPER_ADMIN">Super Admin</option>
                     <option value="ADMIN">Admin</option>
@@ -286,7 +318,15 @@ const AdminSignUp: React.FC = () => {
                   <input {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Create a password" />
+                    placeholder="Create a password"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -303,7 +343,15 @@ const AdminSignUp: React.FC = () => {
                   <input {...register('confirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
                     className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Confirm your password" />
+                    placeholder="Confirm your password"
+                    style={{
+                      backgroundColor: 'white',
+                      backgroundImage: 'none',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '0 0',
+                      backgroundSize: 'auto',
+                      backgroundAttachment: 'scroll'
+                    }} />
                   <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

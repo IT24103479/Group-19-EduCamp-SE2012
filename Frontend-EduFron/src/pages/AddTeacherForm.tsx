@@ -241,6 +241,14 @@ const AddTeacherForm: React.FC = () => {
               placeholder="First Name"
               required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -254,6 +262,14 @@ const AddTeacherForm: React.FC = () => {
               placeholder="Last Name"
               required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -267,6 +283,14 @@ const AddTeacherForm: React.FC = () => {
               placeholder="Email"
               required
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -279,6 +303,14 @@ const AddTeacherForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Phone Number"
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -291,6 +323,14 @@ const AddTeacherForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Qualification"
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -302,6 +342,14 @@ const AddTeacherForm: React.FC = () => {
               value={teacher.dateOfBirth}
               onChange={handleChange}
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -314,6 +362,14 @@ const AddTeacherForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Image URL"
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             />
           </div>
 
@@ -324,6 +380,14 @@ const AddTeacherForm: React.FC = () => {
               value={teacher.subjectName}
               onChange={handleChange}
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              style={{
+                backgroundColor: 'white',
+                backgroundImage: 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '0 0',
+                backgroundSize: 'auto',
+                backgroundAttachment: 'scroll'
+              }}
             >
               <option value="">-- Choose Subject --</option>
               <option value="Mathematics">Mathematics</option>
@@ -350,6 +414,14 @@ const AddTeacherForm: React.FC = () => {
                 required
                 minLength={8}
                 className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-10"
+                style={{
+                  backgroundColor: 'white',
+                  backgroundImage: 'none',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: '0 0',
+                  backgroundSize: 'auto',
+                  backgroundAttachment: 'scroll'
+                }}
               />
               <button
                 type="button"

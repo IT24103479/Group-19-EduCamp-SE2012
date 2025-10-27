@@ -36,6 +36,8 @@ public class PayPalService {
 
     @Value("${paypal.secret}")
     private String secret;
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final PaymentRepository paymentRepository;
@@ -114,8 +116,8 @@ public class PayPalService {
 
         // Add return and cancel URLs BEFORE sending the request
         Map<String, Object> applicationContext = new HashMap<>();
-        applicationContext.put("return_url", "http://localhost:5173/payment-success?token="); // PayPal appends token
-        applicationContext.put("cancel_url", "http://localhost:5173/payment-cancel");
+        applicationContext.put("return_url", frontendUrl + "/payment-success?token="); // PayPal appends token
+        applicationContext.put("cancel_url", frontendUrl + "/payment-cancel");
         orderRequest.put("application_context", applicationContext);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(orderRequest, headers);

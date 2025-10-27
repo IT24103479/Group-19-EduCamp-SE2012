@@ -132,10 +132,6 @@ const AddTeacherForm: React.FC = () => {
             navigate("/teacher-dashboard");
             return;
           }
-          if (role === "ADMIN" || role.includes("ADMIN")) {
-            navigate("/admin-dashboard");
-            return;
-          }
         }
       } catch (err) {
         if ((err as any)?.name === "AbortError") return;

@@ -43,6 +43,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             "/subjects/**",
             "/classes/**",
             "/classes",
+            "/subjects",
             "/teachers/**",
             "/api/teachers/**",
             "/api/teachers",

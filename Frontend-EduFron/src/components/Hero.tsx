@@ -86,14 +86,14 @@ const Hero: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-full mb-4">
                 <BookOpen className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white">15+</h3>
+              <h3 className="text-2xl font-bold text-white">10+</h3>
               <p className="text-slate-300">Subjects Available</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-sky-500 rounded-full mb-4">
                 <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white">50+</h3>
+              <h3 className="text-2xl font-bold text-white">12+</h3>
               <p className="text-slate-300">Expert Teachers</p>
             </div>
             <div className="text-center">

@@ -2,6 +2,7 @@ package com.example.Edu_Camp.controller;
 
 import com.example.Edu_Camp.models.Subject;
 import com.example.Edu_Camp.repository.SubjectRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ public class SubjectController {
         this.subjectRepository = subjectRepository;
     }
 
-    // GET all subjects
+    // GET all subjects - Public access
     @GetMapping
+    @PreAuthorize("permitAll()")
     public List<Subject> getAllSubjects() {
         return subjectRepository.findAll();
     }

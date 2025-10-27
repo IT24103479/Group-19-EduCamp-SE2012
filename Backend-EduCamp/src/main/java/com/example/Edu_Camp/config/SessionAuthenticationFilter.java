@@ -41,20 +41,25 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_GET_PATTERNS = List.of(
             "/subjects/**",
-            "/classes/**",
-            "/classes",
+            "/api/subjects/**",
+            "/api/subjects",
             "/subjects",
+            "/classes/**",
+            "/api/classes/**",
+            "/api/classes",
+            "/classes",
             "/teachers/**",
             "/api/teachers/**",
             "/api/teachers",
             "/payments/**",
-            "/api/enrollments",
+            "/api/payments/**",
             "/api/payments",
+            "/api/enrollments",
+            "/api/enrollments/**",
+            "/api/enrollments/class/**",
             "/users/**",
             "/api/admin/**",
             "/admin/**",
-            "/api/enrollments/**",
-            "/api/enrollments/class/**",
             "/admin/enrollments/**"
     );
 
@@ -114,6 +119,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
+        logger.debug("Checking if endpoint is public: {} {}", method, path);
+
         if ("OPTIONS".equalsIgnoreCase(method)) return true;
         if ((path.startsWith("/api/auth/register") && "POST".equalsIgnoreCase(method))
                 || (path.equals("/api/auth/login") && "POST".equalsIgnoreCase(method))
@@ -129,7 +136,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         if ("GET".equalsIgnoreCase(method)) {
             for (String pattern : PUBLIC_GET_PATTERNS) {
                 if (pathMatcher.match(pattern, path)) {
-                    logger.debug("Matched public pattern (GET): {}", pattern);
+                    logger.debug("Matched public pattern (GET): {} for path: {}", pattern, path);
                     return true;
                 }
             }
@@ -140,12 +147,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 && !DEV_PUBLIC_WRITE_PATTERNS.isEmpty()) {
             for (String pattern : DEV_PUBLIC_WRITE_PATTERNS) {
                 if (pathMatcher.match(pattern, path)) {
-                    logger.debug("Matched dev public pattern (write): {}", pattern);
+                    logger.debug("Matched dev public pattern (write): {} for path: {}", pattern, path);
                     return true;
                 }
             }
         }
 
+        logger.debug("No public pattern matched for: {} {}", method, path);
         return false;
     }
 
@@ -185,20 +193,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Skip filter for OPTIONS, static resources, and public GET paths
-        String path = request.getRequestURI();
-        String method = request.getMethod();
-
-        if ("OPTIONS".equalsIgnoreCase(method) || path.startsWith("/public/") || path.contains(".")) {
-            return true;
-        }
-
-        if ("GET".equalsIgnoreCase(method)) {
-            for (String pattern : PUBLIC_GET_PATTERNS) {
-                if (pathMatcher.match(pattern, path)) return true;
-            }
-        }
-
-        return false;
+        // Skip filter for public endpoints - use the same logic as isPublicEndpoint
+        return isPublicEndpoint(request);
     }
 }

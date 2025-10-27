@@ -82,7 +82,6 @@ const Header: React.FC = () => {
               Classes
             </Link>
           </nav>
-
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="hidden lg:flex items-center">
             <div className="relative">

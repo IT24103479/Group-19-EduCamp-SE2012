@@ -6,7 +6,7 @@ import com.example.Edu_Camp.repository.AdminRepository;
 import org.springframework.stereotype.Service;
 import com.example.Edu_Camp.models.User;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 import com.example.Edu_Camp.repository.UserRepository;
 
@@ -41,15 +41,39 @@ public class AdminService {
 
         AdminDto dto = new AdminDto();
         dto.setId(admin.getId());
+        dto.setUserId(admin.getId()); // Set userId as well
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
-        dto.setqualification(admin.getqualification());
-        dto.setPhone(admin.getPhone());
-        dto.setAddress(admin.getAddress());
-        dto.setBirthday(admin.getBirthday());
-        dto.setJoiningDate(admin.getJoiningDate());
+        
+        // Set qualification with default value if null or empty
+        String qualification = admin.getqualification();
+        dto.setQualification(qualification != null && !qualification.trim().isEmpty() ? 
+            qualification : "Master's Degree in Administration");
+        
+        // Set position with default value
+        dto.setPosition("System Administrator");
+        
+        // Set phone with default if null or empty
+        String phone = admin.getPhone();
+        dto.setPhone(phone != null && !phone.trim().isEmpty() ? 
+            phone : "077-555-0100");
+        
+        // Set address with default if null or empty
+        String address = admin.getAddress();
+        dto.setAddress(address != null && !address.trim().isEmpty() ? 
+            address : "123 Thalawa Rd, Ginigathhena");
+        
+        // Set birthday with default if null (using admin's creation date or a default)
+        dto.setBirthday(admin.getBirthday() != null ? 
+            admin.getBirthday() : java.time.LocalDate.of(1995, 1, 15));
+        
+        // Set joining date with default if null (using admin's creation date or default)
+        dto.setJoiningDate(admin.getJoiningDate() != null ? 
+            admin.getJoiningDate() : 
+            (admin.getCreatedAt() != null ? admin.getCreatedAt().toLocalDate() : java.time.LocalDate.of(2023, 1, 1)));
+        
         dto.setCreatedAt(admin.getCreatedAt());
         dto.setUpdatedAt(admin.getUpdatedAt());
 

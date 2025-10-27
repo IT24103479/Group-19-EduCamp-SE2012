@@ -57,11 +57,39 @@ export default function AdminDashboard(): JSX.Element {
   async function fetchStats() {
     setLoadingStats(true);
     try {
+      // Get authentication headers
+      const token = localStorage.getItem("token");
+      const sessionId = localStorage.getItem("sessionId");
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      if (sessionId) {
+        headers['X-Session-Id'] = sessionId;
+      }
+
       const [classesRes, teachersRes, paymentsRes, studentsRes] = await Promise.all([
-        fetch(`${API_BASE}/classes`),
-        fetch(`${API_BASE}/api/teachers`),
-        fetch(`${API_BASE}/api/payments`),
-        fetch(`${API_BASE}/api/students`),
+        fetch(`${API_BASE}/classes`, { 
+          credentials: 'include',
+          headers 
+        }),
+        fetch(`${API_BASE}/api/teachers`, { 
+          credentials: 'include',
+          headers 
+        }),
+        fetch(`${API_BASE}/api/payments`, { 
+          credentials: 'include',
+          headers 
+        }),
+        fetch(`${API_BASE}/api/students`, { 
+          credentials: 'include',
+          headers 
+        }),
       ]);
 
       const classesData = classesRes.ok ? await classesRes.json() : [];
@@ -151,10 +179,7 @@ export default function AdminDashboard(): JSX.Element {
               <h1 className="text-2xl font-bold mb-2">Welcome back, Admin! 👋</h1>
               <p className="text-white/90">Here's what's happening with your tuition platform today.</p>
             </div>
-            <Button variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-              <Plus className="w-4 h-4 mr-2" />
-              Quick Actions
-            </Button>
+            
           </div>
         </div>
 

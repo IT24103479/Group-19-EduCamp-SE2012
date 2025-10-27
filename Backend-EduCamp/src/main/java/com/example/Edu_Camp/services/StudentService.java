@@ -107,4 +107,9 @@ public class StudentService {
             default -> false;
         };
     }
+
+    // NEW: Get all students for admin dashboard
+    public List<Student> getAllStudents() {
+        return studentRepository.findAll();
+    }
 }

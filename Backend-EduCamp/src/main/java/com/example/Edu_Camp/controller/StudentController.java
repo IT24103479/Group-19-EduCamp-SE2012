@@ -147,6 +147,31 @@ public class StudentController {
         }
     }
 
+    // NEW: Admin endpoint to get all students for dashboard
+    @GetMapping
+    public ResponseEntity<?> getAllStudents(HttpServletRequest request) {
+        try {
+            String sessionId = extractSessionId(request);
+            User user = authService.getAuthenticatedUser(sessionId);
+
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Not authenticated"));
+            }
+
+            // Only allow admin to access all students
+            if (!"ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Access denied. Admin role required."));
+            }
+
+            var students = studentService.getAllStudents();
+            return ResponseEntity.ok(students);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
 
     private String extractSessionId(HttpServletRequest request) {
         if (request.getCookies() != null) {

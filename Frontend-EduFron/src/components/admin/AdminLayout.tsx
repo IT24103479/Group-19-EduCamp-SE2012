@@ -38,8 +38,8 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profile, setProfile] = useState<AdminProfileProps | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const location = useLocation();
-  const userId = 13; // replace with actual logic to get the logged-in user's ID
 
   const isActiveRoute = (path: string) => {
     if (path === "/admin/") {
@@ -49,20 +49,56 @@ export default function AdminLayout() {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const res = await fetch(`${API_BASE}/api/admin/${userId}`);
-      const data = await res.json();
-      console.log('Fetched admin profile:', data); 
-      setProfile(data);
+    const fetchCurrentUserAndProfile = async () => {
+      try {
+        // First get current user from /me endpoint
+        const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.success && meData.user) {
+            setCurrentUser(meData.user);
+            
+            // Then try to fetch admin profile using the user ID
+            try {
+              const res = await fetch(`${API_BASE}/api/admin/${meData.user.id}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+              });
+              
+              if (res.ok) {
+                const data = await res.json();
+                console.log('Fetched admin profile:', data); 
+                setProfile(data);
+              } else {
+                console.log('Admin profile not found, using basic user info');
+                // Create a fallback profile from user data
+                setProfile({
+                  firstName: meData.user.firstName || 'Admin',
+                  lastName: meData.user.lastName || 'User',
+                  email: meData.user.email || 'admin@example.com'
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching admin profile:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
     };
-    fetchProfile();
+    
+    fetchCurrentUserAndProfile();
   }, []);
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <>
-        {profile && <AdminProfile profile={profile} isProfileOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />}
-      </>
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -201,6 +237,7 @@ export default function AdminLayout() {
         <AdminProfile
           isOpen={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
+          userId={currentUser?.id}
         />
         {/* Page Content */}
         <main className="p-1 flex-1 ">
@@ -209,6 +246,5 @@ export default function AdminLayout() {
       </div>
       
     </div>
-    
   );
 }

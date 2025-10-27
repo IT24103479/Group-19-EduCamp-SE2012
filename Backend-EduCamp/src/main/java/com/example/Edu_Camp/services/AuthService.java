@@ -3,6 +3,8 @@ package com.example.Edu_Camp.services;
 import com.example.Edu_Camp.dto.*;
 import com.example.Edu_Camp.models.*;
 import com.example.Edu_Camp.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
@@ -149,6 +153,19 @@ public class AuthService {
             );
 
             Teacher savedTeacher = teacherRepository.save(teacher);
+
+            // Console log the temporary password for debugging/reference
+            System.out.println("=== TEACHER REGISTRATION SUCCESSFUL ===");
+            System.out.println("Teacher: " + savedTeacher.getFirstName() + " " + savedTeacher.getLastName());
+            System.out.println("Email: " + savedTeacher.getEmail());
+            System.out.println("Teacher Number: " + savedTeacher.getTeacherNumber());
+            System.out.println("Temporary Password: " + tempPassword);
+            System.out.println("=======================================");
+
+            // Also log using the logger
+            logger.info("Teacher registration successful - Name: {} {}, Email: {}, Teacher Number: {}, Temporary Password: {}", 
+                       savedTeacher.getFirstName(), savedTeacher.getLastName(), 
+                       savedTeacher.getEmail(), savedTeacher.getTeacherNumber(), tempPassword);
 
             // Send login email with temporary password - DISABLED FOR NOW
             // if (emailService != null) {

@@ -34,18 +34,31 @@ public class DataInitializer implements CommandLineRunner {
             createTestStudent();
         } else {
             logger.info("Test user anura@gmail.com already exists");
+            System.out.println("ℹ️ Test user anura@gmail.com already exists in database");
+            System.out.println("📧 Login credentials: anura@gmail.com / DsD123@2004");
         }
     }
 
     private void createTestStudent() {
         try {
+            String testPassword = "DsD123@2004";
             logger.info("Creating test student: anura@gmail.com");
+            logger.info("=== TEST USER CREDENTIALS ===");
+            logger.info("Email: anura@gmail.com");
+            logger.info("Password: {}", testPassword);
+            logger.info("============================");
+            
+            // Also print to console for visibility
+            System.out.println("=== TEST USER CREATED ===");
+            System.out.println("Email: anura@gmail.com");
+            System.out.println("Password: " + testPassword);
+            System.out.println("========================");
 
             Student testStudent = new Student(
                 "Anura",                                    // firstName
                 "Test",                                     // lastName
                 "anura@gmail.com",                         // email
-                passwordEncoder.encode("DsD123@2004"),     // password (encoded)
+                passwordEncoder.encode(testPassword),       // password (encoded)
                 generateStudentNumber(),                    // studentNumber
                 "+94771234567",                            // phoneNumber
                 LocalDate.of(2004, 1, 1),                 // dateOfBirth
@@ -59,9 +72,11 @@ public class DataInitializer implements CommandLineRunner {
 
             studentRepository.save(testStudent);
             logger.info("Test student created successfully: anura@gmail.com");
+            System.out.println("✅ Test student saved to database successfully!");
 
         } catch (Exception e) {
             logger.error("Failed to create test student", e);
+            System.out.println("❌ Failed to create test student: " + e.getMessage());
         }
     }
 

@@ -53,7 +53,7 @@ public class AdminService {
             qualification : "Master's Degree in Administration");
         
         // Set position with default value
-        dto.setPosition("System Administrator");
+        dto.setPosition("Administrator");
         
         // Set phone with default if null or empty
         String phone = admin.getPhone();

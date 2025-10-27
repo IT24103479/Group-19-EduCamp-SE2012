@@ -1,9 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-// Example teachers array (you can import this from another file instead)
+
+// Static teachers array with updated IDs to match database
 const teachers = [
   {
-    id: 1,
+    id: 6,  // Changed from 1 to 6
     name: "Mr. Anuradha Lakmal",
     subject: "Maths",
     email: "anuradhamath@gmail.com",
@@ -13,7 +14,7 @@ const teachers = [
     qualifications: "School teacher",
   },
   {
-    id: 2,
+    id: 7,  // Changed from 2 to 7
     name: "Ms. Disna Chandrasena",
     subject: "Maths",
     email: "disna1998@gmail.com",
@@ -23,7 +24,7 @@ const teachers = [
     qualifications: "Diploma in Mathematics",
   },
  {
-    id: 3,
+    id: 8,  // Changed from 3 to 8
     name: "Mr. Janaka Nayanapriyaa",
     subject: "Science",
     email: "janka23@gmail.com",
@@ -33,7 +34,7 @@ const teachers = [
     qualifications: "Diploma in Science",
   },
   {
-    id: 4,
+    id: 9,  // Changed from 4 to 9
     name: "Mr. Chandana Disanayaka",
     subject: "Science",
     email: "chandana202@gmail.com",
@@ -43,7 +44,7 @@ const teachers = [
     qualifications: "Diploma in Science",
   },
   {
-    id: 5,
+    id: 10,  // Changed from 5 to 10
     name: "Mr. S. Dayalan",
     subject: "English and English Literature",
     email: "dayala444@gmail.com",
@@ -53,7 +54,7 @@ const teachers = [
     qualifications: "Special Degree in Translations",
   },
   {
-    id: 6,
+    id: 11,  // Changed from 6 to 11
     name: "Mr. Suranga Wanninayaka",
     subject: "English",
     email: "surang2004@gmail.com",
@@ -62,7 +63,7 @@ const teachers = [
     qualifications: "B.A. English Trained",
   },
   {
-    id: 7,
+    id: 12,  // Changed from 7 to 12
     name: "Mr. Nalin S. Kulathunga",
     subject: "Business and Accounting",
     email: "kulath04@gmail.com",
@@ -71,7 +72,7 @@ const teachers = [
     qualifications: "BSc. (Mgt.) Accountancy (Sp.)",
   },
   {
-    id: 8,
+    id: 19,  // Changed from 8 to 19 (special mapping as requested)
     name: "Mr. Harsha Mahesh",
     subject: "ICT",
     email: "harshaict@gmail.com",
@@ -80,7 +81,7 @@ const teachers = [
     qualifications: "Diploma in ICT",
   },
   {
-    id: 9,
+    id: 14,  // Changed from 9 to 14
     name: "Mr. S.A.M. Risvan",
     subject: "Tamil",
     email: "kulath04@gmail.com",
@@ -89,7 +90,7 @@ const teachers = [
     qualifications: "Special Tamil Trained",
   },
   {
-    id: 10,
+    id: 15,  // Changed from 10 to 15
     name: "Ms. Janitha Aberathna",
     subject: "Dancing",
     email: "dancing22@gmail.com",
@@ -99,7 +100,7 @@ const teachers = [
     qualifications: "Special Degree in Dance",
   },
   {
-    id: 11,
+    id: 16,  // Changed from 11 to 16
     name: "Mr. Saman Kumara",
     subject: "Drama",
     email: "drama233@gmail.com",
@@ -109,7 +110,7 @@ const teachers = [
     qualifications: "School Teacher",
   },
   {
-    id: 12,
+    id: 17,  // Changed from 12 to 17
     name: "Ms. Vathsala Senavirathna",
     subject: "Maths (E.M)",
     email: "vathsalamaths@gmail.com",

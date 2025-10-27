@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { API_BASE } from "../../lib/api";
+import { api, API_BASE } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface Material {
   id: number;
@@ -17,20 +19,63 @@ const ViewResources: React.FC = () => {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubject, setSelectedSubject] = useState("all");
+  
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Handle authenticated download
+  const handleDownload = async (materialId: number, fileName: string) => {
+    try {
+      const response = await api.get(`/api/materials/${materialId}`, {
+        responseType: 'blob', // Important for file downloads
+      });
+
+      // Create blob link and trigger download
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error("Failed to download file");
+      }
+    }
+  };
 
   // 🔹 Fetch materials from backend
   useEffect(() => {
-    axios
-      .get(`${API_BASE}/api/materials`)
+    if (!isAuthenticated) {
+      toast.error("Please login to view resources");
+      navigate("/login");
+      return;
+    }
+
+    api
+      .get("/api/materials")
       .then((response) => {
         setMaterials(response.data);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching materials:", error);
+        if (error.response?.status === 401) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+        } else {
+          toast.error("Failed to load materials");
+        }
         setLoading(false);
       });
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   // 🔹 Filter materials by selected subject
   const filteredMaterials =
@@ -103,14 +148,12 @@ const ViewResources: React.FC = () => {
                 <p className="text-sm text-gray-500">
                   <strong>Class:</strong> {material.className || "N/A"}
                 </p>
-                <a
-                  href={`${API_BASE}/api/materials/${material.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block text-white bg-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-700"
+                <button
+                  onClick={() => handleDownload(material.id, material.fileName || `material-${material.id}`)}
+                  className="mt-3 inline-block text-white bg-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-700 cursor-pointer"
                 >
                   Download
-                </a>
+                </button>
               </div>
             ))}
           </div>

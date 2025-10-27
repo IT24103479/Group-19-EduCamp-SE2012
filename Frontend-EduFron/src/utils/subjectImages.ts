@@ -10,4 +10,5 @@ export const subjectImages: Record<string, string> = {
   "Mathematics(English)":"https://i.pinimg.com/736x/a4/85/87/a48587338aa08ba3e60701332c327fb0.jpg",
   Drama:"https://i.pinimg.com/736x/5e/3a/83/5e3a83329e9bba340eb960df310e975c.jpg",
   Tamil:"https://i.pinimg.com/736x/90/94/29/9094291e76c92d44f59d2eeaed8a89aa.jpg",
+  "default": "https://i.pinimg.com/736x/a4/85/87/a48587338aa08ba3e60701332c327fb0.jpg",
 };

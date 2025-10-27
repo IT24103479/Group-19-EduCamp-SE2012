@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { API_BASE } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface Material {
   id: number;
@@ -19,6 +21,9 @@ const TeacherMaterialForm: React.FC = () => {
   const [className, setClassName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
+  
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch uploaded materials
   const fetchMaterials = async (signal?: AbortSignal) => {
@@ -28,6 +33,12 @@ const TeacherMaterialForm: React.FC = () => {
         credentials: "include", // send cookies with request
         signal,
       });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
 
       if (!response.ok) {
         const text = await response.text().catch(() => "");
@@ -39,16 +50,23 @@ const TeacherMaterialForm: React.FC = () => {
       setMaterials(Array.isArray(data) ? data : []);
     } catch (err: any) {
       if (err.name === "AbortError") return;
-      console.error(err);
+      console.error("Materials fetch error:", err);
       toast.error("Failed to load materials");
     }
   };
 
   useEffect(() => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      toast.error("Please login to access materials");
+      navigate("/login");
+      return;
+    }
+
     const controller = new AbortController();
     fetchMaterials(controller.signal);
     return () => controller.abort();
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   // Handle upload
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +100,12 @@ const TeacherMaterialForm: React.FC = () => {
         });
 
         console.log("Upload response status:", response.status);
+
+        if (response.status === 401) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
 
         if (!response.ok) {
           const text = await response.text().catch(() => "");
@@ -118,6 +142,12 @@ const TeacherMaterialForm: React.FC = () => {
         credentials: "include", // send cookie too
       });
 
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
       if (!response.ok) {
         const text = await response.text().catch(() => "");
         throw new Error(`Delete failed: ${response.status} ${text}`);
@@ -130,6 +160,16 @@ const TeacherMaterialForm: React.FC = () => {
       toast.error("Delete failed!");
     }
   };
+
+  // Show loading or login message if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 className="text-2xl font-bold mb-4 text-emerald-700">Authentication Required</h2>
+        <p className="text-gray-600">Please login to access teaching materials.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">

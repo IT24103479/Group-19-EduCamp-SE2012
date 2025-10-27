@@ -153,15 +153,6 @@ const Login: React.FC = () => {
           color: #64748b !important;
           opacity: 0.7 !important;
         }
-        
-        /* Ensure button visibility */
-        .login-form button[type="submit"] {
-          display: block !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-          position: static !important;
-          z-index: auto !important;
-        }
       `}</style>
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -265,12 +256,6 @@ const Login: React.FC = () => {
                 type="submit"
                 disabled={isLoading}
                 className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  display: 'block',
-                  position: 'static',
-                  visibility: 'visible',
-                  opacity: isLoading ? '0.5' : '1'
-                }}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </button>

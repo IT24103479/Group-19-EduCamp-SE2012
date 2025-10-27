@@ -157,7 +157,7 @@ html, body {
   max-width: none;
 }
 
-/* Fix for form inputs to ensure proper styling */
+/* Form inputs basic styling - allow Tailwind to override */
 .form-input, 
 input[type="text"], 
 input[type="email"], 
@@ -168,11 +168,8 @@ input[type="url"],
 input[type="search"],
 textarea,
 select {
-  background-color: white !important;
-  color: #213547 !important;
-  border: 1px solid hsl(215.3 19.3% 88.2%) !important;
-  border-radius: 6px;
-  padding: 8px 12px;
+  background-color: white;
+  color: #213547;
 }
 
 .form-input:focus, 
@@ -185,10 +182,7 @@ input[type="url"]:focus,
 input[type="search"]:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid hsl(158.1 64.4% 51.6%) !important;
-  outline-offset: 2px;
-  border-color: hsl(158.1 64.4% 51.6%) !important;
-  background-color: white !important;
+  background-color: white;
 }
 
 /* Remove browser autocomplete watermarks/backgrounds - Enhanced version */
@@ -332,58 +326,13 @@ textarea {
   appearance: none;
 }
 
-/* Ensure no browser default styling interferes */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-textarea,
-select {
-  background-color: white !important;
-  -webkit-background-clip: padding-box !important;
-  background-clip: padding-box !important;
-}
-
-/* Additional protection against watermarks and autocomplete styling */
-input:-webkit-autofill::first-line,
-input:-webkit-autofill::first-letter {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Remove any potential watermark overlays */
+/* Remove potential watermark overlays */
 input::before,
 input::after,
 textarea::before,
 textarea::after {
   display: none !important;
   content: none !important;
-  background: none !important;
-}
-
-/* Force override for all input states */
-input[type="text"]:not(:focus):not(:hover):not(:active),
-input[type="email"]:not(:focus):not(:hover):not(:active),
-input[type="password"]:not(:focus):not(:hover):not(:active),
-input[type="tel"]:not(:focus):not(:hover):not(:active),
-textarea:not(:focus):not(:hover):not(:active),
-select:not(:focus):not(:hover):not(:active) {
-  background-color: white !important;
-  background-image: none !important;
-  border: 1px solid hsl(215.3 19.3% 88.2%) !important;
-}
-
-/* Specific fix for Tailwind classes that might have background images */
-.border-slate-300,
-.focus\:ring-2,
-.focus\:ring-emerald-500,
-.focus\:border-transparent {
-  background-image: none !important;
-}
-
-/* Override any potential CSS custom properties that might add watermarks */
-input,
-textarea,
-select {
-  --tw-bg-opacity: 1 !important;
-  --tw-border-opacity: 1 !important;
 }
 
 /* -----------------------------
@@ -521,245 +470,24 @@ select {
   background-image: none !important;
 }
 
-/* ========================================
-   COMPREHENSIVE WATERMARK REMOVAL FIX
-======================================== */
-
-/* Remove ALL possible watermark sources */
+/* Basic watermark removal for browser autofill */
 input::-webkit-credentials-auto-fill-button,
-input::-webkit-strong-password-auto-fill-button,
-input::-webkit-caps-lock-indicator,
-input::-webkit-contact-auto-fill-button,
-input[type="password"]::-webkit-caps-lock-indicator {
+input::-webkit-strong-password-auto-fill-button {
   display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  position: absolute !important;
-  left: -9999px !important;
 }
 
-/* Remove Microsoft Edge password reveal button watermark */
 input::-ms-reveal,
 input::-ms-clear {
   display: none !important;
 }
 
-/* Remove Firefox password suggestions */
-input[type="password"]::-moz-placeholder {
-  opacity: 0.6 !important;
-}
-
-/* Comprehensive background override for all form elements */
-input[class*="pl-10"],
-input[class*="pr-4"],
-input[class*="py-3"],
-input[class*="border"],
-input[class*="border-slate"],
-input[class*="rounded"],
-input[class*="focus:ring"],
-textarea[class*="pl-10"],
-textarea[class*="pr-4"],
-textarea[class*="py-3"],
-select[class*="pl-10"],
-select[class*="pr-4"],
-select[class*="py-3"] {
-  background-color: white !important;
-  background-image: none !important;
-  background-repeat: no-repeat !important;
-  background-position: 0 0 !important;
-  background-size: auto !important;
-  background-attachment: scroll !important;
-  background-origin: padding-box !important;
-  background-clip: padding-box !important;
-}
-
-/* Force clean state for inputs with Tailwind focus classes */
-.focus\:ring-2.focus\:ring-emerald-500,
-.focus\:border-transparent {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Remove any pseudo-element watermarks */
-input::before,
-input::after,
-input::-webkit-inner-spin-button::before,
-input::-webkit-inner-spin-button::after,
-textarea::before,
-textarea::after,
-select::before,
-select::after {
-  display: none !important;
-  content: none !important;
-  background: none !important;
-  opacity: 0 !important;
-}
-
-/* Ultimate fallback - force override any remaining backgrounds */
-[class*="w-full"][class*="border"][class*="rounded"] {
-  background: white !important;
-}
-
-/* Specific targeting for your form inputs */
-input[placeholder*="email"],
-input[placeholder*="Email"],
-input[placeholder*="password"],
-input[placeholder*="Password"],
-input[placeholder*="name"],
-input[placeholder*="Name"],
-input[placeholder*="phone"],
-input[placeholder*="Phone"],
-input[type="email"][placeholder],
-input[type="password"][placeholder],
-input[type="text"][placeholder],
-input[type="tel"][placeholder] {
-  background-color: white !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* Remove any box-shadow that might contain watermarks */
-input:not(:focus):not(:hover) {
-  box-shadow: none !important;
-}
-
-/* Override Lucide React icon positioning that might interfere */
-.relative input + svg,
-.relative input + button > svg {
-  pointer-events: none !important;
-  z-index: 10 !important;
-}
-
-/* ========================================
-   SPECIFIC FIX FOR LOGIN & REGISTER FORMS
-======================================== */
-
-/* Target the exact classes used in Login, SignUp, AdminSignUp, and AddTeacherForm */
-.w-full.pl-10.pr-4.py-3.border.border-slate-300.rounded-lg.focus\:ring-2.focus\:ring-emerald-500.focus\:border-transparent,
-.w-full.pl-10.pr-12.py-3.border.border-slate-300.rounded-lg.focus\:ring-2.focus\:ring-emerald-500.focus\:border-transparent,
-.w-full.px-4.py-3.border.border-slate-300.rounded-lg.focus\:ring-2.focus\:ring-emerald-500 {
-  background-color: white !important;
-  background-image: none !important;
-  background-repeat: no-repeat !important;
-  background-position: 0 0 !important;
-  background-size: auto !important;
-  background-attachment: scroll !important;
-  -webkit-box-shadow: none !important;
-  box-shadow: none !important;
-}
-
-/* Specific fix for inputs with left padding for icons */
-input.pl-10 {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Focus state override */
-input.pl-10:focus,
-input.pr-4:focus,
-input.py-3:focus {
-  background-color: white !important;
-  background-image: none !important;
-  -webkit-box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
-}
-
-/* Remove watermarks from password fields specifically */
-input[type="password"].pl-10,
-input[type="password"].pr-12 {
-  background-color: white !important;
-  background-image: none !important;
-  -webkit-text-security: disc !important;
-}
-
-/* Remove watermarks from email fields specifically */
-input[type="email"].pl-10 {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* AddTeacherForm specific inputs */
-.w-full.border.p-2.rounded.focus\:outline-none.focus\:ring-2.focus\:ring-emerald-500 {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Override any Tailwind utility that might add backgrounds */
-.border-slate-300 {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-.rounded-lg {
-  background-image: none !important;
-}
-
-/* Force clean state for all form containers */
-.bg-white.rounded-lg.shadow-lg.p-8 input,
-.bg-white.p-6.rounded.shadow-md input {
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Remove autofill styling specifically for these forms */
-input.pl-10:-webkit-autofill,
-input.pr-4:-webkit-autofill,
-input.py-3:-webkit-autofill,
-input.border:-webkit-autofill,
-input.rounded-lg:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #213547 !important;
-  background-color: white !important;
-  background-image: none !important;
-  transition: background-color 5000s ease-in-out 0s !important;
-}
-
-/* Additional browser-specific watermark removal for login/register forms */
-input[placeholder="Enter your email"]:-webkit-autofill,
-input[placeholder="Enter your password"]:-webkit-autofill,
-input[placeholder="Create a password"]:-webkit-autofill,
-input[placeholder="Confirm your password"]:-webkit-autofill,
-input[placeholder="First name"]:-webkit-autofill,
-input[placeholder="Last name"]:-webkit-autofill,
-input[placeholder="e.g., +94712345678"]:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #213547 !important;
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Force override for any remaining background issues */
-.relative > input[type="email"],
-.relative > input[type="password"],
-.relative > input[type="text"],
-.relative > input[type="tel"] {
-  background: white !important;
-  background-color: white !important;
-  background-image: none !important;
-}
-
-/* Prevent any overlay elements from showing watermarks */
-.relative::before,
-.relative::after {
-  display: none !important;
-}
-
-/* Ensure icons don't interfere with input backgrounds */
-.absolute.left-3.top-1\/2.transform.-translate-y-1\/2.text-slate-400 {
-  background: none !important;
-  z-index: 1 !important;
-}
-
-/* Final override - force clean backgrounds on all form inputs */
+/* Specific watermark removal for form inputs */
 form input[type="text"],
 form input[type="email"],
 form input[type="password"],
 form input[type="tel"],
 form textarea,
 form select {
-  background: white !important;
   background-color: white !important;
   background-image: none !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
 }

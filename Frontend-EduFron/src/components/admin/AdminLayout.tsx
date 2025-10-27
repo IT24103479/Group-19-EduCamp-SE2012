@@ -81,7 +81,7 @@ export default function AdminLayout() {
                 setProfile({
                   firstName: meData.user.firstName || 'Admin',
                   lastName: meData.user.lastName || 'User',
-                  email: meData.user.email || 'admin@example.com'
+                  
                 });
               }
             } catch (error) {

@@ -93,53 +93,82 @@ const AddTeacherForm: React.FC = () => {
     }
   };
 
+  // Only redirect if current user is already a TEACHER (they don't need to register again)
+  // Allow access for: unauthenticated users, admins, students, or any non-teacher roles
   useEffect(() => {
     const controller = new AbortController();
 
-    const checkLoggedInAndRedirect = async () => {
+    const checkIfTeacherAndRedirect = async () => {
       try {
+        // Check if there's a stored user session
         const stored = localStorage.getItem("user");
         if (stored) {
           const user = JSON.parse(stored);
           const role = (user?.role || "").toString().toUpperCase();
           if (role === "TEACHER" || role.includes("TEACHER")) {
+            console.log("Current user is already a teacher, redirecting to dashboard");
             navigate("/teacher-dashboard");
             return;
+          } else {
+            console.log(`Current user role is ${role || 'unknown'}, allowing access to teacher registration`);
           }
         }
 
-        const r = await fetch(`${API_BASE}/api/auth/me`, {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-        });
+        // If there might be a server session, verify it
+        const isAuthenticated = localStorage.getItem("isAuthenticated");
+        if (isAuthenticated === "true") {
+          const r = await fetch(`${API_BASE}/api/auth/me`, {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
+          });
 
-        if (!r.ok) return; // not logged in / no session
-
-        const me = await r.json();
-        if (me?.success && me?.user?.role) {
-          try {
-            localStorage.setItem("user", JSON.stringify(me.user));
-            localStorage.setItem("isAuthenticated", "true");
-            if (me.sessionId) localStorage.setItem("sessionId", String(me.sessionId));
-            if (me.token) localStorage.setItem("token", String(me.token));
-          } catch {
-            /* ignore localStorage errors */
-          }
-          const role = String(me.user.role).toUpperCase();
-          if (role === "TEACHER" || role.includes("TEACHER")) {
-            navigate("/teacher-dashboard");
-            return;
+          if (r.ok) {
+            const me = await r.json();
+            if (me?.success && me?.user?.role) {
+              const role = String(me.user.role).toUpperCase();
+              console.log(`Server confirmed user role: ${role}`);
+              
+              if (role === "TEACHER" || role.includes("TEACHER")) {
+                console.log("Server confirmed teacher role, redirecting to dashboard");
+                // Update localStorage and redirect
+                try {
+                  localStorage.setItem("user", JSON.stringify(me.user));
+                  localStorage.setItem("isAuthenticated", "true");
+                  if (me.sessionId) localStorage.setItem("sessionId", String(me.sessionId));
+                  if (me.token) localStorage.setItem("token", String(me.token));
+                } catch { /* ignore localStorage errors */ }
+                navigate("/teacher-dashboard");
+                return;
+              } else {
+                console.log(`User is ${role}, allowing access to teacher registration form`);
+              }
+            }
+          } else {
+            // Clear invalid authentication state
+            console.log("Invalid server session, clearing authentication state");
+            localStorage.removeItem("isAuthenticated");
+            localStorage.removeItem("user");
+            localStorage.removeItem("sessionId");
+            localStorage.removeItem("token");
           }
         }
+        
+        // Allow access: user is not authenticated OR user is authenticated but not a teacher
+        console.log("Allowing access to teacher registration form");
       } catch (err) {
         if ((err as any)?.name === "AbortError") return;
-        // ignore other errors
+        console.log("Authentication check failed, allowing access to teacher registration form:", err);
+        // Clear potentially corrupted authentication state
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("user");
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("token");
       }
     };
 
-    checkLoggedInAndRedirect();
+    checkIfTeacherAndRedirect();
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps

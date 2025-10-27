@@ -106,10 +106,6 @@ const AddTeacherForm: React.FC = () => {
             navigate("/teacher-dashboard");
             return;
           }
-          if (role === "ADMIN" || role.includes("ADMIN")) {
-            navigate("/admin-dashboard");
-            return;
-          }
         }
 
         const r = await fetch(`${API_BASE}/api/auth/me`, {

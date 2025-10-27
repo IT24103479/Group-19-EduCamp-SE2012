@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { API_BASE } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // ✅ Validation schema
 const loginSchema = z.object({
@@ -21,6 +22,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const {
     register,
@@ -52,9 +54,9 @@ const Login: React.FC = () => {
       if (response.ok && result.success) {
         toast.success('Login successful!');
         
-
-        // Store user info in localStorage
+        // Update the AuthContext with the user data
         if (result.user) {
+          setUser(result.user);
           localStorage.setItem('user', JSON.stringify(result.user));
           localStorage.setItem('isAuthenticated', 'true');
           localStorage.setItem('sessionId', result.sessionId);
@@ -62,17 +64,24 @@ const Login: React.FC = () => {
 
         // ✅ Redirect user based on role
         const role = result.user?.role?.toUpperCase();
+        console.log('User role detected:', role);
+        console.log('About to navigate based on role...');
+        
         switch (role) {
           case 'STUDENT':
+            console.log('Navigating to /dashboard for STUDENT');
             navigate('/dashboard');
             break;
           case 'TEACHER':
+            console.log('Navigating to /teacher-dashboard for TEACHER');
             navigate('/teacher-dashboard');
             break;
           case 'ADMIN':
+            console.log('Navigating to /admin/dashboard for ADMIN');
             navigate('/admin/dashboard');
             break;
           default:
+            console.log('No specific role match, navigating to /dashboard');
             navigate('/dashboard');
         }
       } else {

@@ -22,8 +22,18 @@ const TeacherMaterialForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
   
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Show loading while authentication is being checked
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <span className="ml-2 text-slate-600">Checking authentication...</span>
+      </div>
+    );
+  }
 
   // Fetch uploaded materials
   const fetchMaterials = async (signal?: AbortSignal) => {
@@ -56,7 +66,12 @@ const TeacherMaterialForm: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check authentication first
+    // Wait for loading to complete before checking authentication
+    if (isLoading) {
+      return; // Still loading, don't do anything yet
+    }
+
+    // Check authentication after loading is complete
     if (!isAuthenticated) {
       toast.error("Please login to access materials");
       navigate("/login");
@@ -66,7 +81,7 @@ const TeacherMaterialForm: React.FC = () => {
     const controller = new AbortController();
     fetchMaterials(controller.signal);
     return () => controller.abort();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   // Handle upload
   const handleSubmit = async (e: React.FormEvent) => {

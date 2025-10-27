@@ -16,6 +16,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isLoading: boolean;
 }
 
 const SESSION_ID_KEY = 'sessionId';
@@ -24,11 +25,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-    const [sessionId, setSessionId] = useState<string | null>(() => localStorage.getItem(SESSION_ID_KEY));
-  const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(() => localStorage.getItem(SESSION_ID_KEY));
+  const [loading, setLoading] = useState(true); // Start with loading = true
 
   // Fetch user from session on mount
   useEffect(() => {
+    setLoading(true);
     api
       .get(`/api/auth/me`)
       .then((res) => {
@@ -48,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error("❌ Failed to fetch /me:", err);
         }
         setUser(null);
+      })
+      .finally(() => {
+        setLoading(false); // Authentication check complete
       });
   }, []);
 
@@ -67,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role === "admin",
+    isLoading: loading,
   };
    useEffect(() => {
     // Optional: hydrate user if you also persist it

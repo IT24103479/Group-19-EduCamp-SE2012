@@ -59,7 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     api.post(`/api/auth/logout`)
       .catch((err) => console.error("Logout error:", err));
   };
-
   const value: AuthContextType = {
     user,
     token: localStorage.getItem("token"),

@@ -31,7 +31,7 @@ type AdminSignUpFormData = z.infer<typeof adminSignUpSchema>;
  * Helper: inspect a login response and redirect if role includes "ADMIN".
  * - Accepts a login-style response object (result from /api/auth/login).
  * - If result.success && result.user.role contains "ADMIN" (case-insensitive),
- *   navigates to /admin-dashboard and returns true.
+ *   navigates to /admin/dashboard and returns true.
  * - Persists useful values to localStorage when present.
  */
 const assessLoginResponse = (res: any, navigate: ReturnType<typeof useNavigate>): boolean => {
@@ -82,14 +82,23 @@ const AdminSignUp: React.FC = () => {
           }
         }
 
-        // Fallback: call /me to ensure server session (if you use session cookies)
+        // Fallback: call /me to ensure server session
+        const token = localStorage.getItem('token');
+        const sessionId = localStorage.getItem('sessionId');
+        
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        if (sessionId) headers['X-Session-Id'] = sessionId;
+
         const r = await fetch(`${API_BASE}/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
         });
+        
         if (r.ok) {
           const me = await r.json();
+          console.log('🔑 /me response:', me);
           if (me?.success && me?.user?.role) {
             const role = String(me.user.role).toUpperCase();
             if (role === 'ADMIN' || role.includes('ADMIN')) {
@@ -101,9 +110,23 @@ const AdminSignUp: React.FC = () => {
               navigate('/admin/dashboard');
             }
           }
+        } else {
+          console.log('Authentication check failed:', r.status, r.statusText);
+          // Clear potentially invalid tokens
+          if (r.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('sessionId');
+            localStorage.removeItem('user');
+            localStorage.removeItem('isAuthenticated');
+          }
         }
       } catch (err) {
-        // ignore errors here; user is not logged in or /me unreachable
+        console.log('Auth check error (expected if not logged in):', err);
+        // Clear potentially invalid tokens on network error
+        localStorage.removeItem('token');
+        localStorage.removeItem('sessionId');
+        localStorage.removeItem('user');
+        localStorage.removeItem('isAuthenticated');
       }
     };
 
@@ -126,15 +149,19 @@ const AdminSignUp: React.FC = () => {
       console.log('Auto-login response:', result);
 
       if (res.ok && result.success) {
-        // Persist minimal session info
+        // Persist all session info that the backend provides
         try {
           if (result.user) localStorage.setItem('user', JSON.stringify(result.user));
           localStorage.setItem('isAuthenticated', 'true');
           if (result.sessionId) localStorage.setItem('sessionId', String(result.sessionId));
-        } catch {}
+          if (result.token) localStorage.setItem('token', String(result.token));
+        } catch (err) {
+          console.warn('Could not save to localStorage:', err);
+        }
         toast.success('Welcome to EduCamp Admin!');
         return result;
       } else {
+        console.error('Login failed:', result);
         toast.error(result.message || 'Auto-login failed.');
         return result;
       }
@@ -180,7 +207,7 @@ const AdminSignUp: React.FC = () => {
         if (loginResult) {
           const redirected = assessLoginResponse(loginResult, navigate);
           if (redirected) {
-            // already redirected to /admin-dashboard
+            // already redirected to /admin/dashboard
             return;
           }
 

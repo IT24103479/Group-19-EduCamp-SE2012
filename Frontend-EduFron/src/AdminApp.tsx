@@ -37,6 +37,7 @@ const AdminApp: React.FC = () => {
               <Route path="/*" element={<AdminLayout />}>
               
                 <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="classes" element={<ClassRecords />} />
                 <Route path="teachers" element={<TeacherRecords />} />
                 <Route path="users" element={<AdminUsers />} />

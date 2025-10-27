@@ -68,7 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     isAdmin: user?.role === "admin",
   };
-
    useEffect(() => {
     // Optional: hydrate user if you also persist it
     const saved = localStorage.getItem(SESSION_ID_KEY);

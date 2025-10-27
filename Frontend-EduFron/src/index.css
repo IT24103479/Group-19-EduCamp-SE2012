@@ -7,14 +7,37 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Default to light theme */
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Default CSS variables for components */
+  --background: 0 0% 100%;
+  --foreground: 215.4 16.3% 26.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 215.4 16.3% 26.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215.4 16.3% 26.9%;
+  --primary: 158.1 64.4% 51.6%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 200.4 98% 39.4%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 215.4 16.3% 96.9%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 47.9 95.8% 53.1%;
+  --accent-foreground: 26 83.3% 14.1%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 215.3 19.3% 88.2%;
+  --input: 215.3 19.3% 88.2%;
+  --ring: 158.1 64.4% 51.6%;
+  --radius: 0.75rem;
 }
 
 a {
@@ -28,15 +51,28 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* Remove flex and place-items to allow full width layouts */
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+/* Base input styles */
+input, textarea, select {
+  background-color: white;
+  color: #213547;
+  border: 1px solid hsl(215.3 19.3% 88.2%);
+  border-radius: 6px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid hsl(158.1 64.4% 51.6%);
+  outline-offset: 2px;
+  border-color: hsl(158.1 64.4% 51.6%);
 }
 
 button {
@@ -46,7 +82,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
+  color: #213547;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -58,17 +95,81 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Dark theme support (only when explicitly applied) */
+.dark {
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+}
+
+.dark input, 
+.dark textarea, 
+.dark select {
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.87);
+  border-color: #3a3a3a;
+}
+
+.dark button {
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+/* Global layout fixes */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+/* Ensure container elements take full width */
+.container-fluid {
+  width: 100%;
+  max-width: none;
+}
+
+/* Fix for form inputs to ensure proper styling */
+.form-input, 
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"], 
+input[type="tel"], 
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  background-color: white !important;
+  color: #213547 !important;
+  border: 1px solid hsl(215.3 19.3% 88.2%) !important;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.form-input:focus, 
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus, 
+input[type="number"]:focus, 
+input[type="tel"]:focus, 
+input[type="url"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid hsl(158.1 64.4% 51.6%) !important;
+  outline-offset: 2px;
+  border-color: hsl(158.1 64.4% 51.6%) !important;
+  background-color: white !important;
 }
 
 /* -----------------------------

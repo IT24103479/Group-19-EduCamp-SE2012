@@ -64,10 +64,6 @@ const AddTeacherForm: React.FC = () => {
       navigate("/teacher-dashboard");
       return true;
     }
-    if (role === "ADMIN" || role.includes("ADMIN")) {
-      navigate("/admin-dashboard");
-      return true;
-    }
     return false;
   };
 

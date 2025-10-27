@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -123,8 +123,39 @@ const Login: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <>
+      <style>{`
+        /* Login form specific watermark removal */
+        .login-form input:-webkit-autofill,
+        .login-form input:-webkit-autofill:hover,
+        .login-form input:-webkit-autofill:focus,
+        .login-form input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px white inset !important;
+          -webkit-text-fill-color: #213547 !important;
+          background-color: white !important;
+          background-image: none !important;
+          transition: background-color 5000s ease-in-out 0s !important;
+        }
+        
+        .login-form input {
+          background-color: white !important;
+          background-image: none !important;
+          -webkit-appearance: none !important;
+          appearance: none !important;
+        }
+        
+        .login-form input:focus {
+          background-color: white !important;
+          background-image: none !important;
+        }
+        
+        .login-form input::placeholder {
+          color: #64748b !important;
+          opacity: 0.7 !important;
+        }
+      `}</style>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
 
       <main className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -133,31 +164,31 @@ const Login: React.FC = () => {
             <p className="mt-2 text-slate-600">Sign in to your EduCamp account</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg p-8 login-form">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    {...register('email')}
-                    type="email"
-                    id="email"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                    style={{
-                      backgroundColor: 'white',
-                      backgroundImage: 'none',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: '0 0',
-                      backgroundSize: 'auto', 
-                      backgroundAttachment: 'scroll'
-                    }}
-                  />
-                </div>
+                <input
+                  {...register('email')}
+                  type="email"
+                  id="email"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                  style={{
+                    backgroundColor: 'white !important',
+                    backgroundImage: 'none !important',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: '0 0',
+                    backgroundSize: 'auto',
+                    backgroundAttachment: 'scroll',
+                    WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                    WebkitTextFillColor: '#213547 !important',
+                    transition: 'background-color 5000s ease-in-out 0s'
+                  }}
+                />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                 )}
@@ -169,20 +200,22 @@ const Login: React.FC = () => {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     id="password"
-                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-4 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your password"
                     style={{
-                      backgroundColor: 'white',
-                      backgroundImage: 'none',
+                      backgroundColor: 'white !important',
+                      backgroundImage: 'none !important',
                       backgroundRepeat: 'no-repeat',
                       backgroundPosition: '0 0',
                       backgroundSize: 'auto',
-                      backgroundAttachment: 'scroll'
+                      backgroundAttachment: 'scroll',
+                      WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                      WebkitTextFillColor: '#213547 !important',
+                      transition: 'background-color 5000s ease-in-out 0s'
                     }}
                   />
                   <button
@@ -236,10 +269,18 @@ const Login: React.FC = () => {
             </div>
 
             {/* Signup Link */}
-            <div className="mt-6 text-center">
-              <p className="text-slate-600">
-                Don’t have an account?{' '}
-                <Link to="/signup" className="text-emerald-600 hover:text-emerald-500 font-medium">
+            <div className="mt-6 text-center" style={{ zIndex: 10, position: 'relative' }}>
+              <p className="text-slate-600" style={{ marginBottom: '0.5rem' }}>
+                Don't have an account?{' '}
+                <Link 
+                  to="/signup" 
+                  className="text-emerald-600 hover:text-emerald-500 font-medium"
+                  style={{ 
+                    textDecoration: 'underline',
+                    display: 'inline-block',
+                    padding: '2px 4px'
+                  }}
+                >
                   Sign up here
                 </Link>
               </p>
@@ -250,6 +291,7 @@ const Login: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

@@ -98,7 +98,10 @@ export default function AdminDashboard(): JSX.Element {
       const studentsData = studentsRes.ok ? await studentsRes.json() : [];
 
       const classesCount = Array.isArray(classesData) ? classesData.length : 0;
-      const teachersCount = Array.isArray(teachersData) ? teachersData.length : 0;
+      // Fix: Handle the structured response from teachers endpoint
+      const teachersCount = teachersData?.success && Array.isArray(teachersData.teachers) 
+        ? teachersData.teachers.length 
+        : (Array.isArray(teachersData) ? teachersData.length : 0);
       const paymentsCount = Array.isArray(paymentsData) ? paymentsData.length : 0;
       const studentsCount = Array.isArray(studentsData) ? studentsData.length : 0;
 
@@ -126,7 +129,7 @@ export default function AdminDashboard(): JSX.Element {
           color: "accent",
         },
         {
-          title: "Payments (count)",
+          title: "Payments Total ",
           value: `${paymentsCount} • ${paymentsTotal ? `${paymentsTotal}` : "0"}`,
           icon: UserCheck,
           color: "muted",

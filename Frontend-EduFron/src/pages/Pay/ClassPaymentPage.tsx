@@ -4,6 +4,7 @@ import ClassPayment from "../../components/Enroll/ClassPayment";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import { API_BASE } from "../../lib/api";
 interface LocationState {
   classId?: number | string;
@@ -101,6 +102,7 @@ const ClassPaymentPage: React.FC = () => {
         {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
       </div>
     </div>
+    <Footer />
     </>
   );
 };

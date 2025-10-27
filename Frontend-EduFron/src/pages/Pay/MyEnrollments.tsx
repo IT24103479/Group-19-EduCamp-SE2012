@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import enrollmentService, { type Enrollment } from "../../services/enrollmentService";
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import { API_BASE } from "../../lib/api";
 type ClassInfo = {
   id: string | number;
@@ -334,6 +335,7 @@ const MyEnrollments: React.FC = () => {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 };

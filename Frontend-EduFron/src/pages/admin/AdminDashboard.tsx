@@ -23,14 +23,14 @@ type StatItem = {
   color?: "primary" | "secondary" | "accent" | "muted";
 };
 
-type TeacherRow = {
+/*type TeacherRow = {
   id: number | string;
   name: string;
   email?: string;
   subject?: string;
   qualification?: string;
   joined?: string;
-};
+};*/
 
 
 
@@ -40,17 +40,17 @@ export default function AdminDashboard(): JSX.Element {
   const [stats, setStats] = useState<StatItem[]>([
    // { title: "Total Students", value: "—", icon: Users, color: "primary" },
     { title: "Active Teachers", value: "12", icon: GraduationCap, color: "secondary" },
-    { title: "Total Classes", value: "7", icon: BookOpen, color: "accent" },
+    { title: "Total Classes", value: "10", icon: BookOpen, color: "accent" },
    // { title: "Payments", value: "—", icon: UserCheck, color: "muted" },
   ]);
 
-  const [teachers, setTeachers] = useState<TeacherRow[]>([]);
+  //const [teachers, setTeachers] = useState<TeacherRow[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [loadingTeachers, setLoadingTeachers] = useState(false);
+  //const [loadingTeachers, setLoadingTeachers] = useState(false);
 
   useEffect(() => {
     fetchStats();
-    fetchTeachers();
+   // fetchTeachers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -112,7 +112,7 @@ export default function AdminDashboard(): JSX.Element {
     }
   }
 
-  // Fetch the teachers endpoint and normalize rows
+ /* // Fetch the teachers endpoint and normalize rows
   async function fetchTeachers() {
     setLoadingTeachers(true);
     try {
@@ -139,7 +139,7 @@ export default function AdminDashboard(): JSX.Element {
     } finally {
       setLoadingTeachers(false);
     }
-  }
+  } */
 
   return (
     <div className="admin">
@@ -197,7 +197,7 @@ export default function AdminDashboard(): JSX.Element {
         </div>
 
         {/* Teachers Table */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* <div className="grid grid-cols-1 gap-6">
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -246,7 +246,7 @@ export default function AdminDashboard(): JSX.Element {
               </Table>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );

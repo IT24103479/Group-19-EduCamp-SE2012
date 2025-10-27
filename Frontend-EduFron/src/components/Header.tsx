@@ -28,8 +28,8 @@ const Header: React.FC = () => {
     { name: 'My DashBoard', path: '/dashboard', icon: UserCircle },
     { name: 'Materials', path: '/resources', icon: Bell },
     { name: 'My Classes', path: '/my-enrollments', icon: BookOpen },
-    { name: 'Instructor', path: '/register/teacher', icon: GraduationCap },
-    { name: 'Admin', path: '/register/admin', icon: Shield },
+    //{ name: 'Instructor', path: '/register/teacher', icon: GraduationCap },
+    //{ name: 'Admin', path: '/register/admin', icon: Shield },
   ];
 
   return (
